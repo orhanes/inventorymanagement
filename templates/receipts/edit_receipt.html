@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+
+{% block title %} {{title}} {% endblock title %}
+
+
+{% block content %}
+
+    <div style="color:#575757; font-style: bold; font-size: 3rem; border-bottom: 1px solid white;">{{title}}</div> 
+    <hr style="height:1px;border:none;color:#333;background-color:#333;">
+    <form method="post">
+    
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        
+        <div class="form-group">
+            {{ form.buyer.errors }}
+            <label for="{{ form.buyer.id_for_label }}">Ünvan:</label>
+            {{ form.buyer }}
+        </div>
+       
+        <div class="form-group">
+            {{ form.created_date.errors }}
+            <label for="{{ form.created_date.id_for_label }}">Tarih:</label>
+            <input type="date" value="{{ form.created_date }}" />
+        </div>
+        <div class="form-group">
+            {{ form.serial_number.errors }}
+            <label for="{{ form.serial_number.id_for_label }}">Makbuz No:</label>
+            {{ form.serial_number }}
+        </div>
+        <div class="form-group">
+            {{ form.payment_method.errors }}
+            <label for="{{ form.payment_method.id_for_label }}">Ödeme Yöntemi:</label>
+            {{ form.payment_method }}
+        </div>
+        <div class="form-group">
+            {{ form.payment_total.errors }}
+            <label for="{{ form.payment_total.id_for_label }}">Ödeme Toplamı:</label>
+            {{ form.payment_total }}
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                {{ form.payment_one_payment_type.errors }}
+                <label for="{{ form.payment_one_payment_type.id_for_label }}">Ödeme 1 Türü:</label>
+                {{ form.payment_one_payment_type }}
+            </div>
+            <div class="form-group col-md-6">
+                {{ form.payment_one_date.errors }}
+                <label for="{{ form.payment_one_date.id_for_label }}">Ödeme 1 Tarihi:</label>
+                <input type="date" value="{{ form.payment_one_date }}" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                {{ form.payment_one_description.errors }}
+                <label for="{{ form.payment_one_description.id_for_label }}">Ödeme 1 Açıklama:</label>
+                {{ form.payment_one_description }}
+            </div>
+            <div class="form-group col-md-6">
+                {{ form.payment_one_amount.errors }}
+                <label for="{{ form.payment_one_amount.id_for_label }}">Ödeme 1 Tutarı:</label>
+                {{ form.payment_one_amount }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                {{ form.payment_two_payment_type.errors }}
+                <label for="{{ form.payment_two_payment_type.id_for_label }}">Ödeme 2 Türü:</label>
+                {{ form.payment_two_payment_type }}
+            </div>
+            <div class="form-group col-md-6">
+                {{ form.payment_two_date.errors }}
+                <label for="{{ form.payment_two_date.id_for_label }}">Ödeme 2 Tarihi:</label>
+                <input type="date" value="{{ form.payment_two_date }}" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                {{ form.payment_two_description.errors }}
+                <label for="{{ form.payment_two_description.id_for_label }}">Ödeme 2 Açıklama:</label>
+                {{ form.payment_two_description }}
+            </div>
+            <div class="form-group col-md-6">
+                {{ form.payment_two_amount.errors }}
+                <label for="{{ form.payment_two_amount.id_for_label }}">Ödeme 2 Tutarı:</label>
+                {{ form.payment_two_amount }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                {{ form.payment_three_payment_type.errors }}
+                <label for="{{ form.payment_three_payment_type_for_label }}">Ödeme 3 Türü:</label>
+                {{ form.payment_three_payment_type }}
+            </div>
+            <div class="form-group col-md-6">
+                {{ form.payment_three_date.errors }}
+                <label for="{{ form.form.payment_three_date.id_for_label }}">Ödeme 3 Tarihi:</label>
+                <input type="date" value="{{ form.payment_three_date }}" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                {{ form.payment_three_description.errors }}
+                <label for="{{ form.cpayment_three_description.id_for_label }}">Ödeme 3 Açıklama:</label>
+                {{ form.payment_three_description }}
+            </div>
+            <div class="form-group col-md-6">
+                {{ form.payment_three_amount.errors }}
+                <label for="{{ form.payment_three_amount.id_for_label }}">Ödeme 3 Tutarı:</label>
+                {{ form.payment_three_amount }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            {{ form.payment_handwrite.errors }}
+            <label for="{{ form.payment_handwrite.id_for_label }}">Yazı İle:</label>
+            {{ form.payment_handwrite }}
+        </div>
+        <div class="form-group">
+            {{ form.collector.errors }}
+            <label for="{{ form.collector.id_for_label }}">Tahsil Eden:</label>
+            {{ form.collector }}
+        </div>
+        
+
+        <br>
+
+        <div class="align-middle">
+            <button type="submit" class="btn btn-success">{{ savebtn }}</button>
+            {% if title == "Yeni Nakliye" %}
+                <button type="reset" class="btn btn-danger" >Sıfırla</button>
+            {% endif %}
+            {% if delbtn %}
+                <a href="{% url 'delete-receipt' receipt.pk %}" class="btn btn-danger"> Makbuzu Sil</a>
+            {% endif %}
+            <a href="{% url 'receipts-list' %}" class="btn btn-secondary">Vazgeç</a>
+        </div>
+        
+    </form>
+
+{% endblock content %}

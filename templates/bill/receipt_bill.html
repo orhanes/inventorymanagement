@@ -1,0 +1,215 @@
+{% extends bill_base %}
+{% load static %}
+
+{% load l10n %}
+{% block title %} Tahsilat Makbuzu : {{ bill.serial_number }}{% endblock title %}
+
+
+{% block content %}
+    
+    <div style="color:#575757; font-style: bold; font-size: 3rem;  border-bottom: 1px solid white;">Tahsilat Makbuzu : {{ bill.serial_number }}</div>
+
+    <!-- <br><br> -->
+
+    <form method="post">
+    {% csrf_token %}
+
+    <div id="printArea" class="bg">
+
+            <table class="outer-box inner-box" style="width: 840px; margin-left: auto; margin-right: auto;">
+                <tbody>
+                    <!--
+                    <tr style="height: 1px;">
+                        <td> <p style="text-align: center;">MALZEME TALEP FİŞİ</p> </td>
+                    </tr>
+                    -->
+                    <tr style="text-align: center;">
+                        <td >
+                            <span><img src="/static/images/toprak_logo.jpg" alt="Toprak Logo" width="800" height="220"></span>
+                            <span style="font-size: 200%;">TOPRAK BORU PROFİL SAC</span> <br>
+                            <span style="font-size: 120%; font-weight: bold;">SAN. VE LTD. ŞTİ</span> <br>
+                            <span style="font-weight: bold;">ADRES :</span>Yıldırım Beyazıt Mah. 305 No'lu Cad. No: 2/1 <br>Payas - HATAY<br>
+                            <span style="font-weight: bold;">EMAIL : info@toprakboruprofil.com</span> <br><br>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>
+                        <table class="outer-box" style="width: 800px; margin-left: auto; margin-right: auto;">
+                            <tbody>
+                                <tr>
+                                    <td class="inner-box" style="text-align: center; font-weight: bold;background-color:#D3D3D3;" colspan="3">TAHSİLAT MAKBUZU</td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="width: 50%; font-weight: bold;">&nbsp; ÜNVAN</td>
+                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp; MAKBUZ SERİ NO</td>
+                                    <td class="inner-box" style="width: 25%;">&nbsp;{{ bill.serial_number }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="width: 50%;">&nbsp;{{ bill.buyer }}</td>
+                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;TARİH</td>
+                                    <td class="inner-box" style="width: 25%;">&nbsp;{{ bill.created_date }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="width: 50%;" rowspan="3">{{ bill.buyer.address|linebreaks }}</td>
+                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;NAKİT</td>
+                                    <td class="inner-box align-left" style="width: 25%;"> <input type="text" name="cash" class="align-left" style="border: 0; overflow: hidden;" value="{{ bill.total_cash }} TL"> </td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;ÇEK</td>
+                                    <td class="inner-box align-left" style="width: 25%;"> <input type="text" name="cheque" class="align-left" style="border: 0; overflow: hidden;" value="{{ bill.total_cheque }} TL"> </td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;SENET</td>
+                                    <td class="inner-box align-left" style="width: 25%;"> <input type="text" name="bond" class="align-left" style="border: 0; overflow: hidden;" value="{{ bill.total_bond }} TL"> </td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;" rowspan="2">&nbsp;İLGİLİ KİŞİ : <span style="font-weight:300;">{{ bill.buyer.representative }}</span></td>
+                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp; VISA</td>
+                                    <td class="inner-box align-left" style="width: 25%;"> <input type="text" name="courier_vehicle" class="align-left" style="border: 0; overflow: hidden;" value="{{ bill.total_creditcard }} TL"> </td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp; TOPLAM</td>
+                                    <td class="inner-box align-left" style="width: 25%;"> <input type="text" name="total" class="align-left" style="border: 0; overflow: hidden;" value="{{ bill.get_total_price }} TL"> </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>
+                        <table class="outer-box" style="width: 800px; margin-left: auto; margin-right: auto;">
+                            <tbody>
+                                <br>
+                                <tr>
+                                    <!-- <td class="inner-box" style="width: 05%; font-weight: bold; text-align: center;">&nbsp;SL</td>-->
+                                    <td class="inner-box" style="width: 30%; font-weight: bold; text-align: center;">ÖDEME CİNSİ</td>
+                                    <td class="inner-box" style="width: 12%; font-weight: bold; text-align: center;">VADE</td>
+                                    <td class="inner-box" style="width: 12%; font-weight: bold; text-align: center;">AÇIKLAMA</td>
+                                    <td class="inner-box" style="width: 12%; font-weight: bold; text-align: center;">TUTAR</td>
+                                </tr>
+                                    <tr style="height: auto;">
+                                        <!-- <td class="inner-box" style="width: 5%;">&nbsp; {{ forloop.counter }}</td>-->
+                                        <td class="inner-box" style="width: 30%;">&nbsp; {{ bill.payment_one_payment_type  }}</td>
+                                        <td class="inner-box align-middle" style="width: 12%;">&nbsp; {{ bill.payment_one_date }}</td>
+                                        <td class="inner-box align-middle" style="width: 12%;">&nbsp; {{ bill.payment_one_description }}</td>
+                                        <td class="inner-box align-middle" style="width: 12%;">&nbsp; {{  bill.payment_one_amount  }} TL</td>
+                                        <!-- <td class="inner-box" style="width: 12%;">&nbsp;{{ item.totalprice }}</td>-->
+                                        <!--<td class="inner-box" style="width: 5%;">&nbsp;0</td>-->
+                                    </tr>
+                                    <tr style="height: auto;">
+                                        <!-- <td class="inner-box" style="width: 5%;">&nbsp; {{ forloop.counter }}</td>-->
+                                        <td class="inner-box" style="width: 30%;">&nbsp; {{ bill.payment_two_payment_type  }}</td>
+                                        <td class="inner-box align-middle" style="width: 12%;">&nbsp; {{ bill.payment_two_date }}</td>
+                                        <td class="inner-box align-middle" style="width: 12%;">&nbsp; {{ bill.payment_two_description }}</td>
+                                        <td class="inner-box align-middle" style="width: 12%;">&nbsp; {{  bill.payment_two_amount  }} TL</td>
+                                        <!-- <td class="inner-box" style="width: 12%;">&nbsp;{{ item.totalprice }}</td>-->
+                                        <!--<td class="inner-box" style="width: 5%;">&nbsp;0</td>-->
+                                    </tr>
+                                    <tr style="height: auto;">
+                                        <!-- <td class="inner-box" style="width: 5%;">&nbsp; {{ forloop.counter }}</td>-->
+                                        <td class="inner-box" style="width: 30%;">&nbsp; {{ bill.payment_three_payment_type  }}</td>
+                                        <td class="inner-box align-middle" style="width: 12%;">&nbsp; {{ bill.payment_three_date }}</td>
+                                        <td class="inner-box align-middle" style="width: 12%;">&nbsp; {{ bill.payment_three_description }}</td>
+                                        <td class="inner-box align-middle" style="width: 12%;">&nbsp; {{  bill.payment_three_amount  }} TL</td>
+                                        <!-- <td class="inner-box" style="width: 12%;">&nbsp;{{ item.totalprice }}</td>-->
+                                        <!--<td class="inner-box" style="width: 5%;">&nbsp;0</td>-->
+                                    </tr>
+                   
+                            </tbody>
+                        </table>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>
+                        <table class="outer-box inner-box" style="width: 800px; margin-left: auto; margin-right: auto;">
+                            <tbody>
+                                <br>
+                                <tr>
+                                    <td class="inner-box" style="width: 30%; font-weight: bold;">&nbsp;TOPLAM TUTAR (YAZI İLE)</td>
+                                    <td class="inner-box" style="width: 50%;" colspan="2">&nbsp;{{bill.payment_handwrite}}</td>
+                                </tr>
+                                <!--
+                                <tr>
+                                    <td class="inner-box" style="width: 35%; text-align: center;" rowspan="6">
+                                        <p> <span style="font-weight: bold;">NOTLAR <br> </span> <br>
+                                           {{bill.description}}</p>
+                                    </td>
+                                    
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;Analizli S-420</td>
+                                    <td class="inner-box align-left">&nbsp; <input type="text" name="analysed" class="align-left" style="border: 0; overflow: hidden;" value="{% if bill.analysed == True %} Evet {% else %} Hayır{% endif %}"></td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;"> </td>
+                                    <td class="inner-box align-middle">&nbsp; <input type="text" name="igst" class="align-middle" pattern="[0-9]+\.[0-9]+" style="border: 0; overflow: hidden;" value=""></td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;</td>
+                                    <td class="inner-box align-middle">&nbsp; <input type="text" name="cess" class="align-middle" pattern="[0-9]+\.[0-9]+" style="border: 0; overflow: hidden;" value=""></td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;</td>
+                                    <td class="inner-box align-middle">&nbsp; <input type="text" name="tcs" class="align-middle" pattern="[0-9]+\.[0-9]+" style="border: 0; overflow: hidden;" value=""></td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;</td>
+                                    <td class="inner-box align-middle">&nbsp; <input type="text" name="total" class="align-middle" pattern="[0-9]+\.[0-9]+" style="border: 0; overflow: hidden;" value=""> </td>
+                                </tr>
+                            -->
+                            </tbody>
+                        </table>
+                        </td>
+                    </tr>
+                   
+                    <tr>
+                        <td style="text-align: right;margin-right: 60px;">
+                            <br>
+                            <span style="font-weight: bold;margin-right: 60px;">FİRMA ADINA &nbsp;&nbsp;</span><span style="font-weight: bold;margin-right: 60px;"><br> Tahsil Eden Ad / Soyad / İmza</span>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <td style="text-align: center;">
+                            <!-- FINAL TEXT -->
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+        </div>
+
+        <br><br>
+
+        <div class="wrapper">
+            <button class="center btn btn-primary" onclick="printpage('printArea')">Yazdır</button>
+            <!-- <button class="center btn btn-success" type="submit">Taslağı Kaydet</button>-->
+            <a href="{% url 'receipts-list' %}" class="btn center btn-secondary">Geri Dön</a>
+        </div>
+    
+    </form>
+    
+    <script>
+        function printpage(divName) {
+            var printContents = document.getElementById(divName).innerHTML;
+            var originalContents = document.body.innerHTML;
+            document.body.innerHTML = printContents;
+            window.print();
+            document.body.innerHTML = originalContents;
+        }       
+        </script>
+
+{% endblock %}

@@ -1,0 +1,4 @@
+<option value="">Görev Seçiniz</option>
+{% for position in positions %}
+<option value="{{ position.pk }}">{{ position.name }}</option>
+{% endfor %}

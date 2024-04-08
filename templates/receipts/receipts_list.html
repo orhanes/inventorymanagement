@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% load widget_tweaks %}
+
+
+{% block title %} Tahsilat Makbuzu Listesi {% endblock title %}
+
+
+{% block content %}
+    
+    <div class="row" style="color: #575757; font-style: bold; font-size: 3rem;">
+        <div class="col-md-8">Tahsilat Makbuzu Listesi</div>
+        <div class="col-md-4"> 
+            <div style="float:right;"> <a class="btn btn-success" href="{% url 'new-receipt' %}">Makbuz Ekle</a> </div>
+        </div>
+    </div>
+
+    <div style="border-bottom: 1px solid white;"></div>
+    
+    <br>
+
+    <table class="table table-css table-hover table-bordered">
+
+        <form method="get">
+            <div class="input-group search noprint">
+                {% render_field filter.form.buyer class="form-control textinput" placeholder="Müşteri adıyla ara" %}
+                <div class="input-group-append">
+                   <button type="submit" class="btn btn-pink"> Ara </button>
+                </div>
+            </div>
+        </form>
+
+        <br>
+        
+        <thead class="thead-dark align-middle">
+            <tr>
+                <th>Makbuz No</th>
+                <th>Tarih</th>
+                <th>Ünvan</th>
+                <th>Ödeme Şekli</th>
+                <th>Ödeme Toplamı</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+
+{% if object_list %}
+
+        <tbody>
+            {% for receipt in object_list %}
+            <tr>
+                <!-- <td class="align-middle"><p> <a href="{% url 'receipt' receipt.id %}"> {{ receipt.id }}</a> </p> </td> -->
+                <td class="align-middle"> {{ receipt.serial_number }} </td>
+                <td class="align-middle"> {{ receipt.created_date }} </td>
+                <td class="align-middle"> {{ receipt.buyer }} </td>
+                <td class="align-middle"> {{ receipt.payment_method }} </td>
+                <td class="align-middle"> {{ receipt.get_total_price }} TL </td>
+                <td class="align-middle">
+                    <div class="align-middle">
+                        <a href="{% url 'receipt' receipt.pk %}" class="btn btn-warning btn-sm">Göster</a>
+                        <a href="{% url 'edit-receipt' receipt.pk %}" class="btn btn-info btn-sm">Düzenle</a>
+                        <a href="{% url 'delete-receipt' receipt.pk %}" class="btn btn-danger btn-sm">Sil</a>
+                    </div>
+                </td>              
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+    <div class="align-middle">
+        {% if is_paginated %}
+
+            {% if page_obj.has_previous %}
+                <a class="btn btn-outline-info mb-4" href="?page=1">İlk</a>
+                <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Önceki</a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Sonraki</a>
+                <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Son</a>
+            {% endif %}
+
+        {% endif %}
+    </div>
+
+{% else %}
+
+        <tbody></tbody>   
+    </table>
+
+    <br><br><br><br><br><br><br><br>
+    <div style="color: #575757; font-style: bold; font-size: 1.5rem; text-align: center;">Herhangi bir kayıt bulunamadı. Eklemeyi deneyin.</div>
+
+{% endif %}
+
+
+{% endblock content %}
