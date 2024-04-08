@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+
+{% block title %} Hakkında {% endblock title %}
+
+
+{% block content %}
+    
+    {% if not user.is_authenticated  %}
+        <br>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Geri Dön</a>
+    {% endif %}    
+    
+    <div class="align-middle" style="color: #4caf50; font-style: bold; font-size: 3rem;">Stok Yönetimi</div>
+    <div class="align-middle" style="color: rgb(73, 73, 73)">Bir Stok Yönetimi Programı</div>
+    <br><br>
+
+    <div class="align-middle"> 
+        <h2 style="color:#4caf50">| Hakkında |</h3> <br>
+            <p>
+                Stok Yönetimi, bir şirketin gereksinimlerine göre oluşturulmuş basit bir envanter yönetimi yazılımıdır.
+                Yazılım, dinamik olarak oluşturulmuş bir fatura ile gelen ve giden stokları takip edebilme yeteneğine sahiptir.
+                Her tedarikçiye şirketle yaptığı işlemlerin geçmişini görebileceği bir profil sunulur.
+            </p>
+        <br>
+    </div>
+        <h2 style="color:#4caf50" class="align-middle">| Özellikler |</h3> <br>
+            <ul style="display:table; margin:0 auto; ">                
+                <li style="color:#494949;">Mevcut uygun stoğu görüntülemek için İnteraktif Grafik</li>
+                <li style="color:#494949;">Mevcut uygun stok gibi stok ayrıntıları korunur</li>
+                <li style="color:#494949;">Gelen işlemler satın alma yoluyla yapılır</li>
+                <li style="color:#494949;">Giden işlemler satış yoluyla yapılır</li>
+                <li style="color:#494949;">Yazılım üzerinden gerçekleştirilen her işlem kayıt altına alınmaktadır</li>
+                <li style="color:#494949;">Fatura dinamik olarak işlenir ve yazdırılabilir</li>
+                <li style="color:#494949;">Tedarikçiler için ayrı profiller tutulur</li>
+            </ul>  
+        <br>
+    <div class="align-middle">
+        <h2 style="color:#4caf50" >| Geliştirici |</h3> <br>
+            <p>Orhan Eş</p>
+            <br><br><br>
+    </div>
+
+{% endblock content %}
