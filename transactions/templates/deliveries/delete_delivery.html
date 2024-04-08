@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+
+{% block title %} Nakliye Sil {% endblock title %}
+
+
+{% block content %}
+                
+    <form method="post">
+        
+        {% csrf_token %}
+        
+        <fieldset class="form-group">
+            <div style="color:#575757; font-style: bold; font-size: 3rem; border-bottom: 1px solid white;">Nakliye Sil</div>
+            <hr style="height:1px;border:none;color:#333;background-color:#333;">
+            <h2 style="color:#575757;">Nakliyeyi silmek istediğinize emin misiniz: "{{ object.courier_name }}"?</h2>
+        </fieldset>
+
+        <div class="form-group">  
+            <button type="submit" class="btn btn-danger">Evet, Sil</button>
+            <a href="{% url 'deliveries-list' %}" class="btn btn-secondary">Vazgeç</a>
+        </div>
+        
+    </form>
+
+{% endblock content %}

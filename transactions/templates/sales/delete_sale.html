@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+
+{% block title %} Satış Sil {% endblock title %}
+
+
+{% block content %}
+                
+    <form method="post">
+        
+        {% csrf_token %}
+        
+        <fieldset class="form-group">
+            <div style="color:#575757; font-style: bold; font-size: 3rem; border-bottom: 1px solid white;">Satış Faturası Sil</div> <br>
+            <h2 style="color:#575757;">{{ object.billno }}, numaralı satış faturasını silmek istediğinize emin misiniz?</h2>
+        </fieldset>
+
+        <div class="form-group">  
+            <button type="submit" class="btn btn-danger">Evet, Sil</button>
+            <a href="{% url 'sales-list' %}" class="btn btn-secondary">Vazgeç</a>
+        </div>
+        
+    </form>
+
+{% endblock content %}
