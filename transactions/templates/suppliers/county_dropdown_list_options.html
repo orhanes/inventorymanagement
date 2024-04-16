@@ -1,0 +1,4 @@
+<option value="">İlçe Seçiniz</option>
+{% for county in counties %}
+<option value="{{ county.pk }}">{{ county.name }}</option>
+{% endfor %}
