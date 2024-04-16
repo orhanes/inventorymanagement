@@ -54,4 +54,8 @@ urlpatterns = [
     path('ajax/load-counties/', views.load_counties, name='ajax_load_counties'),
     path('ajax/load-positions/', views.load_positions, name='ajax_load_positions'),
 
+    path('ajax/load-cities-supplier/', views.load_cities_supplier, name='ajax_load_cities_supplier'),
+    path('ajax/load-counties-supplier/', views.load_counties_supplier, name='ajax_load_counties_supplier'),
+    path('ajax/load-positions-supplier/', views.load_positions_supplier, name='ajax_load_positions_supplier'),
+
 ]

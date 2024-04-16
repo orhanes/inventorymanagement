@@ -32,9 +32,9 @@ class PurchaseItemForm(forms.ModelForm):
         self.fields['stock'].queryset = Stock.objects.filter(is_deleted=False)
         self.fields['stock'].widget.attrs.update({'class': 'textinput form-control setprice stock', 'required': 'true'})
         self.fields['quantity'].widget.attrs.update({'class': 'textinput form-control setprice quantity', 'min': '0', 'required': 'true'})
-        self.fields['perprice'].widget.attrs.update({'class': 'textinput form-control setprice price', 'min': '0', 'required': 'true'})
+        self.fields['perprice'].widget.attrs.update({'class': 'textinput form-control setprice price', 'min': '0', 'required': 'true', 'placeholder':'Birim Fiyat Giriniz'})
         self.fields['tax_rate'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['waybill_no'].widget.attrs.update({'class': 'textinput form-control'})
+        self.fields['waybill_no'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'İrsaliye Numarası Giriniz'})
         self.fields['waybill_date'].widget.attrs.update({'class': 'dateinput form-control'})
         self.fields['due_date'].widget.attrs.update({'class': 'dateinput form-control'})
 
@@ -55,38 +55,75 @@ class PurchaseDetailsForm(forms.ModelForm):
 class SupplierForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['name'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['phone'].widget.attrs.update({'class': 'textinput form-control'})
+        self.fields['name'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'Tedarikçi Firma/Kişi Adı Giriniz'})
+        self.fields['phone'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'Tedarikçi Telefonu Giriniz'})
         self.fields['country'].widget.attrs.update({'class': 'textinput form-control'})
         self.fields['city'].widget.attrs.update({'class': 'textinput form-control'})
         self.fields['county'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['web'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['representative'].widget.attrs.update({'class': 'textinput form-control'})
+        self.fields['web'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'Web Adresi Giriniz'})
+        self.fields['representative'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'Temsilci Ad/Soyad Giriniz'})
+        self.fields['department'].widget.attrs.update({'class': 'textinput form-control'})
         self.fields['position'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['mobile_phone'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['email'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['tax_id'].widget.attrs.update({'class': 'textinput form-control' })
-        self.fields['tax_administration'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['kep_address'].widget.attrs.update({'class': 'textinput form-control'})
+        self.fields['mobile_phone'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'Cep Telefonu Giriniz'})
+        self.fields['email'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'Email Adresi Giriniz'})
+        self.fields['tax_id'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'Vergi Kimlik Numarası Giriniz' })
+        self.fields['tax_administration'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'Vergi Dairesi Giriniz'})
+        self.fields['kep_address'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'KEP Adresi Giriniz'})
         self.fields['bank_name'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['iban_no'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['branch_code'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['account_number'].widget.attrs.update({'class': 'textinput form-control'})
+        self.fields['iban_no'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'IBAN Numarası Giriniz'})
+        self.fields['branch_code'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'Şube Kodu Giriniz'})
+        self.fields['account_number'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'Hesap Numarası Giriniz'})
         # self.fields['created_date'].widget.attrs.update({'class': 'textinput form-control'})
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields['city'].queryset = City.objects.none()
+            self.fields['county'].queryset = County.objects.none()
+            self.fields['position'].queryset = Position.objects.none()
+            
+            if 'country' in self.data:
+                try:
+                    country_id = int(self.data.get('country'))
+                    self.fields['city'].queryset = City.objects.filter(country_id=country_id).order_by('name')
+                except (ValueError, TypeError):
+                    pass  # invalid input from the client; ignore and fallback to empty City queryset
+            elif self.instance.pk:
+                self.fields['city'].queryset = self.instance.country.city_set.order_by('name')
+            
+            if 'city' in self.data:
+                try:
+                    city_id = int(self.data.get('city'))
+                    self.fields['county'].queryset = County.objects.filter(city_id=city_id).order_by('name')
+                except (ValueError, TypeError):
+                    pass
+            elif self.instance.pk:
+                self.fields['county'].queryset = self.instance.city.county_set.order_by('name')
+
+            
+            if 'department' in self.data:
+                try:
+                    department_id = int(self.data.get('department'))
+                    self.fields['position'].queryset = Position.objects.filter(department_id=department_id).order_by('name')
+                except (ValueError, TypeError):
+                    pass
+            elif self.instance.pk:
+                self.fields['position'].queryset = self.instance.department.position_set.order_by('name')
+
 
     class Meta:
         model = Supplier
-        fields = ['name', 'phone', 'address', 'country', 'city', 'county', 'web', 'representative', 'position', 
+        fields = ['name', 'phone', 'address', 'country', 'city', 'county', 'web', 'representative', 'department', 'position', 
                   'mobile_phone', 'email', 'tax_id', 'tax_administration', 'kep_address', 'bank_name', 'iban_no', 'branch_code', 'account_number']
         widgets = {
             'address' : forms.Textarea(
                 attrs = {
                     'class' : 'textinput form-control',
-                    'rows'  : '4'
+                    'rows'  : '4',
+                    'placeholder':' Tedarikçi Adresi Giriniz'
                 }
             )
         }
-
+        
 # Müşteri Formu
 class BuyerForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -105,7 +142,7 @@ class BuyerForm(forms.ModelForm):
         self.fields['email'].widget.attrs.update({'class': 'textinput form-control', 'placeholder': 'Email Giriniz'})
         self.fields['tax_id'].widget.attrs.update({'class': 'textinput form-control', 'placeholder': 'Vergi Kimlik No Giriniz'})
         self.fields['tax_administration'].widget.attrs.update({'class': 'textinput form-control', 'placeholder': 'Vergi Dairesi Giriniz'})
-        self.fields['kep_address'].widget.attrs.update({'class': 'textinput form-control', 'placeholder': 'KEP Adresi Giriniz', 'title': 'İstenilen Biçimde Giriniz'})
+        self.fields['kep_address'].widget.attrs.update({'class': 'textinput form-control', 'placeholder': 'KEP Adresi Giriniz'})
         self.fields['bank_name'].widget.attrs.update({'class': 'textinput form-control', 'title': 'İstenilen Biçimde Giriniz'})
         self.fields['iban_no'].widget.attrs.update({'class': 'textinput form-control', 'placeholder': 'IBAN Numarası Giriniz'})
         self.fields['branch_code'].widget.attrs.update({'class': 'textinput form-control', 'placeholder': 'Şube Kodu Giriniz'})
@@ -166,9 +203,9 @@ class SaleItemForm(forms.ModelForm):
         self.fields['stock'].queryset = Stock.objects.filter(is_deleted=False)
         self.fields['stock'].widget.attrs.update({'class': 'textinput form-control setprice stock', 'required': 'true'})
         self.fields['quantity'].widget.attrs.update({'class': 'textinput form-control setprice quantity', 'min': '0', 'required': 'true'})
-        self.fields['perprice'].widget.attrs.update({'class': 'textinput form-control setprice price', 'min': '0', 'required': 'true'})
+        self.fields['perprice'].widget.attrs.update({'class': 'textinput form-control setprice price', 'min': '0', 'required': 'true', 'placeholder':'Birim Fiyat Giriniz'})
         self.fields['tax_rate'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['waybill_no'].widget.attrs.update({'class': 'textinput form-control'})
+        self.fields['waybill_no'].widget.attrs.update({'class': 'textinput form-control', 'placeholder':'İrsaliye Numarası Giriniz'})
         self.fields['waybill_date'].widget.attrs.update({'class': 'dateinput form-control'})
         self.fields['due_date'].widget.attrs.update({'class': 'dateinput form-control'})
     class Meta:

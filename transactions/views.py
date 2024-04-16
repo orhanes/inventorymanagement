@@ -684,21 +684,40 @@ class MailOrderBillView(View):
         }
         return render(request, self.template_name, context)
 
-# Ülkeye Göre Şehir Seçimi
+# Ülkeye Göre Şehir Seçimi Müşteri
 def load_cities(request):
     country_id = request.GET.get('country_id')
     cities = City.objects.filter(country_id=country_id).all()
     return render(request, 'buyers/city_dropdown_list_options.html', {'cities': cities})
     # return JsonResponse(list(cities.values('id', 'name')), safe=False)
 
-# Şehre Göre İlçe Seçimi
+# Şehre Göre İlçe Seçimi Müşteri
 def load_counties(request):
     city_id = request.GET.get('city_id')
     counties = County.objects.filter(city_id=city_id).all()
     return render(request, 'buyers/county_dropdown_list_options.html', {'counties': counties})
 
-# Departmana Göre Pozisyon Seçimi
+# Departmana Göre Pozisyon Seçimi Müşteri
 def load_positions(request):
     department_id = request.GET.get('department_id')
     positions = Position.objects.filter(department_id=department_id).all()
     return render(request, 'buyers/position_dropdown_list_options.html', {'positions': positions})
+
+# Ülkeye Göre Şehir Seçimi Tedarikçi
+def load_cities_supplier(request):
+    country_id = request.GET.get('country_id')
+    cities = City.objects.filter(country_id=country_id).all()
+    return render(request, 'suppliers/city_dropdown_list_options.html', {'cities': cities})
+    # return JsonResponse(list(cities.values('id', 'name')), safe=False)
+
+# Şehre Göre İlçe Seçimi Tedarikçi
+def load_counties_supplier(request):
+    city_id = request.GET.get('city_id')
+    counties = County.objects.filter(city_id=city_id).all()
+    return render(request, 'suppliers/county_dropdown_list_options.html', {'counties': counties})
+
+# Departmana Göre Pozisyon Seçimi Tedarikçi
+def load_positions_supplier(request):
+    department_id = request.GET.get('department_id')
+    positions = Position.objects.filter(department_id=department_id).all()
+    return render(request, 'suppliers/position_dropdown_list_options.html', {'positions': positions})
