@@ -1,143 +1,545 @@
 {% extends "base.html" %}
-
+{% load widget_tweaks %}
 
 {% block title %} {{title}} {% endblock title %}
 
-
 {% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-file-invoice me-2"></i>{{title}}</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.number.errors }}
+                            <label for="{{ form.number.id_for_label }}" class="form-label">
+                                Makbuz No <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                                {{ form.number }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.created_date.errors }}
+                            <label for="{{ form.created_date.id_for_label }}" class="form-label">
+                                Tarih <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                {{ form.created_date|attr:"type:date" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="mb-4">
+                        <label class="form-label mb-2">
+                            <i class="fas fa-building me-2"></i>Ünvan <span class="text-danger">*</span>
+                        </label>
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="buyer_choice" id="buyer_select" value="select" checked>
+                                <label class="form-check-label text-primary" for="buyer_select" style="font-size:0.95em;">
+                                    <i class="fas fa-users me-1 text-primary"></i> Mevcut Müşteriden Seç
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="buyer_choice" id="buyer_manual" value="manual">
+                                <label class="form-check-label text-primary" for="buyer_manual" style="font-size:0.95em;">
+                                    <i class="fas fa-keyboard me-1 text-primary"></i> Elle Gir
+                                </label>
+                            </div>
+                        </div>
+                        <div id="buyer_select_area" class="mt-2">
+                            {{ form.buyer_select|add_class:"form-select" }}
+                        </div>
+                        <div id="buyer_area" class="mt-2" style="display:none;">
+                            {{ form.buyer_manual|add_class:"form-control" }}
+                        </div>
+                    </div>
+                </div>
 
-    <div style="color:#575757; font-style: bold; font-size: 3rem; border-bottom: 1px solid white;">{{title}}</div> 
-    <hr style="height:1px;border:none;color:#333;background-color:#333;">
-    <form method="post">
+                <hr class="my-4">
+                <h4 class="mb-4">Ödeme Bilgileri</h4>
+                <div class="row align-items-end" id="payment-row">
+                    <div class="col-md-2 mb-2">
+                        <div class="form-group">
+                            <label for="id_payment_method" class="form-label">Ödeme Yöntemi <span class="text-danger">*</span></label>
+                            {{ payment_form.payment_method }}
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <div class="form-group">
+                            <label for="id_date" class="form-label">Tarih <span class="text-danger">*</span></label>
+                            {{ payment_form.date|attr:"type:date" }}
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <div class="form-group">
+                            <label for="id_description" class="form-label">Açıklama</label>
+                            {{ payment_form.description }}
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <div class="form-group">
+                            <label for="id_amount" class="form-label">Tutar <span class="text-danger">*</span></label>
+                            {{ payment_form.amount }}
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <div class="form-group">
+                            <label for="id_currency" class="form-label">Para Birimi</label>
+                            {{ payment_form.currency }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-12 d-flex justify-content-center">
+                        <button type="button" class="btn btn-primary btn-sm px-4" id="add-payment-btn">
+                            <i class="fas fa-plus"></i> Ödeme Ekle
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5 class="mb-3">Eklenen Ödemeler</h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="payments-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Ödeme Yöntemi</th>
+                                        <th>Tarih</th>
+                                        <th>Açıklama</th>
+                                        <th>Tutar</th>
+                                        <th>Sil</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- JS ile eklenecek -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                <div class="row mb-2">
+                    <div class="col-12">
+                        <div class="form-group">
+                            {{ form.payment_total.errors }}
+                            <label for="id_payment_total" class="form-label">
+                                Ödeme Toplamı (Rakam ile) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lira-sign"></i></span>
+                                <input type="text" id="id_payment_total" name="payment_total" class="form-control" readonly>
+                                <span class="input-group-text" id="payment_currency_symbol">₺</span>
+                            </div>
+                            <small class="form-text text-muted">Girdiğiniz ödemelere göre otomatik hesaplanacaktır.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-12">
+                        <div class="form-group">
+                            {{ form.payment_handwrite.errors }}
+                            <label for="{{ form.payment_handwrite.id_for_label }}" class="form-label">
+                                Ödeme Toplamı (Yazı ile) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-pen"></i></span>
+                                {{ form.payment_handwrite }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="form-group">
+                            {{ form.collector.errors }}
+                            <label for="{{ form.collector.id_for_label }}" class="form-label">
+                                Tahsil Eden <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                {{ form.collector }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-12">
+                        <div class="form-group">
+                            {{ form.payment_method.errors }}
+                            <label for="{{ form.payment_method.id_for_label }}" class="form-label">
+                                Ödeme Yöntemi <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-money-bill"></i></span>
+                                {{ form.payment_method|add_class:"form-select" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <div>
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="fas fa-save me-2"></i>{{ savebtn }}
+                        </button>
+                        {% if title == "Yeni Makbuz" %}
+                            <button type="reset" class="btn btn-danger px-4">
+                                <i class="fas fa-undo me-2"></i>Sıfırla
+                            </button>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if delbtn %}
+                            <a href="{% url 'delete-receipt' receipt.pk %}" class="btn btn-danger px-4">
+                                <i class="fas fa-trash me-2"></i>Sil
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'receipts-list' %}" class="btn btn-secondary px-4">
+                            <i class="fas fa-times me-2"></i>Vazgeç
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+    .form-control:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    select.form-control {
+        width: 100% !important;
+        min-width: 200px;
+        height: calc(1.5em + 1.5rem) !important;
+        padding: 0.375rem 2.25rem 0.375rem 0.75rem !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23555' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        line-height: 1.5;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .input-group select.form-control {
+        flex: 1 1 auto;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: 0;
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-right: none;
+        display: flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .input-group {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        flex-wrap: nowrap;
+    }
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    .form-group select {
+        max-width: none;
+    }
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .is-valid {
+        border-color: #198754 !important;
+    }
+    .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+        position: absolute;
+        bottom: -1.25rem;
+        left: 0;
+        padding-left: 0.5rem;
+    }
+    .is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    .form-control.is-invalid:focus,
+    .form-control.is-valid:focus {
+        box-shadow: none;
+    }
+    .input-group .form-control.is-invalid,
+    .input-group .form-control.is-valid {
+        z-index: 3;
+    }
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    .input-group {
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const paymentTotalInput = document.getElementById('id_payment_total');
+    const paymentCurrencySymbol = document.getElementById('payment_currency_symbol');
     
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+    // Mevcut ödemeleri tabloya ekle
+    const paymentsData = JSON.parse(document.getElementById('payments-data').textContent);
+    if (paymentsData && paymentsData.length > 0) {
+        paymentsData.forEach(function(payment) {
+            const row = document.createElement('tr');
+            const [y, m, d] = payment.date.split('-');
+            const formattedDate = `${d}/${m}/${y}`;
+            row.innerHTML = `
+                <td><input type="hidden" name="payments_payment_method[]" value="${payment.payment_method.id}">${payment.payment_method.name}</td>
+                <td><input type="hidden" name="payments_date[]" value="${payment.date}">${formattedDate}</td>
+                <td><input type="hidden" name="payments_description[]" value="${payment.description || ''}">${payment.description || '-'}</td>
+                <td><input type="hidden" name="payments_amount[]" value="${payment.amount}">${payment.amount} ${payment.currency.symbol}</td>
+                <td><input type="hidden" name="payments_currency[]" value="${payment.currency.id}"></td>
+                <td><button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.remove(); updatePaymentTotal();"><i class="fas fa-trash"></i></button></td>
+            `;
+            document.querySelector('#payments-table tbody').appendChild(row);
+        });
+        // Toplam tutarı güncelle
+        updatePaymentTotal();
+    }
+    
+    // Ünvan seçimi için
+    const buyerSelect = document.getElementById('buyer_select');
+    const buyerManual = document.getElementById('buyer_manual');
+    const buyerSelectArea = document.getElementById('buyer_select_area');
+    const buyerArea = document.getElementById('buyer_area');
+    
+    if (buyerSelect && buyerSelect.value) {
+        buyerSelect.checked = true;
+        buyerSelectArea.style.display = 'block';
+        buyerArea.style.display = 'none';
+    } else if (buyerManual && buyerManual.value) {
+        buyerManual.checked = true;
+        buyerSelectArea.style.display = 'none';
+        buyerArea.style.display = 'block';
+    }
+    
+    // Para birimi sembolünü güncelleme fonksiyonu
+    function updateCurrencySymbol() {
+        const currencySelect = document.getElementById('id_currency');
+        if (currencySelect) {
+            const selectedOption = currencySelect.options[currencySelect.selectedIndex];
+            const symbol = selectedOption.text.split('-')[0].trim();
+            paymentCurrencySymbol.textContent = symbol;
+        }
+    }
+
+    // Para birimi değiştiğinde sembolü güncelle
+    const currencySelect = document.getElementById('id_currency');
+    if (currencySelect) {
+        currencySelect.addEventListener('change', updateCurrencySymbol);
+        // Sayfa yüklendiğinde mevcut para birimini ayarla
+        updateCurrencySymbol();
+    }
+
+    // Input alanlarını otomatik büyük harfe çevirme
+    const autoUpperCaseInputs = [
+        'id_buyer_manual',
+        'id_description',
+        'id_payment_handwrite',
+        'id_collector'
+    ];
+
+    autoUpperCaseInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        }
+    });
+
+    // Form submit öncesi kontrol
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        <div class="form-group">
-            {{ form.buyer.errors }}
-            <label for="{{ form.buyer.id_for_label }}">Ünvan:</label>
-            {{ form.buyer }}
-        </div>
-       
-        <div class="form-group">
-            {{ form.created_date.errors }}
-            <label for="{{ form.created_date.id_for_label }}">Tarih:</label>
-            <input type="date" value="{{ form.created_date }}" />
-        </div>
-        <div class="form-group">
-            {{ form.serial_number.errors }}
-            <label for="{{ form.serial_number.id_for_label }}">Makbuz No:</label>
-            {{ form.serial_number }}
-        </div>
-        <div class="form-group">
-            {{ form.payment_method.errors }}
-            <label for="{{ form.payment_method.id_for_label }}">Ödeme Yöntemi:</label>
-            {{ form.payment_method }}
-        </div>
-        <div class="form-group">
-            {{ form.payment_total.errors }}
-            <label for="{{ form.payment_total.id_for_label }}">Ödeme Toplamı:</label>
-            {{ form.payment_total }}
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.payment_one_payment_type.errors }}
-                <label for="{{ form.payment_one_payment_type.id_for_label }}">Ödeme 1 Türü:</label>
-                {{ form.payment_one_payment_type }}
-            </div>
-            <div class="form-group col-md-6">
-                {{ form.payment_one_date.errors }}
-                <label for="{{ form.payment_one_date.id_for_label }}">Ödeme 1 Tarihi:</label>
-                <input type="date" value="{{ form.payment_one_date }}" />
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.payment_one_description.errors }}
-                <label for="{{ form.payment_one_description.id_for_label }}">Ödeme 1 Açıklama:</label>
-                {{ form.payment_one_description }}
-            </div>
-            <div class="form-group col-md-6">
-                {{ form.payment_one_amount.errors }}
-                <label for="{{ form.payment_one_amount.id_for_label }}">Ödeme 1 Tutarı:</label>
-                {{ form.payment_one_amount }}
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.payment_two_payment_type.errors }}
-                <label for="{{ form.payment_two_payment_type.id_for_label }}">Ödeme 2 Türü:</label>
-                {{ form.payment_two_payment_type }}
-            </div>
-            <div class="form-group col-md-6">
-                {{ form.payment_two_date.errors }}
-                <label for="{{ form.payment_two_date.id_for_label }}">Ödeme 2 Tarihi:</label>
-                <input type="date" value="{{ form.payment_two_date }}" />
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.payment_two_description.errors }}
-                <label for="{{ form.payment_two_description.id_for_label }}">Ödeme 2 Açıklama:</label>
-                {{ form.payment_two_description }}
-            </div>
-            <div class="form-group col-md-6">
-                {{ form.payment_two_amount.errors }}
-                <label for="{{ form.payment_two_amount.id_for_label }}">Ödeme 2 Tutarı:</label>
-                {{ form.payment_two_amount }}
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.payment_three_payment_type.errors }}
-                <label for="{{ form.payment_three_payment_type_for_label }}">Ödeme 3 Türü:</label>
-                {{ form.payment_three_payment_type }}
-            </div>
-            <div class="form-group col-md-6">
-                {{ form.payment_three_date.errors }}
-                <label for="{{ form.form.payment_three_date.id_for_label }}">Ödeme 3 Tarihi:</label>
-                <input type="date" value="{{ form.payment_three_date }}" />
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.payment_three_description.errors }}
-                <label for="{{ form.cpayment_three_description.id_for_label }}">Ödeme 3 Açıklama:</label>
-                {{ form.payment_three_description }}
-            </div>
-            <div class="form-group col-md-6">
-                {{ form.payment_three_amount.errors }}
-                <label for="{{ form.payment_three_amount.id_for_label }}">Ödeme 3 Tutarı:</label>
-                {{ form.payment_three_amount }}
-            </div>
-        </div>
-
-        <div class="form-group">
-            {{ form.payment_handwrite.errors }}
-            <label for="{{ form.payment_handwrite.id_for_label }}">Yazı İle:</label>
-            {{ form.payment_handwrite }}
-        </div>
-        <div class="form-group">
-            {{ form.collector.errors }}
-            <label for="{{ form.collector.id_for_label }}">Tahsil Eden:</label>
-            {{ form.collector }}
-        </div>
+        // Ödeme toplamını güncelle
+        let total = 0;
+        document.querySelectorAll('#payments-table tbody tr').forEach(function(row) {
+            const amountInput = row.querySelector('input[name="payments_amount[]"]');
+            if (amountInput && !isNaN(parseFloat(amountInput.value))) {
+                total += parseFloat(amountInput.value);
+            }
+        });
         
-
-        <br>
-
-        <div class="align-middle">
-            <button type="submit" class="btn btn-success">{{ savebtn }}</button>
-            {% if title == "Yeni Nakliye" %}
-                <button type="reset" class="btn btn-danger" >Sıfırla</button>
-            {% endif %}
-            {% if delbtn %}
-                <a href="{% url 'delete-receipt' receipt.pk %}" class="btn btn-danger"> Makbuzu Sil</a>
-            {% endif %}
-            <a href="{% url 'receipts-list' %}" class="btn btn-secondary">Vazgeç</a>
-        </div>
+        // Toplamı input'a yaz
+        if (paymentTotalInput) {
+            paymentTotalInput.value = total.toFixed(2);
+        }
         
-    </form>
+        // Form verilerini konsola yazdır
+        const formData = new FormData(form);
+        console.log('Form verileri:');
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+        
+        // Formu gönder
+        this.submit();
+    });
+    
+    // Ödeme ekleme fonksiyonu
+    function addPayment() {
+        const paymentMethod = document.getElementById('id_payment_method');
+        const paymentDate = document.getElementById('id_date');
+        const paymentAmount = document.getElementById('id_amount');
+        const paymentCurrency = document.getElementById('id_currency');
+        if (!paymentMethod.value || !paymentDate.value || !paymentAmount.value) {
+            alert('Lütfen zorunlu alanları doldurun!');
+            return;
+        }
+        const currencySymbol = paymentCurrency.options[paymentCurrency.selectedIndex].text.split('-')[0].trim();
+        const row = document.createElement('tr');
+        const [y, m, d] = paymentDate.value.split('-');
+        const formattedDate = `${d}/${m}/${y}`;
+        row.innerHTML = `
+            <td><input type="hidden" name="payments_payment_method[]" value="${paymentMethod.value}">${paymentMethod.options[paymentMethod.selectedIndex].text}</td>
+            <td><input type="hidden" name="payments_date[]" value="${paymentDate.value}">${formattedDate}</td>
+            <td><input type="hidden" name="payments_description[]" value="${document.getElementById('id_description').value}">${document.getElementById('id_description').value || '-'}</td>
+            <td><input type="hidden" name="payments_amount[]" value="${paymentAmount.value}">${paymentAmount.value} ${currencySymbol}</td>
+            <td><input type="hidden" name="payments_currency[]" value="${paymentCurrency.value}"></td>
+            <td><button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.remove(); updatePaymentTotal();"><i class="fas fa-trash"></i></button></td>
+        `;
+        document.querySelector('#payments-table tbody').appendChild(row);
+        updatePaymentTotal();
+        paymentMethod.value = '';
+        paymentDate.value = '';
+        paymentAmount.value = '';
+        document.getElementById('id_description').value = '';
+    }
+    
+    // Ödeme toplamını güncelleme fonksiyonu
+    function updatePaymentTotal() {
+        let total = 0;
+        document.querySelectorAll('#payments-table tbody tr').forEach(function(row) {
+            const amountInput = row.querySelector('input[name="payments_amount[]"]');
+            if (amountInput && !isNaN(parseFloat(amountInput.value))) {
+                total += parseFloat(amountInput.value);
+            }
+        });
+        
+        // Toplamı input'a yaz
+        if (paymentTotalInput) {
+            paymentTotalInput.value = total.toFixed(2);
+        }
+    }
+    
+    // Ödeme ekleme butonuna tıklama olayı
+    document.getElementById('add-payment-btn').addEventListener('click', addPayment);
+
+    // Ünvan seçimi için toggle fonksiyonu
+    (function() {
+        const selectRadio = document.getElementById('buyer_select');
+        const manualRadio = document.getElementById('buyer_manual');
+        const buyerSelectArea = document.getElementById('buyer_select_area');
+        const buyerArea = document.getElementById('buyer_area');
+        const buyerSelect = buyerSelectArea ? buyerSelectArea.querySelector('select') : null;
+        const buyerInput = buyerArea ? buyerArea.querySelector('input') : null;
+
+        function toggleBuyerFields() {
+            if (selectRadio && selectRadio.checked) {
+                if (buyerSelectArea) buyerSelectArea.style.display = 'block';
+                if (buyerArea) {
+                    buyerArea.style.display = 'none';
+                    if (buyerInput) buyerInput.removeAttribute('disabled');
+                }
+                if (buyerInput) buyerInput.value = '';
+            } else {
+                if (buyerSelectArea) buyerSelectArea.style.display = 'none';
+                if (buyerArea) {
+                    buyerArea.style.display = 'block';
+                    if (buyerInput) buyerInput.removeAttribute('disabled');
+                }
+                if (buyerSelect) buyerSelect.selectedIndex = 0;
+            }
+        }
+
+        if (selectRadio && manualRadio) {
+            selectRadio.addEventListener('change', toggleBuyerFields);
+            manualRadio.addEventListener('change', toggleBuyerFields);
+            // İlk yüklemede doğru alanı göster
+            toggleBuyerFields();
+        }
+    })();
+});
+</script>
+
+<!-- Ödemeleri JSON olarak sakla -->
+<script type="application/json" id="payments-data">
+    {{ payments|safe }}
+</script>
 
 {% endblock content %}

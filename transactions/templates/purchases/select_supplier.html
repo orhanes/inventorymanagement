@@ -5,28 +5,152 @@
 
 
 {% block content %}
-
-    <div style="color:#575757; font-style: bold; font-size: 3rem; border-bottom: 1px solid white;">Satınalma Ekle</div> 
-    
-    <br>
-    
-    <form method="post">
-
-        {% csrf_token %}
-        
-        {% for field in form.visible_fields %}
-            <div class="form-group">
-                {{ field.label_tag }}
-                {{ field }}
-            </div>
-        {% endfor %}
-
-        <br>
-        <div class="align-middle">
-            <button type="submit" class="btn btn-success">Sonraki</button>
-            <a href="{% url 'purchases-list' %}" class="btn btn-secondary">Vazgeç</a>
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-truck-loading me-2"></i>Satınalma Ekle</h3>
         </div>
-        
-    </form>
+        <div class="card-body p-4">
+            <form method="post" class="needs-validation" novalidate id="supplierForm">
+                {% csrf_token %}
+                
+                {% for field in form.visible_fields %}
+                <div class="form-group mb-4">
+                    <label for="{{ field.id_for_label }}" class="form-label">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span class="text-danger">*</span>
+                        {% endif %}
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-building"></i>
+                        </span>
+                        {{ field }}
+                    </div>
+                    {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                    <div class="invalid-feedback">
+                        {{ field.errors|first }}
+                    </div>
+                </div>
+                {% endfor %}
 
+                <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <div>
+                        Tedarikçi seçebilmeniz için öncelikle <strong>Satınalma -> Tedarikçi Ekle</strong> kısmından tedarikçi eklemiş olmanız gerekmektedir.
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-3">
+                    <a href="{% url 'purchases-list' %}" class="btn btn-secondary px-4">
+                        <i class="fas fa-times me-2"></i>Vazgeç
+                    </a>
+                    <button type="submit" class="btn btn-success px-4">
+                        <i class="fas fa-arrow-right me-2"></i>Sonraki
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+    .form-control:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    select.form-control {
+        width: 100% !important;
+        min-width: 200px;
+        height: calc(1.5em + 1.5rem) !important;
+        padding: 0.375rem 2.25rem 0.375rem 0.75rem !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23555' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+    }
+    .input-group select.form-control {
+        flex: 1 1 auto;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: 0;
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-right: none;
+        display: flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .input-group {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        flex-wrap: nowrap;
+    }
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+        position: absolute;
+        bottom: -1.25rem;
+        left: 0;
+        padding-left: 0.5rem;
+    }
+    .is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+{% endblock %}
 {% endblock content %}

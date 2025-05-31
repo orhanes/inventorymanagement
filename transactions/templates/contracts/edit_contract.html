@@ -1,0 +1,920 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %} {{ title }} {% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-file-contract me-2"></i>{{ title }}</h3>
+        </div>
+        <div class="card-body">
+            {% if form.errors %}
+                <div class="alert alert-danger">{{ form.errors }}</div>
+            {% endif %}
+            {% if formset.non_form_errors %}
+                <div class="alert alert-danger">{{ formset.non_form_errors }}</div>
+            {% endif %}
+            {% for f in formset.forms %}
+                {% if f.errors %}
+                    <div class="alert alert-danger">{{ f.errors }}</div>
+                {% endif %}
+            {% endfor %}
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.number.errors }}
+                            <label for="{{ form.number.id_for_label }}" class="form-label">
+                                Sözleşme No <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                                <input type="text" name="number" id="number" class="form-control" value="{{ suggested_number }}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.date.errors }}
+                            <label for="{{ form.date.id_for_label }}" class="form-label">
+                                Sözleşme Tarihi <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                {{ form.date|add_class:'form-control' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.start_date.errors }}
+                            <label for="{{ form.start_date.id_for_label }}" class="form-label">
+                                Başlangıç Tarihi <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+                                {{ form.start_date|add_class:'form-control' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.end_date.errors }}
+                            <label for="{{ form.end_date.id_for_label }}" class="form-label">
+                                Bitiş Tarihi <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
+                                {{ form.end_date|add_class:'form-control' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold mb-2" style="font-size:1.1rem;">
+                        <i class="fas fa-building text-primary me-2"></i>Firma / Kurum
+                    </label>
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="institution_choice" id="institution_select" value="select" checked>
+                            <label class="form-check-label" for="institution_select">
+                                <i class="fas fa-users me-1"></i> Mevcut Müşteriden Seç
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="institution_choice" id="institution_manual" value="manual">
+                            <label class="form-check-label" for="institution_manual">
+                                <i class="fas fa-keyboard me-1"></i> Elle Gir
+                            </label>
+                        </div>
+                    </div>
+                    <div id="buyer_select_area" class="mt-2">
+                        {{ form.institution|add_class:"form-select" }}
+                            </div>
+                    <div id="institution_area" class="mt-2" style="display:none;">
+                        {{ form.institution_name|add_class:"form-control" }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.department.errors }}
+                            <label for="{{ form.department.id_for_label }}" class="form-label">
+                                Departman <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-sitemap"></i></span>
+                                {{ form.department|add_class:'form-control' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.authorized_person.errors }}
+                            <label for="{{ form.authorized_person.id_for_label }}" class="form-label">
+                                Yetkili Kişi <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                {{ form.authorized_person|add_class:'form-control'|attr:'placeholder:Yetkili kişi giriniz' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.contract_type.errors }}
+                            <label for="{{ form.contract_type.id_for_label }}" class="form-label">
+                                Sözleşme Türü <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-file-alt"></i></span>
+                                {{ form.contract_type|add_class:'form-control' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.status.errors }}
+                            <label for="{{ form.status.id_for_label }}" class="form-label">
+                                Sözleşme Durumu <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-info-circle"></i></span>
+                                {{ form.status|add_class:'form-control' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sözleşme Kalemleri (Formset) -->
+                <div class="mt-5">
+                    <h5 class="mb-3"><i class="fas fa-list-ul text-primary me-2"></i><span class="text-primary">Sözleşme Kalemleri</span></h5>
+                    {{ formset.management_form }}
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:3%">#</th>
+                                    <th style="width:10%">Giriş Tipi</th>
+                                    <th style="width:32%">Ürün Adı</th>
+                                    <th style="width:5%">Birim</th>
+                                    <th style="width:11%">Miktar</th>
+                                    <th style="width:16%">Birim Fiyat</th>
+                                    <th style="width:10%; min-width:120px; max-width:150px;" class="text-center">Para Birimi</th>
+                                    <th style="width:10%; min-width:120px; max-width:150px;" class="text-center">KDV Oranı</th>
+                                    <th style="width:5%">Sil</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contract-items-tbody">
+                                {% for form in formset.forms %}
+                                <tr>
+                                    {% for hidden in form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <div class="d-flex flex-column align-items-start">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input product-choice" type="radio" name="product_choice_{{ form.prefix }}" id="product_select_{{ form.prefix }}" value="select" {% if not form.initial.custom_product_name %}checked{% endif %}>
+                                                <label class="form-check-label text-start" for="product_select_{{ form.prefix }}">
+                                                    Stoktan
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input product-choice" type="radio" name="product_choice_{{ form.prefix }}" id="product_custom_{{ form.prefix }}" value="custom" {% if form.initial.custom_product_name %}checked{% endif %}>
+                                                <label class="form-check-label text-start" for="product_custom_{{ form.prefix }}">
+                                                    Elle
+                            </label>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="min-width:220px; max-width:350px;">
+                                        <div id="product_select_area_{{ form.prefix }}">
+                                            {% render_field form.product class="form-control" %}
+                            </div>
+                                        <div id="product_custom_area_{{ form.prefix }}" style="display:none;">
+                                            {% render_field form.custom_product_name class="form-control" %}
+                            </div>
+                                    </td>
+                                    <td class="td-center-input" style="min-width:80px;">{% render_field form.unit class="form-control" placeholder="Birim" %}</td>
+                                    <td class="td-center-input" style="min-width:130px;">{% render_field form.quantity class="form-control" placeholder="Miktar" %}</td>
+                                    <td style="min-width:140px;">{% render_field form.unit_price class="form-control" placeholder="Birim Fiyat" %}</td>
+                                    <td class="td-center-input" style="min-width:120px; max-width:150px;">
+                                        {% render_field form.currency class="form-control form-control-sm text-center currency-tax-input" placeholder="Para Birimi" %}
+                                    </td>
+                                    <td class="td-center-input" style="min-width:120px; max-width:150px;">
+                                        {% render_field form.tax_rate class="form-control form-control-sm text-center currency-tax-input" placeholder="KDV Oranı" %}
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <button type="button" class="btn btn-link text-danger btn-sm delete-row-btn" title="Satırı Sil"><i class="fas fa-trash"></i></button>
+                                        {% render_field form.DELETE class="d-none" %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div class="mt-3 text-end">
+                            <button type="button" id="add-item-btn" class="btn btn-outline-primary">
+                                <i class="fas fa-plus"></i> Ürün Ekle
+                            </button>
+                        </div>
+                        <small class="form-text text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Toplam ve vergili tutarlar otomatik olarak hesaplanacaktır.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Taksitler (Formset) -->
+                <div class="mt-5">
+                    <h5 class="mb-3"><i class="fas fa-table text-primary me-2"></i><span class="text-primary">Ödeme Planı ve Taksitler</span></h5>
+                    {% if installment_formset.non_form_errors %}
+                        <div class="alert alert-danger">{{ installment_formset.non_form_errors }}</div>
+                    {% endif %}
+                    {% for f in installment_formset.forms %}
+                        {% if f.errors %}
+                            <div class="alert alert-danger">{{ f.errors }}</div>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="row">
+                        <div class="col-md-4 mb-4">
+                            <div class="form-group">
+                                {{ form.payment_type.errors }}
+                                <label for="{{ form.payment_type.id_for_label }}" class="form-label">
+                                    Ödeme Türü <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-list-ol"></i></span>
+                                    {{ form.payment_type|add_class:'form-control' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="form-group">
+                                {{ form.installment_count.errors }}
+                                <label for="{{ form.installment_count.id_for_label }}" class="form-label">
+                                    Taksit Sayısı
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-sort-numeric-up"></i></span>
+                                    {{ form.installment_count|add_class:'form-control' }}
+                                    <span class="input-group-text" id="installment-currency-symbol"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="form-group">
+                                {{ form.advance_amount.errors }}
+                                <label for="{{ form.advance_amount.id_for_label }}" class="form-label">
+                                    Avans Tutarı
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-coins"></i></span>
+                                    {{ form.advance_amount|add_class:'form-control' }}
+                                    <span class="input-group-text" id="advance-currency-symbol"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4" id="cash-total-area" style="display:none;">
+                            <div class="form-group">
+                                <label class="form-label">Peşin Ödeme Tutarı</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-coins"></i></span>
+                                    <input type="text" id="cash-total" class="form-control" readonly>
+                                    <span class="input-group-text" id="cash-currency-symbol"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{ installment_formset.management_form }}
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:5%">#</th>
+                                    <th style="width:15%">Taksit No</th>
+                                    <th style="width:25%">Tutar (KDV Dahil)</th>
+                                    <th style="width:25%">Taksit Tarihi</th>
+                                    <th style="width:25%">Not</th>
+                                    <th style="width:5%">Sil</th>
+                                </tr>
+                            </thead>
+                            <tbody id="installment-items-tbody">
+                                {% for form in installment_formset.forms %}
+                                <tr>
+                                    {% for hidden in form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                    <td>{{ forloop.counter }}</td>
+                                    <td><input type="number" name="{{ form.prefix }}-number" value="{{ forloop.counter }}" class="form-control" required></td>
+                                    <td><div class="input-group"><input type="number" name="{{ form.prefix }}-amount" value="{{ form.amount.value }}" class="form-control" step="0.01" required><span class="input-group-text">${{ form.currency.value }}</span></div></td>
+                                    <td><input type="date" name="{{ form.prefix }}-date" value="{{ form.date.value }}" class="form-control" required></td>
+                                    <td><input type="text" name="{{ form.prefix }}-note" value="{{ form.note.value }}" class="form-control"></td>
+                                    <td class="text-center align-middle">
+                                        <button type="button" class="btn btn-link text-danger btn-sm delete-row-btn" title="Satırı Sil"><i class="fas fa-trash"></i></button>
+                                        {% render_field form.DELETE class="d-none" %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div class="mt-3 text-end">
+                            <button type="button" id="add-installment-btn" class="btn btn-outline-primary">
+                                <i class="fas fa-plus"></i> Taksit Ekle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                        <i class="fas fa-align-left text-primary me-2"></i>Sözleşme Açıklama/Maddeleri
+                    </label>
+                    {% if description %}
+                        <textarea name="description" class="form-control" rows="12">{{ description }}</textarea>
+                    {% else %}
+                        {{ form.description }}
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <div>
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="fas fa-save me-2"></i>{{ savebtn }}
+                        </button>
+                        {% if title == "Yeni Sözleşme" %}
+                            <button type="reset" class="btn btn-danger px-4">
+                                <i class="fas fa-undo me-2"></i>Sıfırla
+                            </button>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if delbtn %}
+                            <!--
+                            <a href="{% url 'delete-contract' object.pk %}" class="btn btn-danger px-4">
+                                <i class="fas fa-trash me-2"></i>Sil
+                            </a>
+                            -->
+                            <a href="{% url 'delete-contract' object.pk %}" class="btn btn-danger px-4">
+                                <i class="fas fa-ban me-2"></i>İptal Et
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'contract-list' %}" class="btn btn-secondary px-4">
+                            <i class="fas fa-times me-2"></i>Vazgeç
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+    .form-control:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    select.form-control {
+        width: 100% !important;
+        min-width: 200px;
+        height: calc(1.5em + 1.5rem) !important;
+        padding: 0.375rem 2.25rem 0.375rem 0.75rem !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23555' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        line-height: 1.5;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .input-group select.form-control {
+        flex: 1 1 auto;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: 0;
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-right: none;
+        display: flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .input-group {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        flex-wrap: nowrap;
+    }
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    .form-group select {
+        max-width: none;
+    }
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .is-valid {
+        border-color: #198754 !important;
+    }
+    .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+        position: absolute;
+        bottom: -1.25rem;
+        left: 0;
+        padding-left: 0.5rem;
+    }
+    .is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    .form-control.is-invalid:focus,
+    .form-control.is-valid:focus {
+        box-shadow: none;
+    }
+    .input-group .form-control.is-invalid,
+    .input-group .form-control.is-valid {
+        z-index: 3;
+    }
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    .input-group {
+        margin-bottom: 0.5rem;
+    }
+    .form-check-input:checked {
+        background-color: #2196F3;
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    .form-check-label {
+        font-weight: 500;
+        font-size: 1rem;
+        color: #1976D2;
+        cursor: pointer;
+    }
+    .form-select {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+    .form-select:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    .table td, .table th {
+        vertical-align: middle !important;
+        padding: 0.25rem !important;
+    }
+    .form-control-sm.text-center.currency-tax-input {
+        min-width: 120px;
+        max-width: 150px;
+        height: 36px;
+        font-size: 1em;
+        padding: 0 4px;
+        text-align: center;
+        margin: 0 auto;
+        display: block;
+        box-sizing: border-box;
+    }
+    .td-center-input {
+        vertical-align: middle !important;
+        display: table-cell;
+    }
+    .td-center-input > .form-control,
+    .td-center-input > .form-select {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
+{% endblock %}
+
+<script>
+function applyProductChoiceScript() {
+    document.querySelectorAll('tr').forEach(function(row) {
+        const prefix = row.querySelector('.product-choice')?.name?.replace('product_choice_', '') || '';
+        const selectRadio = row.querySelector(`#product_select_${prefix}`);
+        const customRadio = row.querySelector(`#product_custom_${prefix}`);
+        const selectArea = row.querySelector(`#product_select_area_${prefix}`);
+        const customArea = row.querySelector(`#product_custom_area_${prefix}`);
+        if (selectRadio && customRadio && selectArea && customArea) {
+            function toggleProductFields() {
+                if (selectRadio.checked) {
+                    selectArea.style.display = '';
+                    customArea.style.display = 'none';
+                } else {
+                    selectArea.style.display = 'none';
+                    customArea.style.display = '';
+                }
+            }
+            selectRadio.addEventListener('change', toggleProductFields);
+            customRadio.addEventListener('change', toggleProductFields);
+            toggleProductFields();
+        }
+    });
+}
+function applyDeleteRowScript() {
+    document.querySelectorAll('.delete-row-btn').forEach(function(btn) {
+        btn.onclick = function() {
+            const row = btn.closest('tr');
+            // Formset'in DELETE inputunu işaretle
+            const delInput = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (delInput) {
+                delInput.checked = true;
+            }
+            row.style.display = 'none';
+        };
+    });
+}
+document.addEventListener('DOMContentLoaded', function() {
+    // Firma/Kurum alanı scripti (İngilizce id ve name)
+    const selectRadio = document.getElementById('institution_select');
+    const manualRadio = document.getElementById('institution_manual');
+    const buyerSelect = document.getElementById('buyer_select_area');
+    const institutionInput = document.getElementById('institution_area');
+    function toggleFields() {
+        if (selectRadio.checked) {
+            buyerSelect.style.display = '';
+            institutionInput.style.display = 'none';
+        } else {
+            buyerSelect.style.display = 'none';
+            institutionInput.style.display = '';
+        }
+    }
+    selectRadio.addEventListener('change', toggleFields);
+    manualRadio.addEventListener('change', toggleFields);
+    toggleFields();
+
+    // Ürün giriş tipi scripti (her satır için)
+    applyProductChoiceScript();
+    // Sil butonu scripti
+    applyDeleteRowScript();
+
+    // Formset'e yeni satır ekleme
+    const addBtn = document.getElementById('add-item-btn');
+    if (addBtn) {
+        addBtn.addEventListener('click', function() {
+            const formsetDiv = document.getElementById('contract-items-tbody');
+            const totalForms = document.querySelector("input[name$='-TOTAL_FORMS']");
+            if (!totalForms) {
+                alert("Formset yönetim inputu bulunamadı!");
+                return;
+            }
+            const currentFormCount = parseInt(totalForms.value);
+            // Son satırı kopyala ve indexleri güncelle
+            const lastRow = formsetDiv.querySelector('tr:last-child');
+            let newRowHtml = lastRow.outerHTML.replaceAll(`form-${currentFormCount-1}-`, `form-${currentFormCount}-`);
+            newRowHtml = newRowHtml.replaceAll(`product_choice_form-${currentFormCount-1}`, `product_choice_form-${currentFormCount}`)
+                                   .replaceAll(`product_select_form-${currentFormCount-1}`, `product_select_form-${currentFormCount}`)
+                                   .replaceAll(`product_custom_form-${currentFormCount-1}`, `product_custom_form-${currentFormCount}`)
+                                   .replaceAll(`product_select_area_form-${currentFormCount-1}`, `product_select_area_form-${currentFormCount}`)
+                                   .replaceAll(`product_custom_area_form-${currentFormCount-1}`, `product_custom_area_form-${currentFormCount}`);
+            formsetDiv.insertAdjacentHTML('beforeend', newRowHtml);
+            totalForms.value = currentFormCount + 1;
+            setTimeout(function() {
+                applyProductChoiceScript();
+                applyDeleteRowScript();
+                // Sıra numaralarını güncelle
+                const rows = formsetDiv.querySelectorAll('tr');
+                rows.forEach((row, idx) => {
+                    const td = row.querySelector('td');
+                    if (td) td.textContent = idx + 1;
+                });
+                // Sadece son eklenen satırdaki id inputunu boşalt
+                const lastRow = formsetDiv.querySelector('tr:last-child');
+                if (lastRow) {
+                    const idInput = lastRow.querySelector("input[name$='-id']");
+                    if (idInput) idInput.value = '';
+                }
+            }, 100);
+        });
+    }
+    // Taksit formsetine yeni satır ekleme
+    const addInstallmentBtn = document.getElementById('add-installment-btn');
+    if (addInstallmentBtn) {
+        addInstallmentBtn.addEventListener('click', function() {
+            const formsetDiv = document.getElementById('installment-items-tbody');
+            // Prefix'i management formdan al
+            const totalFormsInput = document.querySelector('input[name$="-TOTAL_FORMS"]');
+            if (!totalFormsInput) {
+                alert("Taksit formset yönetim inputu bulunamadı!");
+                return;
+            }
+            const prefix = totalFormsInput.name.replace('-TOTAL_FORMS', '');
+            const currentFormCount = parseInt(totalFormsInput.value);
+            const lastRow = formsetDiv.querySelector('tr:last-child');
+            if (!lastRow) {
+                alert('Eklenebilecek satır bulunamadı!');
+                return;
+            }
+            let newRowHtml = lastRow.outerHTML.replaceAll(`${prefix}-${currentFormCount-1}-`, `${prefix}-${currentFormCount}-`);
+            formsetDiv.insertAdjacentHTML('beforeend', newRowHtml);
+            totalFormsInput.value = currentFormCount + 1;
+            setTimeout(function() {
+                applyDeleteRowScript();
+                // Sıra numaralarını güncelle
+                const rows = formsetDiv.querySelectorAll('tr');
+                rows.forEach((row, idx) => {
+                    const td = row.querySelector('td');
+                    if (td) td.textContent = idx + 1;
+                });
+                // Sadece son eklenen satırdaki id inputunu boşalt
+                const lastRow = formsetDiv.querySelector('tr:last-child');
+                if (lastRow) {
+                    const idInput = lastRow.querySelector(`input[name="${prefix}-${currentFormCount}-id"]`);
+                    if (idInput) idInput.value = '';
+                }
+            }, 100);
+        });
+    }
+
+    // Tarih seçicileri
+    const dateFields = document.querySelectorAll('input[type="date"], input[name="date"], input[name="start_date"], input[name="end_date"]');
+    dateFields.forEach(field => {
+        flatpickr(field, {
+            locale: "tr",
+            dateFormat: "d/m/Y",
+            allowInput: true
+        });
+        field.setAttribute('placeholder', 'gg/aa/yyyy');
+        field.type = 'text'; // Flatpickr ile uyumlu olması için
+    });
+
+    // Ödeme türü kontrolü
+    const paymentType = document.querySelector('select[name="payment_type"]');
+    const installmentCount = document.querySelector('input[name="installment_count"]');
+    const advanceAmount = document.querySelector('input[name="advance_amount"]');
+    const installmentSection = document.querySelector('.mt-5:last-child');
+    
+    function calculateContractGrandTotalAndCurrency() {
+        let total = 0;
+        let currencySymbol = '';
+        let firstCurrency = '';
+        document.querySelectorAll('#contract-items-tbody tr').forEach(row => {
+            const quantity = parseFloat(row.querySelector('input[name$="-quantity"]')?.value || 0);
+            const unitPrice = parseFloat(row.querySelector('input[name$="-unit_price"]')?.value || 0);
+            // KDV oranı inputu select veya input olabilir, ForeignKey ise option'un text'inden yüzdeyi al
+            let taxRateValue = row.querySelector('input[name$="-tax_rate"]')?.value || 0;
+            const taxRateSelect = row.querySelector('select[name$="-tax_rate"]');
+            if (taxRateSelect && taxRateSelect.selectedOptions.length > 0) {
+                // Option'un text'inde % işareti varsa onu parse et
+                let optionText = taxRateSelect.selectedOptions[0].text;
+                let match = optionText.match(/([\d\.,]+)%?/);
+                if (match) {
+                    taxRateValue = match[1].replace(',', '.');
+                }
+            } else if (typeof taxRateValue === 'string' && taxRateValue.includes('%')) {
+                taxRateValue = taxRateValue.replace('%', '').replace(',', '.');
+            }
+            const taxRate = parseFloat(taxRateValue) || 0;
+            const currencySelect = row.querySelector('select[name$="-currency"]');
+            let rowCurrencySymbol = '';
+            if (currencySelect && currencySelect.selectedOptions.length > 0) {
+                rowCurrencySymbol = currencySelect.selectedOptions[0].text.split('-')[0].trim();
+                if (!firstCurrency) firstCurrency = rowCurrencySymbol;
+            }
+            const rowTotal = quantity * unitPrice;
+            const rowVat = rowTotal * (taxRate / 100);
+            total += rowTotal + rowVat;
+        });
+        currencySymbol = firstCurrency;
+        return { total, currencySymbol };
+    }
+
+    function toggleInstallmentFields() {
+        const paymentTypeText = paymentType && paymentType.options[paymentType.selectedIndex].text.trim();
+        const isCash = paymentTypeText && paymentTypeText.startsWith('Peşin');
+        const isInstallment = paymentTypeText && paymentTypeText.startsWith('Taksit');
+
+        if (isInstallment) {
+            installmentCount.disabled = false;
+            installmentCount.required = true;
+            advanceAmount.disabled = false;
+            if (installmentSection) installmentSection.style.display = '';
+            document.getElementById('cash-total-area').style.display = 'none';
+        } else if (isCash) {
+            installmentCount.disabled = true;
+            installmentCount.required = false;
+            installmentCount.value = '';
+            advanceAmount.disabled = true;
+            advanceAmount.value = '';
+            if (installmentSection) installmentSection.style.display = 'none';
+            document.getElementById('cash-total-area').style.display = 'block';
+            // Hesapla ve yaz
+            const result = calculateContractGrandTotalAndCurrency();
+            document.getElementById('cash-total').value = result.total.toFixed(2);
+            document.getElementById('cash-currency-symbol').textContent = result.currencySymbol;
+        } else {
+            installmentCount.disabled = true;
+            installmentCount.required = false;
+            installmentCount.value = '';
+            advanceAmount.disabled = true;
+            advanceAmount.value = '';
+            if (installmentSection) installmentSection.style.display = 'none';
+            document.getElementById('cash-total-area').style.display = 'none';
+        }
+        // Her durumda currency sembollerini güncelle
+        const result = calculateContractGrandTotalAndCurrency();
+        document.getElementById('installment-currency-symbol').textContent = result.currencySymbol;
+        document.getElementById('advance-currency-symbol').textContent = result.currencySymbol;
+    }
+
+    // Sözleşme kalemleri değiştiğinde peşin tutarı ve currency sembollerini güncelle
+    function updateCurrencyAndTotals() {
+        if (document.getElementById('cash-total-area').style.display !== 'none') {
+            const result = calculateContractGrandTotalAndCurrency();
+            document.getElementById('cash-total').value = result.total.toFixed(2);
+            document.getElementById('cash-currency-symbol').textContent = result.currencySymbol;
+        }
+        // Her durumda currency sembollerini güncelle
+        const result = calculateContractGrandTotalAndCurrency();
+        document.getElementById('installment-currency-symbol').textContent = result.currencySymbol;
+        document.getElementById('advance-currency-symbol').textContent = result.currencySymbol;
+    }
+
+    document.querySelectorAll('#contract-items-tbody input, #contract-items-tbody select').forEach(input => {
+        input.addEventListener('change', updateCurrencyAndTotals);
+    });
+
+    paymentType.addEventListener('change', toggleInstallmentFields);
+    toggleInstallmentFields();
+
+    // Form submit kontrolü: Sadece taksitli ödemede taksit sayısı zorunlu olsun
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const startDate = new Date(document.querySelector('input[name="start_date"]').value);
+        const endDate = new Date(document.querySelector('input[name="end_date"]').value);
+        if (endDate < startDate) {
+            e.preventDefault();
+            alert('Bitiş tarihi başlangıç tarihinden önce olamaz!');
+            return false;
+        }
+        // Zorunlu alanları kontrol et
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        // Sadece taksitli ödemede taksit sayısı zorunlu
+        if (paymentType && paymentType.options[paymentType.selectedIndex].text.trim().startsWith('Taksit')) {
+            if (!installmentCount.value) {
+                e.preventDefault();
+                alert('Taksitli ödemede taksit sayısı zorunludur!');
+                installmentCount.classList.add('is-invalid');
+                return false;
+            }
+        }
+        if (!isValid) {
+            e.preventDefault();
+            alert('Lütfen tüm zorunlu alanları doldurun!');
+            return false;
+        }
+    });
+
+    // Taksitleri otomatik doldur
+    function fillInstallments() {
+        // Sözleşme toplamını ve currency'yi al
+        const result = calculateContractGrandTotalAndCurrency();
+        const total = result.total;
+        const currencySymbol = result.currencySymbol;
+
+        // Avans tutarını ve taksit sayısını al
+        const avans = parseFloat(advanceAmount.value) || 0;
+        const taksitSayisi = parseInt(installmentCount.value) || 0;
+        if (taksitSayisi < 1) return;
+
+        // Kalan tutarı taksitlere böl
+        const kalanTutar = total - avans;
+        const taksitTutari = kalanTutar / taksitSayisi;
+
+        // Prefix'i management formdan al
+        const totalFormsInput = document.querySelector('input[name="installment_form-TOTAL_FORMS"]');
+        if (!totalFormsInput) return;
+        const prefix = totalFormsInput.name.split('-TOTAL_FORMS')[0];
+
+        // Mevcut taksit satırlarını temizle
+        const installmentTbody = document.getElementById('installment-items-tbody');
+        if (!installmentTbody) return;
+        installmentTbody.innerHTML = '';
+
+        // Bugünün tarihi
+        const today = new Date();
+
+        for (let i = 0; i < taksitSayisi; i++) {
+            // Tarihleri otomatik sırayla ayarla (ör: her ay bir taksit)
+            const taksitTarihi = new Date(today.getFullYear(), today.getMonth() + i, today.getDate());
+            const taksitTarihiStr = taksitTarihi.toISOString().split('T')[0];
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${i + 1}</td>
+                <input type="hidden" name="${prefix}-${i}-id" id="id_${prefix}-${i}-id" value="">
+                <td><input type="number" name="${prefix}-${i}-number" value="${i + 1}" class="form-control" required></td>
+                <td><div class="input-group"><input type="number" name="${prefix}-${i}-amount" value="${taksitTutari.toFixed(2)}" class="form-control" step="0.01" required><span class="input-group-text">${currencySymbol}</span></div></td>
+                <td><input type="date" name="${prefix}-${i}-date" value="${taksitTarihiStr}" class="form-control" required></td>
+                <td><input type="text" name="${prefix}-${i}-note" value="" class="form-control"></td>
+                <td><button type="button" class="btn btn-sm btn-danger">Sil</button></td>
+            `;
+            installmentTbody.appendChild(row);
+        }
+
+        // TOTAL_FORMS'u güncelle
+        totalFormsInput.value = taksitSayisi;
+    }
+
+    // Tetikleyiciler
+    installmentCount.addEventListener('change', fillInstallments);
+    advanceAmount.addEventListener('change', fillInstallments);
+    document.querySelectorAll('#contract-items-tbody input, #contract-items-tbody select').forEach(input => {
+        input.addEventListener('change', fillInstallments);
+    });
+
+    // Peşin ödeme tutarı label'ını güncelle
+    const cashTotalLabel = document.querySelector('#cash-total-area .form-label');
+    if (cashTotalLabel) {
+        cashTotalLabel.textContent = 'Peşin Ödeme Tutarı (KDV Dahil)';
+    }
+    // Taksit tablosunda başlığı güncelle
+    const taksitTutarTh = document.querySelector('th:nth-child(3)');
+    if (taksitTutarTh && taksitTutarTh.textContent.includes('Tutar')) {
+        taksitTutarTh.textContent = 'Tutar (KDV Dahil)';
+    }
+});
+
+</script>
+
+{% endblock content %}

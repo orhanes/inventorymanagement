@@ -1,112 +1,252 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
 {% load l10n %}
-{% block title %}
-    Mail Order Formları
-{% endblock %}
 
+{% block title %} {{ mailorder.customer_name }} - Mail Order Detayı {% endblock title %}
 
 {% block content %}
-    <br>
-    <br>
-    <br>
-    <div class="content-section">
-        <br>
-        <div class="media">
-            <div class="media-body">
-                <div class="row">
-                    <div class="col-md-12">
-                        <table class="table table-css table-hover table-bordered">
-                            <thead class="thead-dark align-middle">
-                                <tr>
-                                    <th colspan="4"><h2>{{ mailorder.customer_name }} Firmasına Ait Mail Order</h2></th>
-                                </tr>
-                            </thead>
-                    
-                            <tbody>
-                                <tr>
-                                    <td class="align-left"  style="background-color:#E8E8E8;"><b>Müşteri Adı Soyadı / Firma Adı</b></td>
-                                    <td class="align-left" style="text-transform:uppercase;" colspan="3"> {{ mailorder.customer_name }} </td> 
-                                </tr>
-                                <tr>
-                                    <td class="align-left align-left" style="background-color:#E8E8E8;"><b>Adres</b></td>
-                                    <td class="align-left" style="text-transform:uppercase;" colspan="3"> {{ mailorder.address }} </td> 
-                                </tr>
-                                <tr>
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Mobil / Sabit Telefon</b></td>
-                                    <td class="align-left" style="text-transform:uppercase;" colspan="3"> {{ mailorder.phone }} </td> 
-                                </tr>
-                                <tr>
-                                    <td class="align-left" style="background-color:#E8E8E8;"><b>Banka Adı</b></td>
-                                    <td class="align-left" colspan="3"> {{ mailorder.bank }} </td> 
-                                </tr>
-                                <tr>
-                                    <td class="align-left" style="background-color:#E8E8E8;"><b>Kart No</b></td>
-                                    <td class="align-left" id="spacedText" colspan="3"> {{mailorder.card_number|unlocalize}} </td> 
-                                </tr>
-                                <tr>
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Son Kul. Tar. (Ay)</b></td>
-                                    <td class="align-left"> {{ mailorder.expiry_month }} </td> 
-                                    <td class="align-left align-left col-md-3" style="background-color:#E8E8E8;"><b>Son Kul. Tar. (Yıl)</b></td>
-                                    <td class="align-left"> {{ mailorder.expiry_year }} </td> 
-                                </tr>
-                                <tr>
-                                    <td class="align-left align-left col-md-3" style="background-color:#E8E8E8;"><b>Güvenlik Kodu</b></td>
-                                    <td class="align-left"> {{ mailorder.security_code }} </td>
-                                    <td class="align-left align-left col-md-3" style="background-color:#E8E8E8;"><b>Kart Sahibi<b></td>
-                                    <td class="align-left" style="text-transform:uppercase;"> {{ mailorder.owner }} </td>  
-                                </tr>
-                                <tr>
-                                    <td class="align-left align-left col-md-3" style="background-color:#E8E8E8;"><b>Ödeme Tarihi</b></td>
-                                    <td class="align-left"> {{ mailorder.date }} </td> 
-                                    <td class="align-left align-left col-md-3" style="background-color:#E8E8E8;"><b>Ödeme Tutarı (Rakamla)<b></td>
-                                    <td class="align-left"> {{ mailorder.amount }} TL </td> 
-                                </tr>    
-                                <tr>
-                                    <td class="align-left" style="background-color:#E8E8E8;"><b>Ödeme Tutarı (Yazıyla)</b></td>
-                                    <td class="align-left" colspan="3"> {{ mailorder.amount_write|localize }} </td> 
-                                </tr>  
-                                
-                        </table>
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fas fa-envelope me-2"></i>Mail Order Detayı - ({{ mailorder.customer_name }})
+            </h3>
+            <div>
+                <button onclick="printDetail()" class="btn btn-light me-2">
+                    <i class="fas fa-print me-2"></i>Yazdır
+                </button>
+                <a href="{% url 'edit-mailorder' mailorder.pk %}" class="btn btn-warning">
+                    <i class="fas fa-edit me-2"></i>Düzenle
+                </a>
+                <a href="{% url 'mailorders-list' %}" class="btn btn-secondary ms-2">
+                    <i class="fas fa-arrow-left me-2"></i>Geri Dön
+                </a>
+            </div>
+        </div>
+        <div class="card-body" id="printArea">
+            <div class="row g-4">
+                <!-- Müşteri Bilgileri -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-building text-primary me-2"></i>Müşteri Adı Soyadı / Firma Adı
+                        </label>
+                        <div class="detail-value text-uppercase">{{ mailorder.customer_name }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-map-marker-alt text-primary me-2"></i>Adres
+                        </label>
+                        <div class="detail-value text-uppercase">{{ mailorder.address }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-phone text-primary me-2"></i>Mobil / Sabit Telefon
+                        </label>
+                        <div class="detail-value text-uppercase">{{ mailorder.phone }}</div>
+                    </div>
+                </div>
+
+                <!-- Kart Bilgileri -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-university text-primary me-2"></i>Banka Adı
+                        </label>
+                        <div class="detail-value">{{ mailorder.bank }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-credit-card text-primary me-2"></i>Kart No
+                        </label>
+                        <div class="detail-value" id="spacedText">{{ mailorder.card_number|unlocalize }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-user text-primary me-2"></i>Kart Sahibi
+                        </label>
+                        <div class="detail-value text-uppercase">{{ mailorder.owner }}</div>
+                    </div>
+                </div>
+
+                <!-- Kart Detayları -->
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-calendar text-primary me-2"></i>Son Kullanma Tarihi (Ay)
+                        </label>
+                        <div class="detail-value">{{ mailorder.expiry_month }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-calendar text-primary me-2"></i>Son Kullanma Tarihi (Yıl)
+                        </label>
+                        <div class="detail-value">{{ mailorder.expiry_year }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-shield-alt text-primary me-2"></i>Güvenlik Kodu
+                        </label>
+                        <div class="detail-value">{{ mailorder.security_code }}</div>
+                    </div>
+                </div>
+
+                <!-- Ödeme Bilgileri -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-calendar-check text-primary me-2"></i>Ödeme Tarihi
+                        </label>
+                        <div class="detail-value">{{ mailorder.date }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-lira-sign text-primary me-2"></i>Ödeme Tutarı (Rakamla)
+                        </label>
+                        <div class="detail-value">{{ mailorder.amount }} {{ mailorder.currency.symbol }}</div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-pen text-primary me-2"></i>Ödeme Tutarı (Yazıyla)
+                        </label>
+                        <div class="detail-value">{{ mailorder.amount_write|localize }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted">
+                        <small>
+                            <i class="fas fa-info-circle me-1"></i>
+                            Son güncelleme: {{ mailorder.updated_at|timesince }} önce
+                        </small>
+                    </div>
+                    <div class="noprint">
+                        <a href="{% url 'delete-mailorder' mailorder.pk %}" class="btn btn-outline-danger">
+                            <i class="fas fa-trash me-2"></i>Mail Order'ı Sil
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <td class="align-middle"> <a href="{% url 'mailorder-bill' mailorder.id %}" class="btn btn-secondary btn-sm">Mail Order Görüntüle</a> <a href="{% url 'delete-mailorder' mailorder.pk %}" class="btn btn-danger btn-sm">Mail Order Sil</a> </td>
-    <a href="{% url 'edit-mailorder' mailorder.pk %}" class="btn btn-info" style="float: right;">Bilgileri Düzenle</a>
-    <div class="align-middle">
-        {% if bills.has_other_pages %}
-
-            {% if bills.has_previous %}
-                <a class="btn btn-outline-info mb-4" href="?page=1">İlk</a>
-                <a class="btn btn-outline-info mb-4" href="?page={{ bills.previous_page_number }}">Önceki</a>
-            {% endif %}
-
-            {% for num in bills.paginator.page_range %}
-                {% if bills.number == num %}
-                    <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
-                {% elif num > bills.number|add:'-3' and num < bills.number|add:'3' %}
-                    <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
-                {% endif %}
-            {% endfor %}
-
-            {% if bills.has_next %}
-                <a class="btn btn-outline-info mb-4" href="?page={{ bills.next_page_number }}">Sonraki</a>
-                <a class="btn btn-outline-info mb-4" href="?page={{ bills.paginator.num_pages }}">Son</a>
-            {% endif %}
-
-        {% endif %}
-    </div>
-
 </div>
 
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .detail-group {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+    .detail-label {
+        display: block;
+        color: #6c757d;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .detail-value {
+        color: #212529;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .border-top {
+        border-color: #e9ecef !important;
+    }
+    @media (max-width: 768px) {
+        .detail-group {
+            padding: 1rem;
+        }
+        .detail-value {
+            font-size: 1rem;
+        }
+    }
+    @media print {
+        .noprint {
+            display: none !important;
+        }
+        .card {
+            box-shadow: none !important;
+            border: none !important;
+        }
+        .card-header {
+            background: none !important;
+            color: #000 !important;
+            padding: 0 !important;
+            margin-bottom: 2rem;
+        }
+        .detail-group {
+            background: none !important;
+            box-shadow: none !important;
+            padding: 0.5rem !important;
+            border: 1px solid #dee2e6;
+        }
+        .detail-label {
+            color: #000 !important;
+        }
+        .detail-value {
+            color: #000 !important;
+        }
+        .border-top {
+            border-color: #000 !important;
+        }
+        @page {
+            margin: 1cm;
+        }
+    }
+</style>
+
 <script>
+function printDetail() {
+    window.print();
+}
+
     // Function to add letter spacing every 4 characters
     function addLetterSpacing(text, spacing) {
       var spacedText = '';
       for (var i = 0; i < text.length; i++) {
         spacedText += text[i];
-        if ((i + 0) % 4 === 0) {
+        if ((i + 1) % 4 === 0) {
           spacedText += ' ';
         }
       }
@@ -126,4 +266,8 @@
     textElement.textContent = newText;
   </script>
 
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
 {% endblock content %}

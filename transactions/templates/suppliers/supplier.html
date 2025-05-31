@@ -5,102 +5,505 @@
   {{ supplier.name }}'ın Profili
 {% endblock %}
 
-
 {% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fas fa-building me-2"></i>Tedarikçi Detayı - <span class="text-uppercase">{{ supplier.name }}</span>
+            </h3>
+            <div>
+                <button onclick="printDetail()" class="btn btn-light me-2">
+                    <i class="fas fa-print me-2"></i>Yazdır
+                </button>
+                <a href="{% url 'edit-supplier' supplier.pk %}" class="btn btn-warning">
+                    <i class="fas fa-edit me-2"></i>Düzenle
+                </a>
+                <a href="{% url 'suppliers-list' %}" class="btn btn-secondary ms-2">
+                    <i class="fas fa-arrow-left me-2"></i>Geri Dön
+                </a>
+            </div>
+        </div>
+        <div class="card-body" id="printArea">
+            <div class="row g-4">
+                <!-- İletişim Bilgileri -->
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-phone text-primary me-2"></i>Firma Adı
+                        </label>
+                        <div class="detail-value">{{ supplier.name|default_if_none:"-"|default:"-" }}</div>
+                    </div>
+                </div>
 
-    <div class="content-section">
-        <div class="media">
-            <div class="media-body">
-                <h2 style="color:#575757;" class="account-heading">&nbsp;{{ supplier.name }}</h2>
-                <hr>
-                <div class="row">
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-phone text-primary me-2"></i>Telefon
+                        </label>
+                        <div class="detail-value">{{ supplier.phone|default_if_none:"-"|default:"-" }}</div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-globe text-primary me-2"></i>Web Adresi
+                        </label>
+                        <div class="detail-value">{{ supplier.web|default_if_none:"-"|default:"-" }}</div>
+                    </div>
+                </div>
+                
+
+                <!-- Adres Bilgileri -->
+                <div class="col-md-12">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-map-marker-alt text-primary me-2"></i>Adres
+                        </label>
+                        <div class="detail-value">{{ supplier.address|default_if_none:"-"|default:"-"|linebreaks }}</div>
+                    </div>
+                </div>
+
+                <!-- Konum Bilgileri -->
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-globe text-primary me-2"></i>Ülke
+                        </label>
+                        <div class="detail-value">{{ supplier.country|default_if_none:"-"|default:"-" }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-city text-primary me-2"></i>Şehir
+                        </label>
+                        <div class="detail-value">{{ supplier.city|default_if_none:"-"|default:"-" }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-map text-primary me-2"></i>İlçe
+                        </label>
+                        <div class="detail-value">{{ supplier.county|default_if_none:"-"|default:"-" }}</div>
+                    </div>
+                </div>
+
+                
+                
+
+                <!-- Temsilci Bilgileri -->
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-user-tie text-primary me-2"></i>Temsilci
+                        </label>
+                        <div class="detail-value">{{ supplier.representative|default_if_none:"-"|default:"-"|title }}</div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-building text-primary me-2"></i>Departman
+                        </label>
+                        <div class="detail-value">{{ supplier.department|default_if_none:"-"|default:"-" }}</div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-briefcase text-primary me-2"></i>Görevi
+                        </label>
+                        <div class="detail-value">{{ supplier.position|default_if_none:"-"|default:"-" }}</div>
+                    </div>
+                </div>
+
+                <!-- İletişim Bilgileri -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-mobile-alt text-primary me-2"></i>Cep Telefonu
+                        </label>
+                        <div class="detail-value">{{ supplier.mobile_phone|default_if_none:"-"|default:"-" }}</div>
+                    </div>
+                </div>
                     
                     <div class="col-md-6">
-                        <p class="fal">
-                            <b>Telefon &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.phone }} <br>
-                            <b>Adres &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> <br> {{ supplier.address|linebreaks }}
-                            <b>Ülke &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.country }} <br>
-                            <b>Şehir &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.city }} <br>
-                            <b>İlçe &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.county }} <br>
-                            <b>Web Adresi &nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.web }} <br>
-                            <b>Temsilci &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.representative }} <br>
-                            <b>Departman &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.department }} <br>
-                            <b>Görevi &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.position }} <br>
-                            <b>Cep Telefonu &nbsp; :</b> {{ supplier.mobile_phone }} <br>
-                            <b>E-Mail &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.email }} <br>
-                        </p>
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-envelope text-primary me-2"></i>E-Mail
+                        </label>
+                        <div class="detail-value">{{ supplier.email|default_if_none:"-"|default:"-" }}</div>
+                    </div>
+                </div>
+
+                
+
+               
+
+                <!-- Vergi Bilgileri -->
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-landmark text-primary me-2"></i>Vergi Dairesi
+                        </label>
+                        <div class="detail-value">{{ supplier.tax_administration|default_if_none:"-"|default:"-"|title }}</div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-id-card text-primary me-2"></i>Vergi Kimlik No
+                        </label>
+                        <div class="detail-value">{{ supplier.tax_id|default_if_none:"-"|default:"-"|unlocalize }}</div>
+                    </div>
+                </div>
+
+                <!-- KEP ve Banka Bilgileri -->
+                <div class="col-md-4">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-envelope-open-text text-primary me-2"></i>KEP Adresi
+                        </label>
+                        <div class="detail-value">{{ supplier.kep_address|default_if_none:"-"|default:"-" }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-university text-primary me-2"></i>Banka Adı
+                        </label>
+                        <div class="detail-value">{{ supplier.bank_name|default_if_none:"-"|default:"-" }}</div>
+                    </div>
+                </div>
+
+                <!-- Hesap Bilgileri -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-credit-card text-primary me-2"></i>IBAN Numarası
+                        </label>
+                        <div class="detail-value text-uppercase">{{ supplier.iban_no|default_if_none:"-"|default:"-" }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-code-branch text-primary me-2"></i>Şube Kodu
+                        </label>
+                        <div class="detail-value">{{ supplier.branch_code|default_if_none:"-"|default:"-"|unlocalize }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-hashtag text-primary me-2"></i>Hesap Numarası
+                        </label>
+                        <div class="detail-value">{{ supplier.account_number|default_if_none:"-"|default:"-"|unlocalize }}</div>
+                    </div>
+                </div>
+
+                <!-- Tarih Bilgileri -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-calendar-plus text-primary me-2"></i>Oluşturulma Tarihi
+                        </label>
+                        <div class="detail-value">{{ supplier.created_at|date:"d F Y, H:i" }}</div>
+                    </div>
                     </div>
                     <div class="col-md-6">
-                        <p class="fal">
-                            <b>Vergi Kimlik No &nbsp;&nbsp;&nbsp; :</b> {{ supplier.tax_id|unlocalize }} <br>
-                            <b>Vergi Dairesi &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.tax_administration }} <br>
-                            <b>Kep Adresi &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.kep_address }} <br>
-                            <b>Banka Adı &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.bank_name }} <br>
-                            <b>Iban Numarası &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.iban_no }} <br>
-                            <b>Şube Kodu &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :</b> {{ supplier.branch_code|unlocalize }} <br>
-                            <b>Hesap Numarası &nbsp; :</b> {{ supplier.account_number|unlocalize }} <br>
-                        </p>
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-calendar-check text-primary me-2"></i>Güncellenme Tarihi
+                        </label>
+                        <div class="detail-value">{{ supplier.updated_at|date:"d F Y, H:i" }}</div>
                     </div>
-                    <a href="{% url 'edit-supplier' supplier.pk %}" class="btn btn-info" style="float: right;">Bilgileri Düzenle</a>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted">
+                        <small>
+                            <i class="fas fa-info-circle me-1"></i>
+                            Son güncelleme: {{ supplier.updated_at|timesince }} önce
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <table class="table table-css table-hover table-bordered">
-        
-        <br>
-        
-        <thead class="thead-dark align-middle">
-            <tr>
-                <th width="10%">Sip. Emir No.</th>
-                <th width="15%">Ürün</th>
-                <th width="15%">Miktar</th>
-                <th width="15%">Toplam Satın Alınan Fiyat</th>
-                <th width="15%">Satın Alınan Tarih</th>
-                <th width="30%">İşlemler</th>
+    <!-- Satın Alma Formları Tablosu -->
+    <div class="card shadow-lg mt-4 animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white">
+            <h3 class="mb-0">
+                <i class="fas fa-file-invoice-dollar me-2"></i>Satın Alma Formları
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th width="10%" class="text-center">Form No</th>
+                            <th width="15%" class="text-center">Ürün</th>
+                            <th width="15%" class="text-center">Miktar</th>
+                            <th width="15%" class="text-center">Toplam Fiyat</th>
+                            <th width="15%" class="text-center">Tarih</th>
+                            <th width="30%" class="text-center noprint">İşlemler</th>
             </tr>
         </thead>
-      
         <tbody>
+                        {% if bills %}
             {% for purchase in bills %}
             <tr>
-                <td class="align-middle"> <p>{{ purchase.billno }}</p> </td>
-                <td class="align-middle">{% for item in purchase.get_items_list %} {{ item.stock.name }} <br> {% endfor %}</td>
-                <td class="align-middle">{% for item in purchase.get_items_list %} {{ item.quantity }} <br> {% endfor %}</td>     
-                <td class="align-middle">{{ purchase.get_total_price }} TL</td>
-                <td class="align-middle">{{ purchase.time.date }}</td>
-                <td class="align-middle"> <a href="{% url 'purchase-bill' purchase.billno %}" class="btn btn-secondary">Faturayı Göster</a> <a href="{% url 'delete-purchase' purchase.pk %}" class="btn btn-danger">Faturayı Sil</a> </td>
+                                <td class="align-middle text-center">{{ purchase.billno }}</td>
+                                <td class="align-middle text-center">
+                                    {% for item in purchase.get_items_list %}
+                                        {{ item.stock.name }}<br>
+                                    {% endfor %}
+                                </td>
+                                <td class="align-middle text-center">
+                                    {% for item in purchase.get_items_list %}
+                                        {{ item.quantity }}<br>
+                                    {% endfor %}
+                                </td>
+                                <td class="align-middle text-center">{{ purchase.get_total_price }} TL</td>
+                                <td class="align-middle text-center">{{ purchase.time.date }}</td>
+                                <td class="align-middle text-center noprint">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="{% url 'purchase-bill' purchase.billno %}" class="btn btn-primary btn-sm action-btn" title="Faturayı Göster" data-bs-toggle="tooltip">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'delete-purchase' purchase.pk %}" class="btn btn-danger btn-sm action-btn" title="Faturayı Sil" data-bs-toggle="tooltip">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
             </tr>
             {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="empty-state">
+                                        <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i>
+                                        <h5 class="text-muted">Henüz bu firmaya ait herhangi bir kayıt bulunmamaktadır.</h5>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
         </tbody>
-
     </table>
+            </div>
 
-    <div class="align-middle">
         {% if bills.has_other_pages %}
-
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
             {% if bills.has_previous %}
-                <a class="btn btn-outline-info mb-4" href="?page=1">İlk</a>
-                <a class="btn btn-outline-info mb-4" href="?page={{ bills.previous_page_number }}">Önceki</a>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ bills.previous_page_number }}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
             {% endif %}
 
             {% for num in bills.paginator.page_range %}
                 {% if bills.number == num %}
-                    <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
                 {% elif num > bills.number|add:'-3' and num < bills.number|add:'3' %}
-                    <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
                 {% endif %}
             {% endfor %}
 
             {% if bills.has_next %}
-                <a class="btn btn-outline-info mb-4" href="?page={{ bills.next_page_number }}">Sonraki</a>
-                <a class="btn btn-outline-info mb-4" href="?page={{ bills.paginator.num_pages }}">Son</a>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ bills.next_page_number }}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ bills.paginator.num_pages }}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
             {% endif %}
-
-        {% endif %}
+        </div>
     </div>
-
 </div>
 
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .detail-group {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+    .detail-label {
+        display: block;
+        color: #6c757d;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .detail-value {
+        color: #212529;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .border-top {
+        border-color: #e9ecef !important;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+    .table th {
+        border-top: none;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+        color: white;
+        font-weight: 500;
+        padding: 1rem;
+    }
+    .table td {
+        vertical-align: middle;
+        padding: 0.75rem;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(33, 150, 243, 0.05);
+    }
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .action-btn i {
+        font-size: 0.875rem;
+        line-height: 1;
+    }
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+    .pagination {
+        margin-bottom: 0;
+    }
+    .page-link {
+        border-radius: 4px;
+        margin: 0 2px;
+        color: #2196F3;
+    }
+    .page-item.active .page-link {
+        background-color: #2196F3;
+        border-color: #2196F3;
+    }
+    @media (max-width: 768px) {
+        .detail-group {
+            padding: 1rem;
+        }
+        .detail-value {
+            font-size: 1rem;
+        }
+    }
+    @media print {
+        .noprint {
+            display: none !important;
+        }
+        .card {
+            box-shadow: none !important;
+            border: none !important;
+        }
+        .card-header {
+            background: none !important;
+            color: #000 !important;
+            padding: 0 !important;
+            margin-bottom: 2rem;
+        }
+        .detail-group {
+            background: none !important;
+            box-shadow: none !important;
+            padding: 0.5rem !important;
+            border: 1px solid #dee2e6;
+        }
+        .detail-label {
+            color: #000 !important;
+        }
+        .detail-value {
+            color: #000 !important;
+        }
+        .border-top {
+            border-color: #000 !important;
+        }
+        @page {
+            margin: 1cm;
+        }
+    }
+    .empty-state {
+        padding: 2rem;
+        text-align: center;
+    }
+    .empty-state i {
+        opacity: 0.5;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<script>
+function printDetail() {
+    window.print();
+}
+
+// Tooltip'leri aktifleştir
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+</script>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
 {% endblock content %}

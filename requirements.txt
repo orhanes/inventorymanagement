@@ -14,3 +14,6 @@ pytz==2019.3
 six==1.13.0
 sqlparse==0.3.0
 wrapt==1.11.2
+qrcode
+python-barcode
+Pillow

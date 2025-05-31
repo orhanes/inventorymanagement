@@ -2,14 +2,36 @@
 {% load static %}
 
 {% load l10n %}
-{% block title %} Malzeme Talep Fişi : {{ bill.billno }}{% endblock title %}
+{% block title %} Nakliye Formu : {{ bill.delivery_number }}{% endblock title %}
 
+<style>
+    @media print {
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #printArea {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        table {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+    }
+</style>
 
 {% block content %}
-    
-    <div style="color:#575757; font-style: bold; font-size: 3rem;  border-bottom: 1px solid white;">Malzeme Talep Fiş No : {{ bill.billno }}</div>
-
-    <!-- <br><br> -->
+    <div class="alert alert-info noprint" style="max-width:900px; margin:auto;">
+        <b>Yazdırırken:</b> Tarayıcı yazdırma ekranında "Başlıklar ve altbilgiler" seçeneğini kapatın. PDF'e çevirirken de bu ayarı kullanabilirsiniz.
+    </div>
+    <br>
 
     <form method="post">
     {% csrf_token %}
@@ -25,11 +47,13 @@
                     -->
                     <tr style="text-align: center;">
                         <td >
-                            <span><img src="/static/images/toprak_logo.jpg" alt="Toprak Logo" width="800" height="220"></span>
-                            <span style="font-size: 200%;">TOPRAK BORU PROFİL SAC</span> <br>
-                            <span style="font-size: 120%; font-weight: bold;">SAN. VE LTD. ŞTİ</span> <br>
-                            <span style="font-weight: bold;">ADRES :</span>Yıldırım Beyazıt Mah. 305 No'lu Cad. No: 2/1 <br>Payas - HATAY<br>
-                            <span style="font-weight: bold;">EMAIL : info@toprakboruprofil.com</span> <br><br>
+                            {% if company %}
+                            <span style="margin-top: 20px; display: inline-block;"><img src="{{ company.logo.url }}" alt="Logo" width="380" height="100"></span><br>
+                            <!--<span style="font-size: 200%;">{{ company.name }}</span> <br>-->
+                            <span style="font-weight: bold;">TELEFON: </span><span>{{ company.phone }}</span> <br>
+                            <span style="font-weight: bold;">ADRES: </span><span>{{ company.address }}</span> <br>
+                            <span style="font-weight: bold;">EMAIL : </span><span>{{ company.email }}</span> <br><br>
+                            {% endif %}
                         </td>
                     </tr>
                     
@@ -38,66 +62,115 @@
                         <table class="outer-box" style="width: 800px; margin-left: auto; margin-right: auto;">
                             <tbody>
                                 <tr>
-                                    <td class="inner-box" style="text-align: center; font-weight: bold;background-color:#D3D3D3;" colspan="3">MALZEME TALEP FİŞİ</td>
+                                    <td class="inner-box" style="text-align: center; font-weight: bold;background-color:#D3D3D3;" colspan="3">NAKLİYE FORMU</td>
                                 </tr>
                                 <tr>
-                                    <td class="inner-box" style="width: 50%; font-weight: bold;">&nbsp; SAYIN</td>
-                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp; MALEME TALEP FİŞ NO</td>
-                                    <td class="inner-box" style="width: 25%;">&nbsp;{{ bill.billno }}</td>
+                                    <td class="inner-box" style="width: 50%;" rowspan="2"><span style="font-weight: bold;">&nbsp;SAYIN: </span><br><span>&nbsp;{{ bill.buyer }}</span></td>
+                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;FORM NO</td>
+                                    <td class="inner-box" style="width: 25%;">&nbsp;{{ bill.delivery_number }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="inner-box" style="width: 50%;">&nbsp;{{ bill.buyer }}</td>
                                     <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;TARİH</td>
-                                    <td class="inner-box" style="width: 25%;">&nbsp;{{ bill.created_date }}</td>
+                                    <td class="inner-box" style="width: 25%;">&nbsp;{{ bill.sending_date|default:bill.created_date }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="inner-box" style="width: 50%;" rowspan="3">{{ bill.buyer.address|linebreaks }}</td>
-                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;ŞOFÖR ADI</td>
-                                    <td class="inner-box align-left" style="width: 25%;"> <input type="text" name="courier_name" class="align-left" style="border: 0; overflow: hidden;" value="{{ bill.courier_name }}"> </td>
+                                    <td class="inner-box" colspan="3"><span style="font-weight: bold;">&nbsp;ADRES: </span>
+                                        {% if bill.address %}
+                                            &nbsp;{{ bill.address }}
+                                        {% elif bill.buyer and bill.buyer.address %}
+                                            &nbsp;{{ bill.buyer.address }}
+                                        {% else %}
+                                            &nbsp;-
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;ŞOFÖR T.C. KİMLİK NO</td>
-                                    <td class="inner-box align-left" style="width: 25%;"> <input type="text" name="courier_id" class="align-left" style="border: 0; overflow: hidden;" value="{{ bill.courier_id|unlocalize }}"> </td>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;NAKLİYE TÜRÜ</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.delivery_type.name }}</td>
+                                </tr>
+
+                                {% if bill.delivery_type.name == 'KARGO' or bill.delivery_type.name == 'POSTA' %}
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;KARGO/POSTA TAKİP NO</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.tracking_number }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;ŞOFÖR TELEFONU</td>
-                                    <td class="inner-box align-left" style="width: 25%;"> <input type="text" name="courier_phone" class="align-left" style="border: 0; overflow: hidden;" value="{{ bill.courier_phone }}"> </td>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;KARGO/POSTA FİRMASI</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.delivery_company }}</td>
+                                </tr>
+                                {% endif %}
+
+                                {% if bill.delivery_type.name == 'KURYE' or bill.delivery_type.name == 'ARAÇ' %}
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;ŞOFÖR/KURYE ADI</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.courier_name }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="inner-box" style="font-weight: bold;" rowspan="2">&nbsp;İLGİLİ KİŞİ : <span style="font-weight:300;">{{ bill.buyer.representative }}</span></td>
-                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp; ŞOFÖR ARACI</td>
-                                    <td class="inner-box align-left" style="width: 25%;"> <input type="text" name="courier_vehicle" class="align-left" style="border: 0; overflow: hidden;" value="{{ bill.courier_vehicle }}"> </td>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;T.C. KİMLİK NO</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.courier_id }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp; ARAÇ PLAKASI</td>
-                                    <td class="inner-box align-left" style="width: 25%;"> <input type="text" name="vehicle_plate" class="align-left" style="border: 0; overflow: hidden;" value="{{ bill.vehicle_plate }}"> </td>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;ŞOFÖR/KURYE NUMARASI</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.courier_number }}</td>
                                 </tr>
-                            </tbody>
-                        </table>
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <td>
-                        <table class="outer-box" style="width: 800px; margin-left: auto; margin-right: auto;">
-                            <tbody>
                                 <tr>
-                                    <!-- <td class="inner-box" style="width: 05%; font-weight: bold; text-align: center;">&nbsp;SL</td>-->
-                                    <td class="inner-box" style="width: 30%; font-weight: bold; text-align: center;">MALZEME CİNSİ</td>
-                                    <!--<td class="inner-box" style="width: 12%; font-weight: bold; text-align: center;">&nbsp;STOK KODU</td>-->
-                                    <td class="inner-box" style="width: 12%; font-weight: bold; text-align: center;">MİKTAR</td>
-                                    <td class="inner-box" style="width: 12%; font-weight: bold; text-align: center;">İZAHAT</td>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;TELEFON</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.courier_phone }}</td>
                                 </tr>
-                                    <tr style="height: auto;">
-                                        <!-- <td class="inner-box" style="width: 5%;">&nbsp; {{ forloop.counter }}</td>-->
-                                        <td class="inner-box" style="width: 30%;">&nbsp; {{ bill.sale_item.stock  }}</td>
-                                        <!-- <td class="inner-box" style="width: 12%;">&nbsp;</td>-->
-                                        <td class="inner-box align-middle" style="width: 12%;">&nbsp; {{ bill.sale_item.quantity }}</td>
-                                        <td class="inner-box align-middle" style="width: 12%;">&nbsp; {{ bill.explanation  }}</td>
-                                        <!-- <td class="inner-box" style="width: 12%;">&nbsp;{{ item.totalprice }}</td>-->
-                                        <!--<td class="inner-box" style="width: 5%;">&nbsp;0</td>-->
-                                    </tr>
-                   
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;ARAÇ TÜRÜ</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.vehicle_type }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;ARAÇ PLAKASI</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.vehicle_plate }}</td>
+                                </tr>
+                                {% endif %}
+
+                                {% if bill.delivery_type.name == 'ARAÇ' %}
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;İZAHAT</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.explanation }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;TONAJDAN SORUMLUYUZ</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{% if bill.tonage %}Evet{% else %}Hayır{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;ANALİZLİ S-420</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{% if bill.analysed %}Evet{% else %}Hayır{% endif %}</td>
+                                </tr>
+                                {% endif %}
+
+                                <!-- Ortak Alanlar -->
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;FİŞ NO</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.billno }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;TESLİM EDEN</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.deliverer }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;GÖNDERİM TARİHİ</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.sending_date }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;TAHMİNİ TESLİMAT TARİHİ</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.estimated_delivery_date }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;GERÇEKLEŞEN TESLİMAT TARİHİ</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.actual_delivery_date }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;İRSALİYE NUMARASI</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.waybill_number }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="inner-box" style="font-weight: bold;">&nbsp;DURUM</td>
+                                    <td class="inner-box align-left" colspan="2">&nbsp;{{ bill.status }}</td>
+                                </tr>
                             </tbody>
                         </table>
                         </td>
@@ -108,33 +181,8 @@
                         <table class="outer-box inner-box" style="width: 800px; margin-left: auto; margin-right: auto;">
                             <tbody>
                                 <tr>
-                                    <td class="inner-box" style="width: 35%; text-align: center;" rowspan="6">
-                                        <p> <span style="font-weight: bold;">NOTLAR <br> </span> <br>
-                                           {{bill.description}}</p>
-                                    </td>
-                                    <td class="inner-box" style="width: 30%; font-weight: bold;">&nbsp;Tonajdan Sorumluyuz</td>
-                                    <td class="inner-box align-left" style="width: 30%;">&nbsp; <input type="text" name="tonage" class="align-left" style="border: 0; overflow: hidden;" 
-                                        value="{% if bill.tonage == True %} Evet {% else %} Hayır{% endif %}"></td>
-                                </tr>
-                                <tr>
-                                    <td class="inner-box" style="font-weight: bold;">&nbsp;Analizli S-420</td>
-                                    <td class="inner-box align-left">&nbsp; <input type="text" name="analysed" class="align-left" style="border: 0; overflow: hidden;" value="{% if bill.analysed == True %} Evet {% else %} Hayır{% endif %}"></td>
-                                </tr>
-                                <tr>
-                                    <td class="inner-box" style="font-weight: bold;"> </td>
-                                    <td class="inner-box align-middle">&nbsp; <input type="text" name="igst" class="align-middle" pattern="[0-9]+\.[0-9]+" style="border: 0; overflow: hidden;" value=""></td>
-                                </tr>
-                                <tr>
-                                    <td class="inner-box" style="font-weight: bold;">&nbsp;</td>
-                                    <td class="inner-box align-middle">&nbsp; <input type="text" name="cess" class="align-middle" pattern="[0-9]+\.[0-9]+" style="border: 0; overflow: hidden;" value=""></td>
-                                </tr>
-                                <tr>
-                                    <td class="inner-box" style="font-weight: bold;">&nbsp;</td>
-                                    <td class="inner-box align-middle">&nbsp; <input type="text" name="tcs" class="align-middle" pattern="[0-9]+\.[0-9]+" style="border: 0; overflow: hidden;" value=""></td>
-                                </tr>
-                                <tr>
-                                    <td class="inner-box" style="font-weight: bold;">&nbsp;</td>
-                                    <td class="inner-box align-middle">&nbsp; <input type="text" name="total" class="align-middle" pattern="[0-9]+\.[0-9]+" style="border: 0; overflow: hidden;" value=""> </td>
+                                    <td class="inner-box" style="width: 35%; text-align: center; font-weight: bold;">NOTLAR</td>
+                                    <td class="inner-box align-left" style="width: 65%;">{{ bill.description }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -143,6 +191,7 @@
 
                     <tr>
                         <td style="text-align: right;margin-right: 60px;">
+                            <br>
                             <span style="font-weight: bold;margin-right: 60px;">FİRMA ADINA &nbsp;&nbsp;</span><span style="font-weight: bold;margin-right: 60px;"><br> Ad / Soyad / İmza</span>
                             <br>
                             <br>
@@ -168,10 +217,9 @@
 
         <br><br>
 
-        <div class="wrapper">
-            <button class="center btn btn-primary" onclick="printpage('printArea')">Yazdır</button>
-            <!-- <button class="center btn btn-success" type="submit">Taslağı Kaydet</button>-->
-            <a href="{% url 'deliveries-list' %}" class="btn center btn-secondary">Geri Dön</a>
+        <div class="wrapper d-flex justify-content-center gap-2">
+            <button class="btn btn-primary" onclick="printpage('printArea')">Yazdır</button>
+            <a href="{% url 'deliveries-list' %}" class="btn btn-secondary">Geri Dön</a>
         </div>
     
     </form>
@@ -184,6 +232,6 @@
             window.print();
             document.body.innerHTML = originalContents;
         }       
-        </script>
+    </script>
 
 {% endblock %}

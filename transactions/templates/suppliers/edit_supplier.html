@@ -5,220 +5,799 @@
 
 
 {% block content %}
-
-    <div style="color:#575757; font-style: bold; font-size: 3rem; border-bottom: 1px solid white;">{{title}}</div>
-    <hr>
-    <form method="post" id="supplierForm" data-cities-url="{% url 'ajax_load_cities_supplier' %}" data-counties-url="{% url 'ajax_load_counties_supplier' %}" data-positions-url="{% url 'ajax_load_positions_supplier' %}">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.name.errors }}
-                <label for="{{ form.name.id_for_label }}">Tedarikçi Adı:</label>
-                {{ form.name }}
-            </div>
-
-            <div class="form-group col-md-6">
-                {{ form.phone.errors }}
-                <label for="{{ form.phone.id_for_label }}">Telefon:</label>
-                {{ form.phone }}
-            </div>
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-user-tie me-2"></i>{{title}}</h3>
         </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate id="supplierForm" data-cities-url="{% url 'ajax_load_cities_supplier' %}" data-counties-url="{% url 'ajax_load_counties_supplier' %}" data-positions-url="{% url 'ajax_load_positions_supplier' %}">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.name.errors }}
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                Tedarikçi Adı <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-building"></i></span>
+                                {{ form.name }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen tedarikçi adını giriniz. Bu alan zorunludur.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.phone.errors }}
+                            <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                Telefon <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                {{ form.phone }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen geçerli bir telefon numarası giriniz.
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Örn: 5555555555 (Benzersiz - 10 haneli olmalıdır)
+                            </small>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="form-group">
-            {{ form.address.errors }}
-            <label for="{{ form.address.id_for_label }}">Adres:</label>
-            {{ form.address }}
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <div class="form-group">
+                            {{ form.address.errors }}
+                            <label for="{{ form.address.id_for_label }}" class="form-label">
+                                Adres <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                {{ form.address }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen adres bilgisini giriniz.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.country.errors }}
+                            <label for="{{ form.country.id_for_label }}" class="form-label">
+                                Ülke <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                {{ form.country }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen bir ülke seçiniz.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.city.errors }}
+                            <label for="{{ form.city.id_for_label }}" class="form-label">
+                                Şehir <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-city"></i></span>
+                                {{ form.city }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen bir şehir seçiniz.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.county.errors }}
+                            <label for="{{ form.county.id_for_label }}" class="form-label">
+                                İlçe <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marked-alt"></i></span>
+                                {{ form.county }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen bir ilçe seçiniz.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.web.errors }}
+                            <label for="{{ form.web.id_for_label }}" class="form-label">
+                                Web Adresi
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                {{ form.web }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen geçerli bir web adresi giriniz.
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Örn: www.firmaadi.com veya https://www.firmaadi.com
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.representative.errors }}
+                            <label for="{{ form.representative.id_for_label }}" class="form-label">
+                                Temsilci
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                {{ form.representative }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.department.errors }}
+                            <label for="{{ form.department.id_for_label }}" class="form-label">
+                                Departman
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-sitemap"></i></span>
+                                {{ form.department }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.position.errors }}
+                            <label for="{{ form.position.id_for_label }}" class="form-label">
+                                Görev
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-briefcase"></i></span>
+                                {{ form.position }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.mobile_phone.errors }}
+                            <label for="{{ form.mobile_phone.id_for_label }}" class="form-label">
+                                Cep Telefonu
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-mobile-alt"></i></span>
+                                {{ form.mobile_phone }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen geçerli bir cep telefonu numarası giriniz.
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Örn: 5555555555 (10 haneli olmalıdır)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.email.errors }}
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                E-posta
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                {{ form.email }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen geçerli bir e-posta adresi giriniz.
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Örn: ornek@firmaadi.com
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.tax_id.errors }}
+                            <label for="{{ form.tax_id.id_for_label }}" class="form-label">
+                                Vergi Kimlik No
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                {{ form.tax_id }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen geçerli bir vergi kimlik numarası giriniz.
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> 10 haneli sayısal değer giriniz
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.tax_administration.errors }}
+                            <label for="{{ form.tax_administration.id_for_label }}" class="form-label">
+                                Vergi Dairesi
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-landmark"></i></span>
+                                {{ form.tax_administration }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.kep_address.errors }}
+                            <label for="{{ form.kep_address.id_for_label }}" class="form-label">
+                                KEP Adresi
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope-open-text"></i></span>
+                                {{ form.kep_address }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen geçerli bir KEP adresi giriniz.
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Örn: firmaadi@hs01.kep.tr veya firmaadi@firma.kep.tr
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.bank_name.errors }}
+                            <label for="{{ form.bank_name.id_for_label }}" class="form-label">
+                                Banka Adı
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-university"></i></span>
+                                {{ form.bank_name }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.iban_no.errors }}
+                            <label for="{{ form.iban_no.id_for_label }}" class="form-label">
+                                IBAN Numarası
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                {{ form.iban_no }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen geçerli bir IBAN numarası giriniz.
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> TR ile başlayan 26 haneli IBAN numarası giriniz. Otomatik olarak formatlanacaktır.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.branch_code.errors }}
+                            <label for="{{ form.branch_code.id_for_label }}" class="form-label">
+                                Şube Kodu
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-code-branch"></i></span>
+                                {{ form.branch_code }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.account_number.errors }}
+                            <label for="{{ form.account_number.id_for_label }}" class="form-label">
+                                Hesap Numarası
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-wallet"></i></span>
+                                {{ form.account_number }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <div>
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="fas fa-save me-2"></i>{{ savebtn }}
+                        </button>
+                        {% if title == "Yeni Tedarikçi" %}
+                            <button type="reset" class="btn btn-danger px-4">
+                                <i class="fas fa-undo me-2"></i>Sıfırla
+                            </button>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if delbtn %}
+                            <a href="{% url 'delete-supplier' supplier.pk %}" class="btn btn-danger px-4">
+                                <i class="fas fa-trash me-2"></i>Sil
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'suppliers-list' %}" class="btn btn-secondary px-4">
+                            <i class="fas fa-times me-2"></i>Vazgeç
+                        </a>
+                    </div>
+                </div>
+            </form>
         </div>
+    </div>
+</div>
 
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.country.errors }}
-                <label for="{{ form.country.id_for_label }}">Ülke:</label>
-                {{ form.country }}
-            </div>
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+    .form-control:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    select.form-control {
+        width: 100% !important;
+        min-width: 200px;
+        height: calc(1.5em + 1.5rem) !important;
+        padding: 0.375rem 2.25rem 0.375rem 0.75rem !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23555' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        line-height: 1.5;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .input-group select.form-control {
+        flex: 1 1 auto;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: 0;
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-right: none;
+        display: flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .input-group {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        flex-wrap: nowrap;
+    }
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    .form-group select {
+        max-width: none;
+    }
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .is-valid {
+        border-color: #198754 !important;
+    }
+    .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+        position: absolute;
+        bottom: -1.25rem;
+        left: 0;
+        padding-left: 0.5rem;
+    }
+    .is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    .form-control.is-invalid:focus,
+    .form-control.is-valid:focus {
+        box-shadow: none;
+    }
+    .input-group .form-control.is-invalid,
+    .input-group .form-control.is-valid {
+        z-index: 3;
+    }
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    .input-group {
+        margin-bottom: 0.5rem;
+    }
+</style>
 
-            <div class="form-group col-md-6">
-                {{ form.city.errors }}
-                <label for="{{ form.city.id_for_label }}">Şehir:</label>
-                {{ form.city }}
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.county.errors }}
-                <label for="{{ form.county.id_for_label }}">İlçe:</label>
-                {{ form.county }}
-            </div>
-
-            <div class="form-group col-md-6">
-                {{ form.web.errors }}
-                <label for="{{ form.web.id_for_label }}">Web Adresi:</label>
-                {{ form.web }}
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.representative.errors }}
-                <label for="{{ form.representative.id_for_label }}">Temsilci:</label>
-                {{ form.representative }}
-            </div>
-
-            <div class="form-group col-md-6">
-                {{ form.department.errors }}
-                <label for="{{ form.department.id_for_label }}">Departman:</label>
-                {{ form.department }}
-            </div>
-        </div>
-
-        <div class="form-group">
-            {{ form.position.errors }}
-            <label for="{{ form.position.id_for_label }}">Görevi:</label>
-            {{ form.position }}
-        </div>
-
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.mobile_phone.errors }}
-                <label for="{{ form.mobile_phone.id_for_label }}">Cep Telefonu:</label>
-                {{ form.mobile_phone }}
-            </div>
-
-            <div class="form-group col-md-6">
-                {{ form.email.errors }}
-                <label for="{{ form.email.id_for_label }}">Email:</label>
-                {{ form.email }}
-            </div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.tax_id.errors }}
-                <label for="{{ form.tax_id.id_for_label }}">Vergi Kimlik No:</label>
-                {{ form.tax_id }}
-            </div>
-
-            <div class="form-group col-md-6">
-                {{ form.tax_administration.errors }}
-                <label for="{{ form.tax_administration.id_for_label }}">Vergi Dairesi:</label>
-                {{ form.tax_administration }}
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.kep_address.errors }}
-                <label for="{{ form.kep_address.id_for_label }}">Kep Adresi:</label>
-                {{ form.kep_address }}
-            </div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+    $("#id_country").change(function () {
+        $("#id_county").val('');
+        const url = $("#supplierForm").attr("data-cities-url");
+        const countryId = $(this).val();
     
-            <div class="form-group col-md-6">
-                {{ form.bank_name.errors }}
-                <label for="{{ form.bank_name.id_for_label }}">Banka Adı:</label>
-                {{ form.bank_name }}
-            </div>
-        </div>    
-
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.iban_no.errors }}
-                <label for="{{ form.iban_no.id_for_label }}">Iban Numarası:</label>
-                {{ form.iban_no }}
-            </div>
-    
-            <div class="form-group col-md-6">
-                {{ form.branch_code.errors }}
-                <label for="{{ form.branch_code.id_for_label }}">Şube Kodu:</label>
-                {{ form.branch_code }}
-            </div>
-        </div>    
-
-        <div class="form-group">
-            {{ form.account_number.errors }}
-            <label for="{{ form.account_number.id_for_label }}">Hesap Numarası:</label>
-            {{ form.account_number }}
-        </div>
-
-        <br>
-
-        <div class="align-middle">
-            <button type="submit" class="btn btn-success">{{ savebtn }}</button>
-            {% if title == "Yeni Tedarikçi" %}
-                <button type="reset" class="btn btn-danger" >Sıfırla</button>
-            {% endif %}
-            {% if delbtn %}
-                <a href="{% url 'delete-supplier' supplier.pk %}" class="btn btn-danger"> Tedarikçi Sil</a>
-            {% endif %}
-            <a href="{% url 'suppliers-list' %}" class="btn btn-secondary">Vazgeç</a>
-        </div>
-        
-    </form>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script>
-    $(document).ready(function(){
-        $("#id_country").change(function () {
-            // Ülke seçim alanı değiştiğinde ilçe alanını temizle
-            $("#id_county").val('');
-
-        $("#id_country").change(function () {
-            const url = $("#supplierForm").attr("data-cities-url");  // get the url of the `load_cities` view
-            const countryId = $(this).val();  // get the selected country ID from the HTML input
-    
-            $.ajax({                       // initialize an AJAX request
-                url: url,                    // set the url of the request (= /persons/ajax/load-cities/ )
-                data: {
-                    'country_id': countryId       // add the country id to the GET parameters
-                },
-                success: function (data) {   // `data` is the return of the `load_cities` view function
-                    $("#id_city").html(data);  // replace the contents of the city input with the data that came from the server
-                    /*
-    
-                    let html_data = '<option value="">---------</option>';
-                    data.forEach(function (city) {
-                        html_data += `<option value="${city.id}">${city.name}</option>`
-                    });
-                    console.log(html_data);
-                    $("#id_city").html(html_data);
-    
-                    */
-                }
-            });
-    
-        });
-
-        $("#id_city").change(function () {
-            const url = $("#supplierForm").attr("data-counties-url");
-            const cityId = $(this).val();  // Get the selected city ID
-        
-            $.ajax({
-                url: url,
-                data: {
-                    'city_id': cityId
-                },
-                success: function (data) {
-                    $("#id_county").html(data);
-                }
-            });
-        });
-
-        $("#id_department").change(function () {
-            const url = $("#supplierForm").attr("data-positions-url");
-            const departmentId = $(this).val();  // Get the selected city ID
-        
-            $.ajax({
-                url: url,
-                data: {
-                    'department_id': departmentId
-                },
-                success: function (data) {
-                    $("#id_position").html(data);
-                }
-            });
+        $.ajax({
+            url: url,
+            data: {
+                'country_id': countryId
+            },
+            success: function (data) {
+                $("#id_city").html(data);
+            }
         });
     });
+
+    $("#id_city").change(function () {
+        const url = $("#supplierForm").attr("data-counties-url");
+        const cityId = $(this).val();
+    
+        $.ajax({
+            url: url,
+            data: {
+                'city_id': cityId
+            },
+            success: function (data) {
+                $("#id_county").html(data);
+            }
+        });
+    });
+
+    $("#id_department").change(function () {
+        const url = $("#supplierForm").attr("data-positions-url");
+        const departmentId = $(this).val();
+    
+        $.ajax({
+            url: url,
+            data: {
+                'department_id': departmentId
+            },
+            success: function (data) {
+                $("#id_position").html(data);
+            }
+        });
+    });
+
+    // Validasyon kuralları
+    const validationRules = {
+        'id_name': {
+            rule: (value) => value.length >= 3,
+            message: 'Firma adı en az 3 karakter olmalıdır'
+        },
+        'id_phone': {
+            rule: (value) => /^\d{10}$/.test(value.replace(/\D/g, '')),
+            message: 'Telefon numarası tam olarak 10 haneli olmalıdır'
+        },
+        'id_address': {
+            rule: (value) => value.length >= 10,
+            message: 'Adres en az 10 karakter olmalıdır'
+        },
+        'id_country': {
+            rule: (value) => value !== '',
+            message: 'Lütfen bir ülke seçiniz'
+        },
+        'id_city': {
+            rule: (value) => value !== '',
+            message: 'Lütfen bir şehir seçiniz'
+        },
+        'id_county': {
+            rule: (value) => value !== '',
+            message: 'Lütfen bir ilçe seçiniz'
+        },
+        'id_web': {
+            rule: (value) => !value || /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(value),
+            message: 'Geçerli bir web adresi giriniz'
+        },
+        'id_email': {
+            rule: (value) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+            message: 'Geçerli bir e-posta adresi giriniz'
+        },
+        'id_mobile_phone': {
+            rule: (value) => !value || /^\d{10}$/.test(value.replace(/\D/g, '')),
+            message: 'Cep telefonu numarası tam olarak 10 haneli olmalıdır'
+        },
+        'id_tax_id': {
+            rule: (value) => !value || /^\d{10}$/.test(value.replace(/\D/g, '')),
+            message: 'Vergi kimlik numarası tam olarak 10 haneli olmalıdır'
+        },
+        'id_iban_no': {
+            rule: (value) => !value || /^TR\d{24}$/i.test(value.replace(/\s/g, '')),
+            message: 'Geçerli bir IBAN numarası giriniz (TR ile başlamalı)'
+        },
+        'id_branch_code': {
+            rule: (value) => !value || /^\d{1,5}$/.test(value),
+            message: 'Geçerli bir şube kodu giriniz (1-5 haneli sayı)'
+        },
+        'id_account_number': {
+            rule: (value) => !value || /^\d{1,20}$/.test(value),
+            message: 'Geçerli bir hesap numarası giriniz'
+        },
+        'id_representative': {
+            rule: (value) => !value || /^[a-zA-ZğüşıöçĞÜŞİÖÇ\s]{3,50}$/.test(value),
+            message: 'Temsilci adı en az 3 karakter olmalı ve sadece harf içermelidir'
+        },
+        'id_department': {
+            rule: (value) => !value || value !== '',
+            message: 'Lütfen bir departman seçiniz'
+        },
+        'id_position': {
+            rule: (value) => !value || value !== '',
+            message: 'Lütfen bir görev seçiniz'
+        },
+        'id_tax_administration': {
+            rule: (value) => !value || /^[a-zA-ZğüşıöçĞÜŞİÖÇ\s]{3,50}$/.test(value),
+            message: 'Vergi dairesi adı en az 3 karakter olmalı ve sadece harf içermelidir'
+        },
+        'id_kep_address': {
+            rule: (value) => !value || /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(kep\.tr|hs\d+\.kep\.tr)$/.test(value),
+            message: 'Geçerli bir KEP adresi giriniz (örn: firma@firma.kep.tr)'
+        },
+        'id_bank_name': {
+            rule: (value) => !value || value !== '',
+            message: 'Lütfen bir banka seçiniz'
+        }
+    };
+
+    // Format düzeltme fonksiyonları
+    const formatRules = {
+        'id_representative': (value) => {
+            // İlk harfleri büyük yap
+            return value.toLowerCase().replace(/(^|\s)\S/g, letter => letter.toUpperCase());
+        },
+        'id_tax_administration': (value) => {
+            // İlk harfleri büyük yap
+            return value.toLowerCase().replace(/(^|\s)\S/g, letter => letter.toUpperCase());
+        },
+        'id_kep_address': (value) => {
+            // Küçük harfe çevir
+            return value.toLowerCase();
+        }
+    };
+
+    // Validasyon durumunu göster
+    function showValidationStatus(input, isValid, message = '') {
+        const $input = $(input);
+        const $feedback = $input.siblings('.invalid-feedback');
+        
+        $input.removeClass('is-valid is-invalid');
+        if (input.value) {
+            $input.addClass(isValid ? 'is-valid' : 'is-invalid');
+        }
+        
+        if ($feedback.length) {
+            $feedback.text(message);
+        }
+    }
+
+    // Input değeri değiştiğinde format düzeltme ve validasyon yap
+    function validateAndFormatInput(input) {
+        // Önce format düzeltme yap
+        if (formatRules[input.id]) {
+            const formattedValue = formatRules[input.id](input.value);
+            if (formattedValue !== input.value) {
+                input.value = formattedValue;
+            }
+        }
+
+        // Sonra validasyon yap
+        const rule = validationRules[input.id];
+        if (!rule) return true;
+
+        const isValid = rule.rule(input.value);
+        showValidationStatus(input, isValid, isValid ? '' : rule.message);
+        return isValid;
+    }
+
+    // Bağımlı alanlar için özel kontroller
+    function handleDependentFields() {
+        // Departman seçildiğinde görev alanını kontrol et
+        $('#id_department').on('change', function() {
+            const positionField = $('#id_position');
+            if (this.value) {
+                positionField.prop('required', true);
+            } else {
+                positionField.prop('required', false);
+                positionField.val('');
+            }
+            validateAndFormatInput(positionField[0]);
+        });
+
+        // Banka adı seçildiğinde IBAN ve hesap numarası alanlarını kontrol et
+        $('#id_bank_name').on('change', function() {
+            const ibanField = $('#id_iban_no');
+            const accountField = $('#id_account_number');
+            if (this.value) {
+                ibanField.prop('required', true);
+                accountField.prop('required', true);
+            } else {
+                ibanField.prop('required', false);
+                accountField.prop('required', false);
+                ibanField.val('');
+                accountField.val('');
+            }
+            validateAndFormatInput(ibanField[0]);
+            validateAndFormatInput(accountField[0]);
+        });
+    }
+
+    // Tüm form alanlarını izle
+    Object.keys(validationRules).forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) {
+            // Input değeri değiştiğinde
+            $(input).on('input change blur', function() {
+                validateAndFormatInput(this);
+            });
+        }
+    });
+
+    // Bağımlı alan kontrollerini aktifleştir
+    handleDependentFields();
+
+    // Form gönderilmeden önce tüm alanları kontrol et
+    $('#supplierForm').on('submit', function(e) {
+        let isValid = true;
+        let firstInvalid = null;
+
+        // Tüm alanların validasyonunu kontrol et
+        Object.keys(validationRules).forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                // Zorunlu alan kontrolü
+                if ($(input).prop('required') && !input.value) {
+                    isValid = false;
+                    showValidationStatus(input, false, 'Bu alan zorunludur');
+                    if (!firstInvalid) firstInvalid = input;
+                }
+                // Değer varsa validasyon kontrolü
+                else if (input.value) {
+                    const fieldValid = validateAndFormatInput(input);
+                    if (!fieldValid) {
+                        isValid = false;
+                        if (!firstInvalid) firstInvalid = input;
+                    }
+                }
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            
+            // Hata özeti oluştur
+            let errorSummary = '<div class="alert alert-danger mb-4">' +
+                '<h5 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Lütfen aşağıdaki hataları düzeltin:</h5>' +
+                '<ul class="mb-0">';
+            
+            $('.is-invalid').each(function() {
+                const fieldName = $(this).closest('.form-group').find('label').text().trim();
+                const errorMessage = $(this).siblings('.invalid-feedback').text();
+                errorSummary += `<li>${fieldName}: ${errorMessage}</li>`;
+            });
+            
+            errorSummary += '</ul></div>';
+
+            // Varsa eski hata özetini kaldır
+            $('.alert-danger').remove();
+            
+            // Yeni hata özetini form başına ekle
+            $(this).prepend(errorSummary);
+
+            // İlk hatalı alana odaklan
+            if (firstInvalid) {
+                firstInvalid.focus();
+                // Sayfayı hata mesajına kaydır
+                $('html, body').animate({
+                    scrollTop: $(firstInvalid).offset().top - 100
+                }, 500);
+            }
+        }
+    });
+
+    // Özel format kontrolleri
+    $('#id_iban_no').on('input', function() {
+        let value = this.value.replace(/\s/g, '').toUpperCase();
+        if (value.length > 2 && !value.startsWith('TR')) {
+            value = 'TR' + value;
+        }
+        // IBAN'ı 4'lü gruplar halinde formatla ve 26 karakterle sınırla
+        value = value.replace(/(.{4})/g, '$1 ').trim().substr(0, 32); // 26 karakter + 6 boşluk = 32
+        this.value = value;
+    });
+
+    $('#id_tax_id').on('input', function() {
+        // Sadece rakam girişine izin ver ve tam olarak 10 karakter olmalı
+        this.value = this.value.replace(/\D/g, '').substr(0, 10);
+    });
+
+    $('#id_phone, #id_mobile_phone').on('input', function() {
+        // Sadece rakam girişine izin ver ve tam olarak 10 karakter olmalı
+        this.value = this.value.replace(/\D/g, '').substr(0, 10);
+    });
+
+    // Sayısal alanlarda sadece rakam girişine izin ver
+    $('#id_branch_code, #id_account_number').on('input', function() {
+        this.value = this.value.replace(/\D/g, '');
+    });
+
+    // Adres alanı için karakter sınırlaması
+    $('#id_address').on('input', function() {
+        if (this.value.length > 190) {
+            this.value = this.value.substring(0, 190);
+        }
+    });
 });
-    </script>
+</script>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
 {% endblock content %}

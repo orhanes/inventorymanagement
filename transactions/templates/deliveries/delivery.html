@@ -1,123 +1,422 @@
 {% extends "base.html" %}
-
 {% load l10n %}
-{% block title %}
-    Nakliyeler
-{% endblock %}
+{% load widget_tweaks %}
 
+{% block title %} {{ delivery.billno }} - Nakliye Detayı {% endblock title %}
 
 {% block content %}
-    <br>
-    <br>
-    <br>
-    <div class="content-section">
-        <br>
-        <div class="media">
-            <div class="media-body">
-                <div class="row">
-                    <div class="col-md-12">
-                        <table class="table table-css table-hover table-bordered">
-                            <thead class="thead-dark align-middle">
-                                <tr>
-                                    <th colspan="4"><h2>{{ delivery.billno }} No'lu Nakliye</h2></th>
-                                </tr>
-                            </thead>
-                    
-                            <tbody>
-                                <tr>
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Fiş No</b></td>
-                                    <td class="align-left col-md-3"> {{ delivery.billno }} </td>
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Sipariş Makbuz No</b></td>
-                                    <td class="align-left col-md-3"> {{ delivery.sale_item.billno }} </td> 
-                                </tr>
-                                <tr>
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Müşteri</b></td>
-                                    <td class="align-left" colspan="3"> {{ delivery.buyer }} </td>  
-                                </tr>
-                                <tr>
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Malzeme Cinsi</b></td>
-                                    <td class="align-left" colspan="3"> {{ delivery.sale_item.stock }} </td> 
-                                </tr>
-                                <tr>
-                                    
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Miktar</b></td>
-                                    <td class="align-left" colspan="3"> {{ delivery.sale_item.quantity }} </td> 
-                                </tr>
-                                <tr>
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>İzahat</b></td>
-                                    <td class="align-left" colspan="3"> {{ delivery.explanation }} </td> 
-                                </tr>
-                                <tr>
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Şoför Adı / Soyadı</b></td>
-                                    <td class="align-left col-md-3"> {{ delivery.courier_name }} </td> 
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Şoför Aracı</b></td>
-                                    <td class="align-left col-md-3"> {{ delivery.courier_vehicle }} </td> 
-                                </tr>
-                                <tr>
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Şoför T.C. Kimlik No</b></td>
-                                    <td class="align-left col-md-3"> {{ delivery.courier_id|unlocalize }} </td> 
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Araç Plakası<b></td>
-                                    <td class="align-left col-md-3"> {{ delivery.vehicle_plate }} </td> 
-                                </tr>  
-                                <tr>
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Şoför Telefon Numarası</b></td>
-                                    <td class="align-left col-md-3"> {{ delivery.courier_phone }} </td> 
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Tarih</b></td>
-                                    <td class="align-left col-md-3"> {{ delivery.created_date }} </td> 
-                                </tr>  
-                                <tr>
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Not</b></td>
-                                    <td class="align-left col-md-3" colspan="3"> {{ delivery.description }} </td> 
-                                </tr>  
-                                <tr>
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Tonajdan Sorumluyuz</b></td>
-                                    <td class="align-left col-md-3"> {% if delivery.tonage == True %}
-                                            <p>Evet</p>
-                                        {% else %}
-                                            <p>Hayır</p>
-                                        {% endif %}
-                                    </td> 
-                                    <td class="align-left col-md-3" style="background-color:#E8E8E8;"><b>Analizli S-420</b></td>
-                                    <td class="align-left col-md-3"> {% if delivery.analysed == True %}
-                                            <p>Evet</p>
-                                        {% else %}
-                                            <p>Hayır</p>
-                                        {% endif %}
-                                    </td> 
-                                </tr>  
-                            </tbody>
-                        </table>
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fas fa-truck me-2"></i>Nakliye Detayı - ({{ delivery.delivery_number }})
+            </h3>
+            <div>
+                <button onclick="printDetail()" class="btn btn-light me-2">
+                    <i class="fas fa-print me-2"></i>Yazdır
+                </button>
+                <a href="{% url 'edit-delivery' delivery.pk %}" class="btn btn-warning">
+                    <i class="fas fa-edit me-2"></i>Düzenle
+                </a>
+                <a href="{% url 'deliveries-list' %}" class="btn btn-secondary ms-2">
+                    <i class="fas fa-arrow-left me-2"></i>Geri Dön
+                </a>
+            </div>
+        </div>
+        <div class="card-body" id="printArea">
+            <div class="row g-4">
+                <!-- Ortak Alanlar -->
+                <h5 class="section-title mb-3 mt-4 text-primary"><i class="fas fa-shipping-fast me-2"></i>Ortak Nakliye Bilgileri</h5>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-file-invoice text-primary me-2"></i>Form No</label>
+                        <div class="detail-value">{{ delivery.delivery_number }}</div>
+                    </div>
+                </div>
+                <!-- Nakliye Türü -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-truck text-primary me-2"></i>Nakliye Türü</label>
+                        <div class="detail-value">{{ delivery.delivery_type.name }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-user text-primary me-2"></i>Müşteri</label>
+                        <div class="detail-value">{{ delivery.buyer }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-box text-primary me-2"></i>Malzeme Cinsi</label>
+                        <div class="detail-value">{{ delivery.sale_item.stock }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-balance-scale text-primary me-2"></i>Miktar</label>
+                        <div class="detail-value">{{ delivery.sale_item.quantity }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-file-alt text-primary me-2"></i>Fiş No</label>
+                        <div class="detail-value">{{ delivery.billno }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-barcode text-primary me-2"></i>İrsaliye No</label>
+                        <div class="detail-value">{{ delivery.waybill_number|default:"-" }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-calendar text-primary me-2"></i>Gönderim Tarihi</label>
+                        <div class="detail-value">{{ delivery.sending_date|date:"d.m.Y"|default:"-" }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-calendar text-primary me-2"></i>Tahmini Teslimat Tarihi</label>
+                        <div class="detail-value">{{ delivery.estimated_delivery_date|date:"d.m.Y"|default:"-" }}</div>
+                    </div>
+                </div>
+                <!-- Gerçekleşen Teslimat Tarihi -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-calendar text-primary me-2"></i>Gerçekleşen Teslimat Tarihi</label>
+                        <div class="detail-value">{{ delivery.actual_delivery_date|date:"d.m.Y"|default:"-" }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-tasks text-primary me-2"></i>Durum</label>
+                        <div class="detail-value">
+                            {% if delivery.status == 'BEKLEMEDE' %}
+                                <span class="badge rounded-pill bg-warning text-dark px-3 py-2">Beklemede</span>
+                            {% elif delivery.status == 'İPTAL EDİLDİ' %}
+                                <span class="badge rounded-pill bg-dark px-3 py-2">İptal Edildi</span>
+                            {% elif delivery.status == 'TESLİM EDİLDİ' %}
+                                <span class="badge rounded-pill bg-success px-3 py-2">Teslim Edildi</span>
+                            {% elif delivery.status == 'YOLDA' %}
+                                <span class="badge rounded-pill bg-info text-dark px-3 py-2">Yolda</span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-secondary px-3 py-2">{{ delivery.status|default:"-" }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <!-- Teslim Eden -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-user text-primary me-2"></i>Teslim Eden</label>
+                        <div class="detail-value">{{ delivery.deliverer|default:"-" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Araç Nakliye Bilgileri -->
+            {% if delivery.delivery_type.name == 'ARAÇ' %}
+                <h5 class="section-title mb-3 mt-4 text-primary"><i class="fas fa-truck me-2"></i>Araç Nakliye Bilgileri</h5>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-user-tie text-primary me-2"></i>Şoför Adı / Soyadı</label>
+                            <div class="detail-value">{{ delivery.courier_name|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-id-card text-primary me-2"></i>Şoför T.C. Kimlik No</label>
+                            <div class="detail-value">{{ delivery.courier_id|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <!-- Şoför Numarası -->
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-phone text-primary me-2"></i>Şoför Numarası</label>
+                            <div class="detail-value">{{ delivery.courier_number|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <!-- Şoför Telefonu -->
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-phone text-primary me-2"></i>Şoför Telefonu</label>
+                            <div class="detail-value">{{ delivery.courier_phone|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-truck text-primary me-2"></i>Araç Türü</label>
+                            <div class="detail-value">{{ delivery.vehicle_type|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-car text-primary me-2"></i>Araç Plakası</label>
+                            <div class="detail-value">{{ delivery.vehicle_plate|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-comment text-primary me-2"></i>İzahat</label>
+                            <div class="detail-value">{{ delivery.explanation|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-weight text-primary me-2"></i>Tonajdan Sorumluyuz</label>
+                            <div class="detail-value">
+                                {% if delivery.tonage == True %}
+                                    <span class="badge bg-success">Evet</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Hayır</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-flask text-primary me-2"></i>Analizli S-420</label>
+                            <div class="detail-value">
+                                {% if delivery.analysed == True %}
+                                    <span class="badge bg-success">Evet</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Hayır</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Kargo Nakliye Bilgileri -->
+            {% if delivery.delivery_type.name == 'KARGO' %}
+                <h5 class="section-title mb-3 mt-4 text-primary"><i class="fas fa-shipping-fast me-2"></i>Kargo Nakliye Bilgileri</h5>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-barcode text-primary me-2"></i>Kargo Takip Numarası</label>
+                            <div class="detail-value">{{ delivery.tracking_number|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-building text-primary me-2"></i>Nakliye Firması</label>
+                            <div class="detail-value">{{ delivery.delivery_company.name|default:"-" }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Posta Nakliye Bilgileri -->
+            {% if delivery.delivery_type.name == 'POSTA' %}
+                <h5 class="section-title mb-3 mt-4 text-primary"><i class="fas fa-envelope me-2"></i>Posta Nakliye Bilgileri</h5>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-barcode text-primary me-2"></i>Posta Takip Numarası</label>
+                            <div class="detail-value">{{ delivery.tracking_number|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-building text-primary me-2"></i>Nakliye Firması</label>
+                            <div class="detail-value">{{ delivery.delivery_company.name|default:"-" }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Kurye Nakliye Bilgileri -->
+            {% if delivery.delivery_type.name == 'KURYE' %}
+                <h5 class="section-title mb-3 mt-4 text-primary"><i class="fas fa-motorcycle me-2"></i>Kurye Nakliye Bilgileri</h5>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-user text-primary me-2"></i>Kurye Adı</label>
+                            <div class="detail-value">{{ delivery.courier_name|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-id-card text-primary me-2"></i>T.C. Kimlik No</label>
+                            <div class="detail-value">{{ delivery.courier_id|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-hashtag text-primary me-2"></i>Kurye Numarası</label>
+                            <div class="detail-value">{{ delivery.courier_number|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-phone text-primary me-2"></i>Telefon</label>
+                            <div class="detail-value">{{ delivery.courier_phone|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-truck text-primary me-2"></i>Araç Türü</label>
+                            <div class="detail-value">{{ delivery.vehicle_type|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="detail-group">
+                            <label class="detail-label"><i class="fas fa-car text-primary me-2"></i>Araç Plakası</label>
+                            <div class="detail-value">{{ delivery.vehicle_plate|default:"-" }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Adres -->
+            <div class="row g-4 mt-3">
+                <div class="col-12">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-map-marker-alt text-primary me-2"></i>Adres</label>
+                        <div class="detail-value">{{ delivery.address|default:"-" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Not -->
+            <div class="row g-4 mt-3">
+                <div class="col-12">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-sticky-note text-primary me-2"></i>Not</label>
+                        <div class="detail-value">{{ delivery.description|default:"-" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted">
+                        <small>
+                            <i class="fas fa-info-circle me-1"></i>
+                            Son güncelleme: {{ delivery.updated_at|timesince }} önce
+                        </small>
+                    </div>
+                    <div class="noprint">
+                        <a href="{% url 'delete-delivery' delivery.pk %}" class="btn btn-outline-danger">
+                            <i class="fas fa-trash me-2"></i>Nakliyeyi Sil
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <td class="align-middle"> <a href="{% url 'delivery-bill' delivery.billno %}" class="btn btn-secondary btn-sm">Fiş Görüntüle</a> <a href="{% url 'delete-delivery' delivery.pk %}" class="btn btn-danger btn-sm">Fişi Sil</a> </td>
-    <a href="{% url 'edit-delivery' delivery.pk %}" class="btn btn-info" style="float: right;">Bilgileri Düzenle</a>
-    <div class="align-middle">
-        {% if bills.has_other_pages %}
-
-            {% if bills.has_previous %}
-                <a class="btn btn-outline-info mb-4" href="?page=1">İlk</a>
-                <a class="btn btn-outline-info mb-4" href="?page={{ bills.previous_page_number }}">Önceki</a>
-            {% endif %}
-
-            {% for num in bills.paginator.page_range %}
-                {% if bills.number == num %}
-                    <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
-                {% elif num > bills.number|add:'-3' and num < bills.number|add:'3' %}
-                    <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
-                {% endif %}
-            {% endfor %}
-
-            {% if bills.has_next %}
-                <a class="btn btn-outline-info mb-4" href="?page={{ bills.next_page_number }}">Sonraki</a>
-                <a class="btn btn-outline-info mb-4" href="?page={{ bills.paginator.num_pages }}">Son</a>
-            {% endif %}
-
-        {% endif %}
-    </div>
-
 </div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .detail-group {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+    .detail-label {
+        display: block;
+        color: #6c757d;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .detail-value {
+        color: #212529;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .border-top {
+        border-color: #e9ecef !important;
+    }
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.5em 0.75em;
+    }
+    @media (max-width: 768px) {
+        .detail-group {
+            padding: 1rem;
+        }
+        .detail-value {
+            font-size: 1rem;
+        }
+    }
+    @media print {
+        .noprint {
+            display: none !important;
+        }
+        .card {
+            box-shadow: none !important;
+            border: none !important;
+        }
+        .card-header {
+            background: none !important;
+            color: #000 !important;
+            padding: 0 !important;
+            margin-bottom: 2rem;
+        }
+        .detail-group {
+            background: none !important;
+            box-shadow: none !important;
+            padding: 0.5rem !important;
+            border: 1px solid #dee2e6;
+        }
+        .detail-label {
+            color: #000 !important;
+        }
+        .detail-value {
+            color: #000 !important;
+        }
+        .border-top {
+            border-color: #000 !important;
+        }
+        @page {
+            margin: 1cm;
+        }
+    }
+</style>
+
+<script>
+function printDetail() {
+    window.print();
+}
+
+// Tooltip'leri aktifleştir
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+</script>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
 
 {% endblock content %}

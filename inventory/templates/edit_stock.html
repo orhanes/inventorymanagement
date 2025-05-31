@@ -1,59 +1,718 @@
 {% extends "base.html" %}
+{% load static %}
 
 
 {% block title %} {{title}} {% endblock title %}
 
 
 {% block content %}
-
-    <div style="color:#575757; font-style: bold; font-size: 3rem; border-bottom: 1px solid white;">{{title}}</div> 
-    
-    <br>
-    
-    <form method="post">
-    
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-box-open me-2"></i>{{title}}</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate id="stockForm" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.non_field_errors }}
         
-        <div class="form-group">
-            {{ form.name.errors }}
-            <label for="{{ form.name.id_for_label }}">Ürün Adı: </label>
-            {{ form.name }}
-        </div>
-        <div class="form-group">
-            {{ form.category.errors }}
-            <label for="{{ form.name.id_for_label }}">Kategori: </label>
-            {{ form.category }}
-        </div>
-        <div class="form-group">
-            {{ form.unit.errors }}
-            <label for="{{ form.name.id_for_label }}">Birim: </label>
-            {{ form.unit }}
-        </div>
-        <div class="form-group ">
-            {{ form.quantity.errors }}
-            <label for="{{ form.quantity.id_for_label }}">Miktar:</label>
-            {{ form.quantity }}
-        </div>
-        <div class="form-group ">
-            {{ form.quantity_box.errors }}
-            <label for="{{ form.quantity.id_for_label }}">İç Toplam:</label>
-            {{ form.quantity_box }}
-        </div>
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="{{ form.image.id_for_label }}" class="form-label">
+                                Ürün Resmi <span class="text-muted">(Opsiyonel)</span>
+                            </label>
+                            <div class="image-upload-container">
+                                <div class="image-preview-container mb-3">
+                                    <img id="imagePreview" src="{% if stock.image %}{{ stock.image.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}" 
+                                         alt="Ürün Resmi" class="img-fluid rounded">
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-image"></i></span>
+                                    {{ form.image }}
+                                    <button class="btn btn-outline-secondary" type="button" id="clearImage">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted">
+                                    Maksimum dosya boyutu: 5MB. İzin verilen formatlar: JPG, JPEG, PNG
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.brand.errors }}
+                            <label for="{{ form.brand.id_for_label }}" class="form-label">Marka</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-trademark"></i></span>
+                                {{ form.brand }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.model.errors }}
+                            <label for="{{ form.model.id_for_label }}" class="form-label">Model</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-cube"></i></span>
+                                {{ form.model }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.name.errors }}
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                Ürün Adı <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group ">
+                                <span class="input-group-text"><i class="fas fa-box"></i></span>
+                                {{ form.name }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen ürün adını giriniz. Bu alan zorunludur.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.category.errors }}
+                            <label for="{{ form.category.id_for_label }}" class="form-label">
+                                Kategori <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-list"></i></span>
+                                {{ form.category }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen bir kategori seçiniz. Bu alan zorunludur.
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <br>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.subcategory.errors }}
+                            <label for="{{ form.subcategory.id_for_label }}" class="form-label">
+                                Alt Kategori
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-list-alt"></i></span>
+                                {{ form.subcategory }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen bir alt kategori seçiniz.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.color.errors }}
+                            <label for="{{ form.color.id_for_label }}" class="form-label">
+                                Renk
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-palette"></i></span>
+                                {{ form.color }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen bir renk giriniz.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.unit.errors }}
+                            <label for="{{ form.unit.id_for_label }}" class="form-label">
+                                Birim <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-ruler"></i></span>
+                                {{ form.unit }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen bir birim seçiniz. Bu alan zorunludur.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.quantity.errors }}
+                            <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                                Miktar <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                                {{ form.quantity }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen geçerli bir miktar giriniz. Sadece pozitif sayılar kabul edilir.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.serial_number.errors }}
+                            <label for="{{ form.serial_number.id_for_label }}" class="form-label">
+                                Seri Numarası
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                                {{ form.serial_number }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen geçerli bir seri numarası giriniz.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.barcode.errors }}
+                            <label for="{{ form.barcode.id_for_label }}" class="form-label">Barkod Numarası</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                                {{ form.barcode }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.purchase_price.errors }}
+                            <label for="{{ form.purchase_price.id_for_label }}" class="form-label">Alış Fiyatı</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-money-bill-wave"></i></span>
+                                {{ form.purchase_price }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.sale_price.errors }}
+                            <label for="{{ form.sale_price.id_for_label }}" class="form-label">Satış Fiyatı</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-money-check-alt"></i></span>
+                                {{ form.sale_price }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.expiry_date.errors }}
+                            <label for="{{ form.expiry_date.id_for_label }}" class="form-label">Son Kullanma Tarihi</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                {{ form.expiry_date }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.warranty_period.errors }}
+                            <label for="{{ form.warranty_period.id_for_label }}" class="form-label">Garanti Süresi</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-shield-alt"></i></span>
+                                {{ form.warranty_period }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.manufacturer.errors }}
+                            <label for="{{ form.manufacturer.id_for_label }}" class="form-label">Üretici</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-industry"></i></span>
+                                {{ form.manufacturer }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.supplier.errors }}
+                            <label for="{{ form.supplier.id_for_label }}" class="form-label">Tedarikçi</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-truck"></i></span>
+                                {{ form.supplier }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.min_stock_level.errors }}
+                            <label for="{{ form.min_stock_level.id_for_label }}" class="form-label">Minimum Stok Seviyesi</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-exclamation-triangle"></i></span>
+                                {{ form.min_stock_level }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.location.errors }}
+                            <label for="{{ form.location.id_for_label }}" class="form-label">Raf/Konum</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                {{ form.location }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row align-items-center" style="min-height: 90px;">
+                    <div class="col-md-8 mb-4">
+                        <div class="form-group">
+                            {{ form.description.errors }}
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Açıklama/Özellikler</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                                {{ form.description }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4 d-flex align-items-center justify-content-center" style="height: 100%;">
+                        <div class="form-group d-flex align-items-center mb-0" style="height: 100%;">
+                            <label for="{{ form.is_active.id_for_label }}" class="form-label me-3 mb-0 fs-5 fw-bold">Aktif</label>
+                            <div class="form-switch d-inline-flex align-items-center">
+                                <input type="checkbox" class="form-check-input" id="{{ form.is_active.id_for_label }}" name="is_active" {% if form.is_active.value %}checked{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="align-middle">
-            <button type="submit" class="btn btn-success">{{ savebtn }}</button>
-            {% if title == "Yeni Ürün" %}
-                <button type="reset" class="btn btn-danger" >Sıfırla</button>
-            {% endif %}
-            {% if delbtn %}
-                <a href="{% url 'delete-stock' object.pk %}" class="btn  btn-danger"> Sil </a>
-            {% endif %}
-            <a href="{% url 'inventory' %}" class="btn btn-secondary">Vazgeç</a>
+                <div class="d-flex justify-content-between mt-4">
+                    <div>
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="fas fa-save me-2"></i>{{ savebtn }}
+                        </button>
+                        {% if title == "Yeni Ürün" %}
+                        <button type="reset" class="btn btn-danger px-4">
+                            <i class="fas fa-undo me-2"></i>Sıfırla
+                        </button>
+                        {% endif %}
+                    </div>
+                <div>
+                        {% if delbtn %}
+                        <a href="{% url 'delete-stock' object.pk %}" class="btn btn-danger px-4">
+                            <i class="fas fa-trash me-2"></i>Sil
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'inventory' %}" class="btn btn-secondary px-4">
+                            <i class="fas fa-times me-2"></i>Vazgeç
+                        </a>
+                    </div>
+                </div>
+            </form>
         </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('stockForm');
+    const inputs = form.querySelectorAll('input, select');
+    
+    // Her input için validasyon kuralları
+    const validationRules = {
+        'id_name': {
+            required: true,
+            minLength: 2,
+            validate: (value) => value.trim().length >= 2
+        },
+        'id_category': {
+            required: true
+        },
+        'id_serial_number': {
+            required: false,
+            validate: (value) => value.trim().length === 0 || value.trim().length > 0
+        },
+        'id_color': {
+            required: false,
+            validate: (value) => value.trim().length === 0 || value.trim().length > 0
+        },
+        'id_quantity': {
+            required: true,
+            validate: (value) => !isNaN(value) && parseInt(value) > 0
+        },
+        'id_quantity_box': {
+            required: false,
+            validate: (value) => value.trim().length === 0 || (!isNaN(value) && parseInt(value) >= 0)
+        },
+        'id_unit': {
+            required: true
+        }
+    };
+
+    // Her input değiştiğinde validasyon
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            validateInput(this);
+        });
+
+        input.addEventListener('blur', function() {
+            validateInput(this);
+        });
+    });
+
+    // Input validasyon fonksiyonu
+    function validateInput(input) {
+        const rules = validationRules[input.id];
+        if (!rules) return;
+
+        const value = input.value;
+        let isValid = true;
         
-    </form>
+        if (rules.required && !value.trim()) {
+            isValid = false;
+        } else if (rules.validate && !rules.validate(value)) {
+            isValid = false;
+        }
 
+        if (!isValid) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+        } else {
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+        }
+    }
+
+    // Form gönderilmeden önce tüm validasyonları kontrol et
+    form.addEventListener('submit', function(event) {
+        let isValid = true;
+        
+        inputs.forEach(input => {
+            validateInput(input);
+            if (input.classList.contains('is-invalid')) {
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    });
+
+    const imageInput = document.getElementById('id_image');
+    const imagePreview = document.getElementById('imagePreview');
+    const clearButton = document.getElementById('clearImage');
+    const defaultImage = "{% static 'images/no-image.png' %}";
+
+    // Resim seçildiğinde önizleme
+    imageInput.addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    // Temizle butonu
+    clearButton.addEventListener('click', function() {
+        imageInput.value = '';
+        imagePreview.src = defaultImage;
+    });
+
+    // Sürükle-bırak desteği
+    const container = document.querySelector('.image-upload-container');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        container.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        container.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        container.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        container.classList.add('highlight');
+    }
+
+    function unhighlight(e) {
+        container.classList.remove('highlight');
+    }
+
+    container.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        imageInput.files = files;
+        
+        if (files && files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+            }
+            reader.readAsDataURL(files[0]);
+        }
+    }
+
+    const categorySelect = document.getElementById("id_category");
+    const subcategorySelect = document.getElementById("id_subcategory");
+
+    if (categorySelect && subcategorySelect) {
+        categorySelect.addEventListener("change", function() {
+            const categoryId = this.value;
+            fetch(`/inventory/ajax/load-subcategories/?category=${categoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    subcategorySelect.innerHTML = '<option value="">---------</option>';
+                    data.forEach(function(subcat) {
+                        subcategorySelect.innerHTML += `<option value="${subcat.id}">${subcat.name}</option>`;
+                    });
+                });
+        });
+    }
+
+    // Aktif switch label'ı dinamik olarak değişsin
+    const isActiveInput = document.getElementById('{{ form.is_active.id_for_label }}');
+    const isActiveLabel = document.getElementById('isActiveLabel');
+    if (isActiveInput && isActiveLabel) {
+        isActiveInput.addEventListener('change', function() {
+            isActiveLabel.textContent = this.checked ? 'Açık' : 'Kapalı';
+        });
+    }
+});
+</script>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+    .form-control:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    /* Select elementleri için özel stiller */
+    select.form-control {
+        width: 100% !important;
+        min-width: 200px;
+        height: calc(1.5em + 1.5rem) !important;
+        padding: 0.375rem 2.25rem 0.375rem 0.75rem !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23555' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        line-height: 1.5;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    /* Select için özel input-group stili */
+    .input-group select.form-control {
+        flex: 1 1 auto;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: 0;
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-right: none;
+        display: flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .input-group {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        flex-wrap: nowrap;
+    }
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    /* Form grupları için ek stil */
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    .form-group select {
+        max-width: none;
+    }
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .is-valid {
+        border-color: #198754 !important;
+    }
+    .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+        position: absolute;
+        bottom: -1.25rem;
+        left: 0;
+        padding-left: 0.5rem;
+    }
+    .is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    .form-control.is-invalid:focus,
+    .form-control.is-valid:focus {
+        box-shadow: none;
+    }
+    .input-group .form-control.is-invalid,
+    .input-group .form-control.is-valid {
+        z-index: 3;
+    }
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    .input-group {
+        margin-bottom: 0.5rem;
+    }
+    .image-upload-container {
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .image-upload-container:hover {
+        border-color: #2196F3;
+        background-color: #f8f9fa;
+    }
+
+    .image-preview-container {
+        max-width: 300px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .image-preview-container img {
+        max-height: 200px;
+        width: auto;
+        object-fit: contain;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    #clearImage {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    #clearImage:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .form-text {
+        margin-top: 10px;
+        font-size: 0.85rem;
+    }
+
+    /* Resim input'u için özel stil */
+    #id_image {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-right: none;
+    }
+
+    #id_image::-webkit-file-upload-button {
+        visibility: hidden;
+    }
+
+    #id_image::before {
+        content: 'Resim Seç';
+        display: inline-block;
+        background: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-radius: 3px;
+        padding: 5px 8px;
+        outline: none;
+        white-space: nowrap;
+        cursor: pointer;
+        font-weight: 400;
+        font-size: 0.875rem;
+        color: #495057;
+    }
+
+    .form-switch {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .form-switch .form-check-input {
+        width: 2.5em;
+        height: 1.3em;
+        border-radius: 2em;
+        background-color: #dee2e6;
+        border: 1px solid #ced4da;
+        transition: background 0.3s;
+    }
+    .form-switch .form-check-input:checked {
+        background-color: #2196F3;
+        border-color: #2196F3;
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
 {% endblock content %}

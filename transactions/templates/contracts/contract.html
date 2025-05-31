@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% load l10n %}
+
+{% block title %} {{ contract.number }} - Sözleşme Detayı {% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fas fa-file-contract me-2"></i>Sözleşme Detayı - ({{ contract.number }})
+            </h3>
+            <div>
+                <button onclick="printDetail()" class="btn btn-light me-2">
+                    <i class="fas fa-print me-2"></i>Yazdır
+                </button>
+                <a href="{% url 'edit-contract' contract.pk %}" class="btn btn-warning">
+                    <i class="fas fa-edit me-2"></i>Düzenle
+                </a>
+                <a href="{% url 'contract-list' %}" class="btn btn-secondary ms-2">
+                    <i class="fas fa-arrow-left me-2"></i>Geri Dön
+                </a>
+            </div>
+        </div>
+        <div class="card-body" id="printArea">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-hashtag text-primary me-2"></i>Sözleşme No</label>
+                        <div class="detail-value">{{ contract.number }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-calendar text-primary me-2"></i>Tarih</label>
+                        <div class="detail-value">{{ contract.date|date:'d.m.Y' }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-calendar-day text-primary me-2"></i>Başlangıç Tarihi</label>
+                        <div class="detail-value">{{ contract.start_date|date:'d.m.Y' }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group {% if days_left is not None and days_left < 10 and days_left >= 0 %}bg-danger text-white{% endif %}">
+                        <label class="detail-label"><i class="fas fa-calendar-check text-primary me-2"></i>Bitiş Tarihi</label>
+                        <div class="detail-value">
+                            {{ contract.end_date|date:'d.m.Y' }}
+                            {% if days_left is not None and days_left < 10 and days_left >= 0 %}
+                                <span class="ms-2 fw-bold">({{ days_left }} gün kaldı!)</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-building text-primary me-2"></i>Kurum/Firma</label>
+                        <div class="detail-value">
+                            {% if contract.company %}
+                                {{ contract.company.name }}
+                            {% else %}
+                                {{ contract.institution }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-sitemap text-primary me-2"></i>Departman</label>
+                        <div class="detail-value">{{ contract.department }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-user text-primary me-2"></i>Yetkili Kişi</label>
+                        <div class="detail-value">{{ contract.authorized_person }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-info-circle text-primary me-2"></i>Durum</label>
+                        <div class="detail-value">{{ contract.status }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-file-alt text-primary me-2"></i>Sözleşme Türü</label>
+                        <div class="detail-value">{{ contract.contract_type }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-list-ol text-primary me-2"></i>Ödeme Türü</label>
+                        <div class="detail-value">{{ contract.payment_type }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-sort-numeric-up text-primary me-2"></i>Taksit Sayısı</label>
+                        <div class="detail-value">{{ contract.installment_count }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label"><i class="fas fa-coins text-primary me-2"></i>Avans Tutarı</label>
+                        <div class="detail-value">{{ contract.advance_amount|floatformat:2 }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sözleşme Kalemleri Tablosu -->
+            <div class="mt-5">
+                <h5 class="mb-3 text-primary"><i class="fas fa-list-ul me-2"></i>Sözleşme Kalemleri</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-sm align-middle contract-items-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:4%; text-align:center;">#</th>
+                                <th style="width:36%; text-align:left;">Ürün Adı</th>
+                                <th style="width:10%; text-align:center;">Birim</th>
+                                <th style="width:10%; text-align:center;">Miktar</th>
+                                <th style="width:15%; text-align:right;">Birim Fiyat</th>
+                                <th style="width:10%; text-align:right;">KDV Oranı</th>
+                                <th style="width:15%; text-align:right;">Tutar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td class="text-center">{{ forloop.counter }}</td>
+                                <td class="text-start">
+                                    {% if item.custom_product_name %}
+                                        {{ item.custom_product_name }}
+                                    {% else %}
+                                        {{ item.product }}
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">{{ item.unit }}</td>
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-end">{{ item.unit_price|floatformat:2 }}{% if item.currency %} {{ item.currency.symbol }}{% endif %}</td>
+                                <td class="text-end">{% if item.tax_rate %}{{ item.tax_rate }}{% endif %}</td>
+                                <td class="text-end">{{ item.get_total|floatformat:2 }} {% if item.currency %}{{ item.currency.symbol }}{% endif %}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">Sözleşme kalemi bulunamadı.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr style="background:#f8f9fa; font-weight:bold;">
+                                <td colspan="6" class="text-end">Ara Toplam</td>
+                                <td class="text-end">
+                                    {{ contract.get_total|floatformat:2 }}
+                                    {% if items.first.currency %}{{ items.first.currency.symbol }}{% endif %}
+                                </td>
+                            </tr>
+                            <tr style="background:#f8f9fa; font-weight:bold;">
+                                <td colspan="6" class="text-end">KDV</td>
+                                <td class="text-end">
+                                    {{ contract.get_vat_amount|floatformat:2 }}
+                                    {% if items.first.currency %}{{ items.first.currency.symbol }}{% endif %}
+                                </td>
+                            </tr>
+                            <tr style="background:#e3f2fd; font-weight:bold;">
+                                <td colspan="6" class="text-end">Genel Toplam</td>
+                                <td class="text-end">
+                                    {{ contract.get_grand_total|floatformat:2 }}
+                                    {% if items.first.currency %}{{ items.first.currency.symbol }}{% endif %}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Taksitler veya Peşin Ödeme Bilgisi -->
+            {% if installments and installments|length > 0 %}
+            <div class="mt-5">
+                <h5 class="mb-3 text-primary"><i class="fas fa-table me-2"></i>Ödeme Planı (Taksitler)</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Taksit No</th>
+                                <th>Tutar (KDV Dahil)</th>
+                                <th>Taksit Tarihi</th>
+                                <th>Not</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for taksit in installments %}
+                            <tr>
+                                <td>{{ taksit.number }}</td>
+                                <td>{{ taksit.amount|floatformat:2 }}</td>
+                                <td>{{ taksit.date|date:'d.m.Y' }}</td>
+                                <td>{{ taksit.note|default:'-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% elif contract.payment_type and contract.payment_type.name and contract.payment_type.name|lower|slice:":5" == "peşin" %}
+            <div class="mt-5">
+                <h5 class="mb-3 text-primary"><i class="fas fa-coins me-2"></i>Peşin Ödeme Tutarı (KDV Dahil)</h5>
+                <div class="detail-group">
+                    <span class="detail-value">
+                        {{ contract.get_grand_total|floatformat:2 }}
+                        {% if items.first.currency %}{{ items.first.currency.symbol }}{% endif %}
+                    </span>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Sözleşme Açıklama ve Maddeleri -->
+            <div class="col-12">
+                <div class="detail-group">
+                    <label class="detail-label"><i class="fas fa-align-left text-primary me-2"></i>Sözleşme Açıklama ve Maddeleri</label>
+                    <div class="detail-value">{{ description|linebreaksbr }}</div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted">
+                        <small>
+                            <i class="fas fa-info-circle me-1"></i>
+                            Son güncelleme: {{ contract.updated_at|timesince }} önce
+                        </small>
+                    </div>
+                    <div class="noprint">
+                        <!--
+                        <a href="{% url 'delete-contract' contract.pk %}" class="btn btn-outline-danger">
+                            <i class="fas fa-trash me-2"></i>Sözleşmeyi Sil
+                        </a>
+                        -->
+                        <a href="{% url 'delete-contract' contract.pk %}" class="btn btn-outline-danger">
+                            <i class="fas fa-ban me-2"></i>Sözleşmeyi İptal Et
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .detail-group {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+    .detail-label {
+        display: block;
+        color: #6c757d;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .detail-value {
+        color: #212529;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .border-top {
+        border-color: #e9ecef !important;
+    }
+    @media (max-width: 768px) {
+        .detail-group {
+            padding: 1rem;
+        }
+        .detail-value {
+            font-size: 1rem;
+        }
+    }
+    @media print {
+        .noprint {
+            display: none !important;
+        }
+        .card {
+            box-shadow: none !important;
+            border: none !important;
+        }
+        .card-header {
+            background: none !important;
+            color: #000 !important;
+            padding: 0 !important;
+            margin-bottom: 2rem;
+        }
+        .detail-group {
+            background: none !important;
+            box-shadow: none !important;
+            padding: 0.5rem !important;
+            border: 1px solid #dee2e6;
+        }
+        .detail-label {
+            color: #000 !important;
+        }
+        .detail-value {
+            color: #000 !important;
+        }
+        .border-top {
+            border-color: #000 !important;
+        }
+        @page {
+            margin: 1cm;
+        }
+    }
+    .bg-danger {
+        background: #dc3545 !important;
+        color: #fff !important;
+    }
+    .bg-danger .detail-label,
+    .bg-danger .detail-value {
+        color: #fff !important;
+    }
+    /* Sözleşme kalemleri tablosu için özel stil */
+    .contract-items-table thead tr {
+        background: #f8f9fa !important;
+    }
+    .contract-items-table tbody tr {
+        background: #fff !important;
+    }
+</style>
+
+<script>
+function printDetail() {
+    window.print();
+}
+  </script>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+{% endblock content %}

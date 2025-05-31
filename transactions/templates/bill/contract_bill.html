@@ -1,0 +1,341 @@
+{% extends bill_base %}
+{% load static %}
+{% load l10n %}
+
+{% block title %} Sözleşme Formu - {{ bill.number }} {% endblock title %}
+
+{% block content %}
+<style>
+.table-bordered, .table-bordered th, .table-bordered td {
+    border-color: #222 !important;
+}
+@media print {
+  body, html {
+    background: white !important;
+  }
+  .contract-page-break {
+    page-break-before: always;
+  }
+}
+</style>
+<div class="alert alert-info noprint" style="max-width:900px; margin:auto;">
+  <b>Yazdırırken:</b> Tarayıcı yazdırma ekranında "Başlıklar ve altbilgiler" seçeneğini kapatın. PDF'e çevirirken de bu ayarı kullanabilirsiniz.
+</div>
+<br>
+<div class="bg">
+    <div id="printArea" class="bg">
+<div class="container" style="max-width:900px; margin:auto; background:white; padding:32px 32px 16px 32px; border:1px solid #222;">
+    <table style="width:100%; margin-bottom:8px; border:none;">
+        <tr>
+            <td style="width:25%; vertical-align:middle; border:none;">
+                <img src="{{ common.company.logo.url }}" alt="Firma Logo" style="height:60px; object-fit:contain;">
+            </td>
+            <td style="width:50%; text-align:center; vertical-align:middle; border:none;">
+                <h3 style="margin:0; color:black; font-weight:bold; letter-spacing:2px;">SÖZLEŞME</h3>
+            </td>
+            <td style="width:25%; text-align:right; vertical-align:middle; border:none; font-size:1rem;">
+                <table style="width:auto; float:right; border:none;">
+                    <tr>
+                        <td style="text-align:left; border:none;"><b>NO</b></td>
+                        <td style="width:10px; text-align:center; border:none;">:</td>
+                        <td style="text-align:left; border:none;">{{ bill.number }}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left; border:none;"><b>SAYFA</b></td>
+                        <td style="width:10px; text-align:center; border:none;">:</td>
+                        <td style="text-align:left; border:none;">1/2</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left; border:none;"><b>TARİH</b></td>
+                        <td style="width:10px; text-align:center; border:none;">:</td>
+                        <td style="text-align:left; border:none;">{{ bill.date|date:'d.m.Y' }}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <hr style="border:0; border-top:2px solid #111; margin:12px 0 12px 0;">
+    <table style="width:100%; margin-bottom:8px; font-size:0.97rem;">
+        <tr>
+            <td style="font-weight:bold; width:220px; padding:2px 0;">KURUM/KURULUŞ ADI</td>
+            <td style="width:10px; text-align:center;">:</td>
+            <td style="padding:2px 0;">{{ bill.institution }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight:bold; padding:2px 0;">YETKİLİ ADI/SOYADI</td>
+            <td style="text-align:center;">:</td>
+            <td style="padding:2px 0;">{{ bill.authorized_person }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight:bold; padding:2px 0;">TELEFON</td>
+            <td style="text-align:center;">:</td>
+            <td style="padding:2px 0;">
+                {{ bill.institution.phone|default:"-" }}
+                <span style="font-weight:bold; margin-left:32px;">FAKS :</span>
+                {{ bill.institution.fax|default:"-" }}
+                <span style="font-weight:bold; margin-left:32px;">EMAIL :</span>
+                {{ bill.institution.email|default:"-" }}
+            </td>
+        </tr>
+        <tr>
+            <td style="font-weight:bold; padding:2px 0;">SÖZLEŞME TÜRÜ</td>
+            <td style="text-align:center;">:</td>
+            <td style="padding:2px 0;">{{ bill.contract_type }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight:bold; padding:2px 0;">SÖZLEŞME BAŞLAMA TARİHİ</td>
+            <td style="text-align:center;">:</td>
+            <td style="padding:2px 0;">
+                {{ bill.start_date|date:'d.m.Y' }}
+                <span style="font-weight:bold; margin-left:48px;">SÖZLEŞME BİTİŞ TARİHİ :</span>
+                {{ bill.end_date|date:'d.m.Y' }}
+            </td>
+        </tr>
+    </table>
+    <br>
+    <div class="row mt-2 mb-2">
+        <div class="col-12">
+            <table class="table table-bordered" style="width:100%;">
+                <thead class="table-light">
+                    <tr style="text-align:center;">
+                        <th style="width:32%;">ÜRÜN ADI</th>
+                        <th style="width:12%;">BİRİM</th>
+                        <th style="width:10%;">MİKTAR</th>
+                        <th style="width:10%;">BİRİM FİYAT</th>
+                        <th style="width:10%;">KDV</th>
+                        <th style="width:10%;">TUTAR</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in bill.items.all %}
+                    <tr style="text-align:center;">
+                        <td class="text-start">{{ item.product|default:item.custom_product_name }}</td>
+                        <td>{{ item.unit }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.unit_price|floatformat:2 }} {% if item.currency %}{{ item.currency.symbol }}{% endif %}</td>
+                        <td>{% if item.tax_rate %}{{ item.tax_rate }}{% endif %}</td>
+                        <td>{{ item.get_total|floatformat:2 }} {% if item.currency %}{{ item.currency.symbol }}{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                    {% for i in "1234567890"|make_list %}{% if forloop.counter > bill.items.count %}<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>{% endif %}{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <table class="table table-bordered" style="width:100%; margin-bottom:8px;">
+        <tr>
+            <td style="width:60%;">TOPLAM SÖZLEŞME TUTARI</td>
+            <td style="width:40%; text-align:right;">{{ bill.get_total|floatformat:2 }} {% if bill.items.first.currency %}{{ bill.items.first.currency.symbol }}{% endif %}</td>
+        </tr>
+        <tr>
+            <td>KDV</td>
+            <td style="text-align:right;">{{ bill.get_vat_amount|floatformat:2 }} {% if bill.items.first.currency %}{{ bill.items.first.currency.symbol }}{% endif %}</td>
+        </tr>
+        <tr>
+            <td>GENEL TOPLAM</td>
+            <td style="text-align:right; font-weight:bold;">{{ bill.get_grand_total|floatformat:2 }} {% if bill.items.first.currency %}{{ bill.items.first.currency.symbol }}{% endif %}</td>
+        </tr>
+    </table>
+    <br>
+    <div style="font-weight:bold; margin-top:8px;">ÖDEME PLANI</div>
+    <br>
+    <div style="margin-bottom:4px;">
+        <b>Ödeme Türü:</b> {{ bill.payment_type.name|default:"-" }}
+        {% if bill.payment_type and bill.payment_type.name and bill.payment_type.name|lower|slice:"0:7" == "taksitl" %}
+            &nbsp;|&nbsp; <b>Taksit Sayısı:</b> {{ bill.installment_count|default:bill.installments.all|length }}
+        {% endif %}
+    </div>
+    {% if bill.advance_amount %}
+        <div style="margin-bottom:4px;">
+            <b>Avans Tutarı:</b> {{ bill.advance_amount|floatformat:2 }} {% if bill.items.first.currency %}{{ bill.items.first.currency.symbol }}{% endif %}
+            {% if bill.advance_date %} &nbsp;|&nbsp; <b>Avans Ödeme Tarihi:</b> {{ bill.advance_date|date:'d.m.Y' }}{% endif %}
+        </div>
+    {% endif %}
+    <table class="table table-bordered" style="width:100%; margin-bottom:8px;">
+        <thead>
+            <tr style="text-align:center;">
+                <th style="width:10%;">TAKSİT NO</th>
+                <th style="width:30%;">TUTARI (KDV Dahil)</th>
+                <th style="width:30%;">TARİH</th>
+                <th style="width:30%;">NOT</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if bill.payment_type and bill.payment_type.name|lower|slice:"0:5" == "peşin" %}
+                <tr style="text-align:center;">
+                    <td>1</td>
+                    <td>{{ bill.get_grand_total|floatformat:2 }} {% if bill.items.first.currency %}{{ bill.items.first.currency.symbol }}{% endif %}</td>
+                    <td>{{ bill.date|date:'d.m.Y' }}</td>
+                    <td>Peşin ödeme</td>
+                </tr>
+                {% for i in "12345"|make_list %}<tr><td>&nbsp;</td><td></td><td></td><td></td></tr>{% endfor %}
+            {% elif bill.installments.all and bill.installments.all|length > 0 %}
+                {% for installment in bill.installments.all %}
+                <tr style="text-align:center;">
+                    <td>{{ installment.number }}</td>
+                    <td>{{ installment.amount|floatformat:2 }}</td>
+                    <td>{{ installment.date|date:'d.m.Y' }}</td>
+                    <td>{{ installment.note|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+                {% for i in "123456"|make_list %}{% if forloop.counter > bill.installments.count %}<tr><td>&nbsp;</td><td></td><td></td><td></td></tr>{% endif %}{% endfor %}
+            {% else %}
+                {% for i in "123456"|make_list %}<tr><td>&nbsp;</td><td></td><td></td><td></td></tr>{% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+    <hr style="border:0; border-top:2px solid #111; margin:12px 0 12px 0;">
+    <div class="container" style="max-width:900px; margin:auto; background:white; padding:0; border:none;">
+        <table style="width:100%; margin-top:32px;">
+            <tr>
+                <td style="width:50%; vertical-align:top; padding:16px 0;">
+                    <div style="font-weight:bold; font-size:1.1rem; letter-spacing:1px; margin-bottom:12px; text-align:center;">
+                        {{ bill.institution|default:"KURUM/KURULUŞ" }} ADINA:
+                    </div>
+                    <table style="width:100%; font-size:0.97rem;">
+                        <tr>
+                            <td style="font-weight:bold; text-align:left; width:100px;">ÜNVAN</td>
+                            <td style="width:18px; text-align:center;">:</td>
+                            <td style="text-align:left;">{{ bill.authorized_person }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:bold; text-align:left;">KAŞE/İMZA</td>
+                            <td style="width:18px; text-align:center;">:</td>
+                            <td style="text-align:left; height:90px;">&nbsp;</td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width:50%; vertical-align:top; padding:16px 0;">
+                    <div style="font-weight:bold; font-size:1.1rem; letter-spacing:1px; margin-bottom:12px; text-align:center;">
+                        {{ common.company.name|default:'FİRMA' }} ADINA:
+                    </div>
+                    <table style="width:100%; font-size:0.97rem;">
+                        <tr>
+                            <td style="font-weight:bold; text-align:left; width:100px;">ÜNVAN</td>
+                            <td style="width:18px; text-align:center;">:</td>
+                            <td style="text-align:left;">...............................................................</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:bold; text-align:left;">KAŞE/İMZA</td>
+                            <td style="width:18px; text-align:center;">:</td>
+                            <td style="text-align:left; height:90px;">&nbsp;</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        <div style="font-size:0.60rem; color:#888; text-align:left; margin-top:2px; opacity:0.8;">
+            FORM NO: F033 &nbsp; SAYFA NO: 1 / 2 &nbsp; REV: 3 &nbsp; YÜRÜRLÜK TARİHİ: 16 / 05 / 2018
+        </div>
+    </div>
+</div>
+
+
+<!-- 2. Sayfa: Açıklama ve Genel Şartlar -->
+<div class="container contract-page-break" style="max-width:900px; margin:auto; background:white; padding:32px 32px 16px 32px; border:1px solid #222; margin-top:32px;">
+    <table style="width:100%; margin-bottom:8px; border:none;">
+        <tr>
+            <td style="width:25%; vertical-align:middle; border:none;">
+                <img src="{{ common.company.logo.url }}" alt="Firma Logo" style="height:60px; object-fit:contain;">
+            </td>
+            <td style="width:50%; text-align:center; vertical-align:middle; border:none;">
+                <h3 style="margin:0; color:black; font-weight:bold; letter-spacing:2px;">SÖZLEŞME</h3>
+            </td>
+            <td style="width:25%; text-align:right; vertical-align:middle; border:none; font-size:1rem;">
+                <table style="width:auto; float:right; border:none;">
+                    <tr>
+                        <td style="text-align:left; border:none;"><b>NO</b></td>
+                        <td style="width:10px; text-align:center; border:none;">:</td>
+                        <td style="text-align:left; border:none;">{{ bill.number }}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left; border:none;"><b>SAYFA</b></td>
+                        <td style="width:10px; text-align:center; border:none;">:</td>
+                        <td style="text-align:left; border:none;">2/2</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left; border:none;"><b>TARİH</b></td>
+                        <td style="width:10px; text-align:center; border:none;">:</td>
+                        <td style="text-align:left; border:none;">{{ bill.date|date:'d.m.Y' }}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <hr style="border:0; border-top:2px solid #111; margin:12px 0 12px 0;">
+    <div style="margin-bottom:16px; font-size:1.05rem;">
+        {{ bill.description|linebreaksbr }}
+    </div>
+    <hr style="border:0; border-top:2px solid #111; margin:12px 0 12px 0;">
+    <div class="container" style="max-width:900px; margin:auto; background:white; padding:0; border:none;">
+    <table style="width:100%; margin-top:32px;">
+        <tr>
+            <td style="width:50%; vertical-align:top; padding:16px 0;">
+                <div style="font-weight:bold; font-size:1.1rem; letter-spacing:1px; margin-bottom:12px; text-align:center;">
+                    {{ bill.institution|default:"KURUM/KURULUŞ" }} ADINA:
+                </div>
+                <table style="width:100%; font-size:0.97rem;">
+                    <tr>
+                        <td style="font-weight:bold; text-align:left; width:100px;">ÜNVAN</td>
+                        <td style="width:18px; text-align:center;">:</td>
+                        <td style="text-align:left;">{{ bill.authorized_person }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold; text-align:left;">KAŞE/İMZA</td>
+                        <td style="width:18px; text-align:center;">:</td>
+                        <td style="text-align:left; height:90px;">&nbsp;</td>
+                    </tr>
+                </table>
+            </td>
+            <td style="width:50%; vertical-align:top; padding:16px 0;">
+                <div style="font-weight:bold; font-size:1.1rem; letter-spacing:1px; margin-bottom:12px; text-align:center;">
+                    {{ common.company.name|default:'FİRMA' }} ADINA:
+                </div>
+                <table style="width:100%; font-size:0.97rem;">
+                    <tr>
+                        <td style="font-weight:bold; text-align:left; width:100px;">ÜNVAN</td>
+                        <td style="width:18px; text-align:center;">:</td>
+                        <td style="text-align:left;">...............................................................</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold; text-align:left;">KAŞE/İMZA</td>
+                        <td style="width:18px; text-align:center;">:</td>
+                        <td style="text-align:left; height:90px;">&nbsp;</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <div style="font-size:0.60rem; color:#888; text-align:left; margin-top:2px; opacity:0.8;">
+        FORM NO: F033 &nbsp; SAYFA NO: 1 / 2 &nbsp; REV: 3 &nbsp; YÜRÜRLÜK TARİHİ: 16 / 05 / 2018
+    </div>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+<div class="d-flex justify-content-center mt-4 noprint">
+    <div class="mx-3">
+        <button class="btn btn-primary px-4" onclick="printpage('printArea')">
+            <i class="fas fa-print me-2"></i>Yazdır
+        </button>
+    </div>
+    <div class="mx-3">
+        <a href="{% url 'contract-list' %}" class="btn btn-secondary px-4">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+</div>
+<script>
+    function printpage(divName) {
+        var printContents = document.getElementById(divName) ? document.getElementById(divName).innerHTML : document.body.innerHTML;
+        var originalContents = document.body.innerHTML;
+        document.body.innerHTML = printContents;
+        window.print();
+        document.body.innerHTML = originalContents;
+    }
+</script>
+{% endblock %}

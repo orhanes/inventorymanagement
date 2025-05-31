@@ -1,0 +1,148 @@
+{% load static %}
+
+{% load crispy_forms_tags %}
+
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    <style>
+        body {
+            background-image: url('/static/images/login_photo.jpeg');
+            /* Specify background image size and other properties as needed */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            /* Optionally, you can add a background color in case the image is not loaded or transparent */
+            background-color: #f8f9fa; /* Example color */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logout-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+        }
+        .logout-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        .logout-card:hover {
+            transform: translateY(-5px);
+        }
+        .logout-header {
+            background: rgba(33, 150, 243, 0.85);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 12px 12px 0 0;
+        }
+        .logout-header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .logout-body {
+            padding: 30px;
+            text-align: center;
+        }
+        .app-title {
+            color: white;
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            background: rgba(33, 150, 243, 0.7);
+            border-radius: 12px;
+            padding: 10px 30px;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .app-title i, .logout-header i {
+            margin-right: 0.5rem !important;
+        }
+        .btn-logout {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 30px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            background: linear-gradient(45deg, #1976D2, #2196F3);
+            color: white;
+        }
+        .about-link {
+            margin-top: 20px;
+            display: block;
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .about-link:hover {
+            color: #1976D2;
+            text-decoration: underline;
+        }
+    </style>
+    
+    <title>Stok Yönetimi | Çıkış</title>
+
+</head>
+
+<body>
+
+    <div class="logout-container">
+        <div class="w-100 d-flex justify-content-center">
+            <div class="app-title animate__animated animate__fadeInDown">
+                <i class="fas fa-boxes"></i>Stok Yönetim Programı
+            </div>
+        </div>
+        <div class="logout-card animate__animated animate__fadeIn">
+            <div class="logout-header">
+                <h1><i class="fas fa-sign-out-alt"></i>Çıkış Yaptınız</h1>
+            </div>
+            <div class="logout-body">
+                <h4>Stok Yönetimi'ni kullandığınız için teşekkürler...</h4>
+                <a href="{% url 'login' %}" class="btn btn-logout mt-4">
+                    <i class="fas fa-sign-in-alt me-2"></i>Tekrar Giriş Yapın
+                </a>
+                <!--
+                <a href="{% url 'about' %}" class="about-link">Hakkında</a>
+                -->
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

@@ -5,44 +5,212 @@
 
 
 {% block content %}
-    
-    {% if not user.is_authenticated  %}
-        <br>
-        <a href="{% url 'home' %}" class="btn btn-secondary">Geri Dön</a>
-    {% endif %}    
-    
-    <div class="align-middle" style="color: #4caf50; font-style: bold; font-size: 3rem;">Stok Yönetimi</div>
-    <div class="align-middle" style="color: rgb(73, 73, 73)">Bir Stok Yönetimi Programı</div>
-    <br><br>
+<div class="container mt-4">
+    {% if not user.is_authenticated %}
+        <a href="{% url 'home' %}" class="btn btn-secondary mb-4">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    {% endif %}
 
-    <div class="align-middle"> 
-        <h2 style="color:#4caf50">| Hakkında |</h3> <br>
-            <p>
-                Stok Yönetimi, bir şirketin gereksinimlerine göre oluşturulmuş basit bir envanter yönetimi yazılımıdır.
-                Yazılım, dinamik olarak oluşturulmuş bir fatura ile gelen ve giden stokları takip edebilme yeteneğine sahiptir.
-                Her tedarikçiye şirketle yaptığı işlemlerin geçmişini görebileceği bir profil sunulur.
-            </p>
-        <br>
+    <div class="card shadow animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-success text-white">
+            <h3 class="mb-0"><i class="fas fa-info-circle me-2"></i>Hakkında</h3>
+        </div>
+        <div class="card-body">
+            <div class="text-center mb-4">
+                <i class="fas fa-boxes text-success" style="font-size: 4rem;"></i>
+                <h1 class="mt-3 text-success">Stok Yönetimi</h1>
+                <p class="lead text-muted">Modern ve Kullanıcı Dostu Stok Yönetim Sistemi</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h4 class="mb-0"><i class="fas fa-info-circle me-2 text-success"></i><span class="text-success">Genel Bilgi</span></h4>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                Stok Yönetimi, şirketlerin ihtiyaçlarına özel olarak geliştirilmiş modern bir envanter yönetim sistemidir.
+                                Sistem, dinamik fatura oluşturma özelliği ile giriş-çıkış stok takibi yapabilme yeteneğine sahiptir.
+                                Tedarikçiler ve müşteriler için özel profiller sunarak işlem geçmişlerini kolayca takip etme imkanı sağlar.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h4 class="mb-0"><i class="fas fa-star me-2 text-success"></i><span class="text-success">Özellikler</span></h4>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <i class="fas fa-chart-line text-success me-2"></i>İnteraktif Stok Grafikleri
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-box text-success me-2"></i>Detaylı Stok Takibi
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-shopping-cart text-success me-2"></i>Satın Alma Yönetimi
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-store text-success me-2"></i>Satış Yönetimi
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-history text-success me-2"></i>İşlem Geçmişi Kaydı
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-file-invoice text-success me-2"></i>Dinamik Form Oluşturma
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-truck text-success me-2"></i>Nakliye Yönetimi
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-receipt text-success me-2"></i>Tahsilat Makbuzu Yönetimi
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-envelope text-success me-2"></i>Mail Order Yönetimi
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0"><i class="fas fa-code-branch me-2 text-success"></i><span class="text-success">Güncellemeler</span></h4>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h5 class="mb-1 text-success">v1.0.0.1 - Başlangıç Sürümü</h5>
+                                <p class="text-muted mb-1">15 Mart 2024</p>
+                                <p>Temel stok yönetimi özellikleri eklendi.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h5 class="mb-1 text-success">v1.0.0.2 - Tedarikçi Modülü</h5>
+                                <p class="text-muted mb-1">20 Mart 2024</p>
+                                <p>Tedarikçi yönetimi ve profil sistemi eklendi.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h5 class="mb-1 text-success">v1.0.0.3 - Müşteri Modülü</h5>
+                                <p class="text-muted mb-1">25 Mart 2024</p>
+                                <p>Müşteri yönetimi ve satış takip sistemi eklendi.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h5 class="mb-1 text-success">v1.0.0.4 - Nakliye Modülü</h5>
+                                <p class="text-muted mb-1">30 Mart 2024</p>
+                                <p>Nakliye takip ve yönetim sistemi eklendi.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h5 class="mb-1 text-success">v1.0.0.5 - Tahsilat ve Mail Order</h5>
+                                <p class="text-muted mb-1">5 Nisan 2024</p>
+                                <p>Tahsilat makbuzu ve mail order yönetim sistemleri eklendi.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0"><i class="fas fa-code me-2 text-success"></i><span class="text-success">Geliştirici</span></h4>
+                </div>
+                <div class="card-body text-center">
+                    <i class="fas fa-user-circle text-success" style="font-size: 3rem;"></i>
+                    <h4 class="mt-3 text-success">Orhan Eş</h4>
+                    <p class="text-muted">Full Stack Developer</p>
+                </div>
+            </div>
+        </div>
     </div>
-        <h2 style="color:#4caf50" class="align-middle">| Özellikler |</h3> <br>
-            <ul style="display:table; margin:0 auto; ">                
-                <li style="color:#494949;">Mevcut uygun stoğu görüntülemek için İnteraktif Grafik</li>
-                <li style="color:#494949;">Mevcut uygun stok gibi stok ayrıntıları korunur</li>
-                <li style="color:#494949;">Gelen işlemler satın alma yoluyla yapılır</li>
-                <li style="color:#494949;">Giden işlemler satış yoluyla yapılır</li>
-                <li style="color:#494949;">Yazılım üzerinden gerçekleştirilen her işlem kayıt altına alınmaktadır</li>
-                <li style="color:#494949;">Fatura dinamik olarak işlenir ve yazdırılabilir</li>
-                <li style="color:#494949;">Tedarikçiler için ayrı profiller tutulur</li>
-                <li style="color:#494949;">Müştriler için ayrı profiller tutulur</li>
-                <li style="color:#494949;">Nakliyeler için ayrı profiller tutulur</li>
-                <li style="color:#494949;">Tahsilat Makbuzları için ayrı profiller tutulur</li>
-                <li style="color:#494949;">Mail Order için ayrı profiller tutulur</li>
-            </ul>  
-        <br>
-    <div class="align-middle">
-        <h2 style="color:#4caf50" >| Geliştirici |</h3> <br>
-            <p>Orhan Eş</p>
-            <br><br><br>
-    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    .bg-gradient-success {
+        background: linear-gradient(45deg, #4caf50, #388E3C);
+    }
+    .list-group-item {
+        border: none;
+        padding: 0.75rem 1.25rem;
+    }
+    .list-group-item:hover {
+        background-color: rgba(76, 175, 80, 0.05);
+    }
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+    .timeline-item {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    .timeline-marker {
+        position: absolute;
+        left: -1rem;
+        top: 0.5rem;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+    }
+    .timeline-content {
+        position: relative;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    .timeline-content::before {
+        content: '';
+        position: absolute;
+        left: -2rem;
+        top: 0.5rem;
+        width: 2rem;
+        height: 2px;
+        background: #4caf50;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
 
 {% endblock content %}

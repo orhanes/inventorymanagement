@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% load l10n %}
+{% block title %} Satış Düzenle {% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-edit me-2"></i>Satış Düzenle</h3>
+        </div>
+        <div class="card-body">
+            <!-- Müşteri Bilgileri Kartı -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0 text-primary"><i class="fas fa-user me-2"></i>Müşteri Bilgileri</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Müşteri Adı</label>
+                            <input type="text" class="form-control" value="{{ buyer.name }}" disabled>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Müşteri Adresi</label>
+                            <input type="text" class="form-control" value="{{ buyer.address }}, {{ buyer.county }}, {{ buyer.city }}, {{ buyer.country }}" disabled>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Telefon</label>
+                            <input type="text" class="form-control" value="{{ buyer.phone }}" disabled>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">İlgili Kişi</label>
+                            <input type="text" class="form-control" value="{{ buyer.representative }}" disabled>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Vergi Dairesi</label>
+                            <input type="text" class="form-control" value="{{ buyer.tax_administration }}" disabled>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Vergi Kimlik No</label>
+                            <input type="text" class="form-control" value="{{ buyer.tax_id|unlocalize }}" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ürün Bilgileri Formu -->
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                {{ formset.management_form }}
+
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0 text-primary"><i class="fas fa-box me-2 text-primary"></i>Ürün Bilgileri</h5>
+                    </div>
+                    <div class="card-body" id="stockitem">
+                        {% for form in formset %}
+                        <div class="form-row border-bottom pb-3 mb-3">
+                            <div class="row align-items-end">
+                                <div class="col-md-3 mb-2">
+                                    <label class="form-label small mb-1">Ürün Adı</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text"><i class="fas fa-box"></i></span>
+                                        {{ form.stock }}
+                                    </div>
+                                    <div class="invalid-feedback">{{ form.stock.errors|first }}</div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label small mb-1">Birim Fiyat</label>
+                                    <div class="input-group input-group-sm">
+                                        {{ form.perprice }}
+                                        <span class="input-group-text"><i class="fas fa-turkish-lira-sign"></i></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label small mb-1">Miktar</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                                        {{ form.quantity }}
+                                    </div>
+                                    <div class="invalid-feedback">{{ form.quantity.errors|first }}</div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label small mb-1">Toplam</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text"><i class="fas fa-calculator"></i></span>
+                                        <input type="text" class="form-control totalprice" value="1" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small mb-1">Vergi</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text"><i class="fas fa-percent"></i></span>
+                                        {{ form.tax_rate }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if forloop.first %}
+                            <div class="row mt-2">
+                                <div class="col-md-3 mb-2">
+                                    <label class="form-label small mb-1">İrsaliye No</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text"><i class="fas fa-file-alt"></i></span>
+                                        {{form.waybill_no}}
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label class="form-label small mb-1">İrsaliye Tarihi</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                        {{ form.waybill_date }}
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label class="form-label small mb-1">Vade Tarihi</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                        {{ form.due_date }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="row mt-2">
+                                <div class="col-md-3 mb-2 d-flex align-items-end">
+                                    <button class="btn btn-sm btn-danger remove-form-row w-100">
+                                        <i class="fas fa-trash me-2"></i>Kaydı Sil
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <div class="text-end mb-3">
+                            <a href="#" class="btn btn-primary add-form-row">
+                                <i class="fas fa-plus me-2"></i>Daha Fazla Ürün Ekle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-2 mt-4">
+                    <button type="submit" class="btn btn-success px-4">
+                        <i class="fas fa-save me-2"></i>Kaydet
+                    </button>
+                    <a href="{% url 'sale-bill' bill.billno %}" class="btn btn-warning px-4">
+                        <i class="fas fa-arrow-left me-2"></i>Geri Dön
+                    </a>
+                    <a href="{% url 'sales-list' %}" class="btn btn-secondary px-4">
+                        <i class="fas fa-times me-2"></i>Vazgeç
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+    .form-control:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    .form-control:disabled {
+        background-color: #f8f9fa;
+        cursor: not-allowed;
+    }
+    select.form-control {
+        width: 100% !important;
+        min-width: 200px;
+        height: calc(1.5em + 1.5rem) !important;
+        padding: 0.375rem 2.25rem 0.375rem 0.75rem !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23555' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-right: none;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .form-row {
+        position: relative;
+    }
+    .form-row:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: rgba(0,0,0,0.1);
+    }
+    .invalid-feedback {
+        display: none;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+    .is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    .input-group-sm > .form-control,
+    .input-group-sm > .input-group-text {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.875rem;
+        height: 31px;
+        line-height: 1;
+    }
+    
+    .input-group-text {
+        display: flex;
+        align-items: center;
+        height: 31px;
+        padding: 0.4rem 0.7rem;
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-right: none;
+        border-radius: 0.25rem 0 0 0.25rem;
+    }
+
+    .input-group select.form-control {
+        height: 31px !important;
+    }
+
+    .input-group > .form-control {
+        height: 31px;
+    }
+
+    .input-group {
+        position: relative;
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .input-group > .form-control {
+        position: relative;
+        flex: 1 1 auto;
+        width: 1%;
+        min-width: 0;
+    }
+
+    .input-group select.form-control {
+        padding-right: 2rem;
+    }
+
+    .form-row {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-row:hover {
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+{% endblock %}
+
+<!-- Custom JS -->
+<script type="text/javascript" src="{% static 'js/jquery-3.2.1.slim.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/dialogbox.js' %}"></script>
+<script type="text/javascript">
+    var custom_alert = new custom_alert();
+    
+    function updateElementIndex(el, prefix, ndx) {
+        var id_regex = new RegExp('(' + prefix + '-\\d+)');
+        var replacement = prefix + '-' + ndx;
+        if ($(el).attr("for")) $(el).attr("for", $(el).attr("for").replace(id_regex, replacement));
+        if (el.id) el.id = el.id.replace(id_regex, replacement);
+        if (el.name) el.name = el.name.replace(id_regex, replacement);
+    }
+    
+    var total = 1;
+
+    function cloneMore(selector, prefix) {
+        var newElement = $(selector).clone(true);
+        
+        // İrsaliye ve vade bilgilerini içeren satırı kaldır
+        newElement.find('.row.mt-2:has([name*="waybill"], [name*="due_date"])').remove();
+        
+        // Form alanlarını güncelle
+        newElement.find(':input:not([type=button]):not([type=submit]):not([type=reset])').each(function() {
+            var name = $(this).attr('name');
+            if(name) {
+                // Sadece stock, quantity, perprice ve tax_rate alanlarını güncelle
+                if(name.includes('stock') || name.includes('quantity') || 
+                   name.includes('perprice') || name.includes('tax_rate')) {
+                    name = name.replace('-' + (total-1) + '-', '-' + total + '-');
+                    var id = 'id_' + name;
+                    $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+                }
+            }
+        });
+
+        // Label'ları güncelle
+        newElement.find('label').each(function() {
+            var forValue = $(this).attr('for');
+            if (forValue) {
+                if(forValue.includes('stock') || forValue.includes('quantity') || 
+                   forValue.includes('perprice') || forValue.includes('tax_rate')) {
+                    forValue = forValue.replace('-' + (total-1) + '-', '-' + total + '-');
+                    $(this).attr({'for': forValue});
+                }
+            }
+        });
+
+        total++;
+        $('#id_' + prefix + '-TOTAL_FORMS').val(total);
+        $(selector).after(newElement);
+        return false;
+    }
+    
+    function deleteForm(prefix, btn) {
+        if (total > 1){
+            btn.closest('.form-row').remove();
+            var forms = $('.form-row');
+            $('#id_' + prefix + '-TOTAL_FORMS').val(forms.length);
+            for (var i=0, formCount=forms.length; i<formCount; i++) {
+                $(forms.get(i)).find(':input').each(function() {
+                    updateElementIndex(this, prefix, i);
+                });
+            }
+            total--;
+        } else {
+            custom_alert.render("Bu alan silinemez!");
+        }
+        return false;
+    }
+    
+    $(document).on('click', '.add-form-row', function(e){
+        e.preventDefault();
+        cloneMore('.form-row:last', 'form');
+        return false;
+    });
+    
+    $(document).on('click', '.remove-form-row', function(e){
+        e.preventDefault();
+        deleteForm('form', $(this));
+        return false;
+    });
+
+    $(document).on('change', '.setprice', function(e){
+        e.preventDefault();
+        var element = $(this);
+        var quantity = element.parents('.form-row').find('.quantity').val();
+        var perprice = element.parents('.form-row').find('.price').val();
+        var tprice = quantity * perprice;
+        element.parents('.form-row').find('.totalprice').val(tprice);
+        return false;
+    });
+</script>
+{% endblock content %} 

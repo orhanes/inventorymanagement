@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %} {{ title }} {% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-layer-group me-2"></i>{{ title }}</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate id="subcategoryForm">
+                {% csrf_token %}
+                {% if form %}
+                    {{ form.non_field_errors }}
+                {% endif %}
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            <label for="category" class="form-label">
+                                Kategori <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-list"></i></span>
+                                <select class="form-control" id="category" name="category" required>
+                                    <option value="">---------</option>
+                                    {% for category in categories %}
+                                        <option value="{{ category.id }}" {% if subcategory and subcategory.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen bir kategori seçiniz.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {% if form %}
+                                {{ form.name.errors }}
+                            {% endif %}
+                            <label for="name" class="form-label">
+                                Alt Kategori Adı <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-layer-group"></i></span>
+                                <input type="text" class="form-control" id="name" name="name" value="{% if subcategory %}{{ subcategory.name }}{% endif %}" 
+                                placeholder="Alt kategori adı giriniz" required>
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen alt kategori adını giriniz.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mt-4">
+                    <div>
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="fas fa-save me-2"></i>Kaydet
+                        </button>
+                        <button type="reset" class="btn btn-danger px-4">
+                            <i class="fas fa-undo me-2"></i>Sıfırla
+                        </button>
+                    </div>
+                    <div>
+                        <a href="{% url 'subcategory_list' %}" class="btn btn-secondary px-4">
+                            <i class="fas fa-times me-2"></i>Vazgeç
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+</style>
+{% endblock content %}

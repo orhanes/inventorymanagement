@@ -2,115 +2,557 @@
 
 {% load widget_tweaks %}
 
-
 {% block title %} Ürün Listesi {% endblock title %}
 
-
 {% block content %}
-    <div class="row" style="color: #4e4e4e; font-style: bold; font-size: 3rem; ">
-        <div class="col-md-8">Ürün Listesi</div>
-        <div class="col-md-4">               
-            <div style="float:right;"> <a class="btn btn-success" href="{% url 'new-stock' %}">Ürün Ekle</a> </div>
+<div class="container-fluid mt-4 animate__animated animate__fadeIn">
+    <div class="card shadow">
+        <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fas fa-warehouse me-2"></i>Ürün Listesi
+            </h3>
+            <a class="btn btn-warning" href="{% url 'new-stock' %}">
+                <i class="fas fa-plus me-2"></i>Ürün Ekle
+            </a>
+        </div>
+        <div class="card-body">
+            <div id="printArea">
+                <!-- Arama ve Filtreleme Kartı -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-search me-2"></i>Arama ve Filtreleme</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" action="{% url 'barcode-search' %}" class="row g-2 align-items-end mb-2" id="barcode-form">
+                            <div class="col-md-2 col-6">
+                                <label class="form-label small">Barkod/QR ile Ara</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" name="barcode" id="barcode-input" placeholder="Barkod veya QR kodu...">
+                                    <button type="button" class="btn btn-secondary" id="camera-btn"><i class="fas fa-camera"></i></button>
+                                </div>
+                                <div id="qr-reader" style="width: 250px; display:none;"></div>
+                            </div>
+                            <div class="col-md-2 col-6">
+                                <label class="form-label small">Ürün Adı</label>
+                                <input type="text" class="form-control form-control-sm" name="name" value="{{ request.GET.name }}" placeholder="Ürün adı...">
+                            </div>
+                            <div class="col-md-2 col-6">
+                                <label class="form-label small">Kategori</label>
+                                <select class="form-select form-select-sm" name="category" id="id_category">
+                                    <option value="">Tüm Kategoriler</option>
+                                    {% for category in categories %}
+                                        <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"i" %}selected{% endif %}>{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-6">
+                                <label class="form-label small">Alt Kategori</label>
+                                <select class="form-select form-select-sm" name="subcategory" id="id_subcategory">
+                                    <option value="">Tüm Alt Kategoriler</option>
+                                    {% for subcategory in subcategories %}
+                                        <option value="{{ subcategory.id }}" {% if request.GET.subcategory == subcategory.id|stringformat:"i" %}selected{% endif %}>{{ subcategory.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-6">
+                                <label class="form-label small">Stok Durumu</label>
+                                <select class="form-select form-select-sm" name="stock_status">
+                                    <option value="">Tümü</option>
+                                    <option value="low" {% if request.GET.stock_status == 'low' %}selected{% endif %}>Düşük Stok</option>
+                                    <option value="out" {% if request.GET.stock_status == 'out' %}selected{% endif %}>Stokta Yok</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-6">
+                                <label class="form-label small">Sıralama</label>
+                                <select class="form-select form-select-sm" name="sort">
+                                    <option value="">Varsayılan</option>
+                                    <option value="name_asc" {% if request.GET.sort == 'name_asc' %}selected{% endif %}>Ürün Adı (A-Z)</option>
+                                    <option value="name_desc" {% if request.GET.sort == 'name_desc' %}selected{% endif %}>Ürün Adı (Z-A)</option>
+                                    <option value="quantity_asc" {% if request.GET.sort == 'quantity_asc' %}selected{% endif %}>Stok Miktarı (Düşük-Yüksek)</option>
+                                    <option value="quantity_desc" {% if request.GET.sort == 'quantity_desc' %}selected{% endif %}>Stok Miktarı (Yüksek-Düşük)</option>
+                                </select>
+                            </div>
+                            <div class="w-100"></div>
+                            <div class="col-12 d-flex justify-content-center mt-2 gap-2">
+                                <button type="submit" class="btn btn-primary btn-sm px-4">
+                                    <i class="fas fa-search me-1"></i> Ara
+                                </button>
+                                <a href="{% url 'inventory' %}" class="btn btn-secondary btn-sm px-4">
+                                    <i class="fas fa-times me-1"></i> Temizle
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i>Toplu Barkod/QR Sorgulama</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="" id="bulk-barcode-form">
+                            {% csrf_token %}
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-10">
+                                    <label class="form-label small">Barkod/QR Kodları (her satıra bir kod)</label>
+                                    <textarea class="form-control form-control-sm" name="bulk_barcodes" rows="3" placeholder="Her satıra bir barkod/QR kodu girin veya okutun..."></textarea>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <button type="submit" class="btn btn-primary btn-sm px-3 mt-3"><i class="fas fa-search"></i> Toplu Sorgula</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if bulk_results %}
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-list me-2"></i>Toplu Sorgu Sonuçları</span>
+                        <form method="post" action="" id="export-excel-form" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="export_excel" value="1">
+                            <input type="hidden" name="bulk_codes" value="{{ bulk_results|json_script:'bulkResultsJson' }}">
+                            <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-file-excel"></i> Excel'e Aktar</button>
+                        </form>
+                    </div>
+                    <div class="card-body p-2">
+                        <table class="table table-bordered table-sm mb-0">
+                            <thead>
+                                <tr class="text-center">
+                                    <th>Kod</th>
+                                    <th>Tip</th>
+                                    <th>Ürün</th>
+                                    <th>Seri No</th>
+                                    <th>Adet</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for res in bulk_results %}
+                                    {% if res.type == 'stockcard' %}
+                                        <tr class="text-center">
+                                            <td>{{ res.code }}</td>
+                                            <td>Stok Kartı</td>
+                                            <td>{{ res.stock.name }}</td>
+                                            <td>{{ res.card.serial_number }}</td>
+                                            <td>{{ res.card.quantity }}</td>
+                                            <td>
+                                                <a href="{% url 'view-stock' res.stock.pk %}" class="btn btn-primary btn-sm">Detay</a>
+                                                <a href="{% url 'print-stockcard' res.card.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">Yazdır</a>
+                                            </td>
+                                        </tr>
+                                    {% elif res.type == 'stock' %}
+                                        <tr class="text-center">
+                                            <td>{{ res.code }}</td>
+                                            <td>Ürün</td>
+                                            <td>{{ res.stock.name }}</td>
+                                            <td>{{ res.stock.serial_number }}</td>
+                                            <td>{{ res.stock.quantity }}</td>
+                                            <td>
+                                                <a href="{% url 'view-stock' res.stock.pk %}" class="btn btn-primary btn-sm">Detay</a>
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr class="text-center bg-warning-subtle">
+                                            <td>{{ res.code }}</td>
+                                            <td colspan="5">Kayıt bulunamadı</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th width="5%" class="text-center">Foto</th>
+                                <th width="35%" class="text-start">Ürün Adı</th>
+                                <th class="text-center">Kategori</th>
+                                <th class="text-center">Alt Kategori</th>
+                                <th class="text-center">Mevcut Miktar</th>
+                                <th class="text-center">Birim</th>
+                                <!--<th class="text-center">İç Toplam</th>-->
+                                <th class="text-center noprint">İşlemler</th>
+                            </tr>
+                        </thead>
+                        
+                        {% if object_list %}
+                            <tbody>     
+                                {% for stock in object_list %}
+                                    <tr>
+                                        <td class="align-middle text-center">
+                                            <div class="thumbnail-container">
+                                                {% if stock.image %}
+                                                    <img src="{{ stock.image.url }}" alt="{{ stock.name }}" class="product-thumbnail">
+                                                {% else %}
+                                                    <div class="no-image-thumbnail">
+                                                        <i class="fas fa-image"></i>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td class="align-middle text-start text-uppercase">{{ stock.name }}</td>
+                                        <td class="align-middle text-center">{{ stock.category }}</td>
+                                        <td class="align-middle text-center">{{ stock.subcategory }}</td>
+                                        <td class="align-middle text-center">{{ stock.quantity }}</td>
+                                        <td class="align-middle text-center">{{ stock.unit }}</td>
+                                        <!--<td class="align-middle text-center">{{ stock.quantity_box }}</td>-->
+                                        <td class="align-middle text-center noprint">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <a href="{% url 'view-stock' stock.pk %}" class="btn btn-primary btn-sm action-btn" title="Göster" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'edit-stock' stock.pk %}" class="btn btn-warning btn-sm action-btn" title="Düzenle" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'delete-stock' stock.pk %}" class="btn btn-danger btn-sm action-btn" title="Sil" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>          
+                                    </tr>
+                                {% endfor %}                   
+                            </tbody>
+                        {% else %}
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <i class="fas fa-box-open text-muted mb-3"></i>
+                                            <h4 class="text-muted">Henüz bir kayıt yok</h4>
+                                            <p class="text-muted mb-3">Yeni ürün eklemek için üstteki "Ürün Ekle" butonunu kullanabilirsiniz.</p>
+                                            <a href="{% url 'new-stock' %}" class="btn btn-primary">
+                                                <i class="fas fa-plus me-2"></i>Yeni Ürün Ekle
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        {% endif %}
+                    </table>
+                </div>
+                <div class="text-center text-muted mb-3">
+                    <small>Toplam {{ page_obj.paginator.count }} kayıt bulunmaktadır.</small>
+                </div>
+                {% if is_paginated %}
+                <div class="text-center text-muted mb-3">
+                    <small>Toplam {{ page_obj.paginator.num_pages }} sayfa içerisinde {{ page_obj.number }}. sayfadasınız</small>
+                </div>
+                <nav aria-label="Page navigation" class="mt-2">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+
+            <div class="text-center mt-4">
+                <button class="btn btn-primary px-4" onclick="printpage('printArea')">
+                    <i class="fas fa-print me-2"></i>Yazdır
+                </button>
+            </div>
         </div>
     </div>
-    
-    <div style="border-bottom: 1px solid white;"></div>
-    
-    <br>
-    <div id="printArea">
-    <table class="table table-css table-bordered table-hover">
-
-	
-        <form method="get">
-            <div class="input-group search noprint">
-                {% render_field filter.form.name class="form-control textinput" placeholder="Ürün adıyla ara" %}
-                <div class="input-group-append">
-                   <button type="submit" class="btn btn-pink"> Ara </button>
-                </div>
-            </div>
-        </form>
-
-        <br>
-        
-        <thead class="thead-dark align-middle">
-            <tr>
-                <th width="40%">Ürün Adı</th>
-                <th>Kategori</th>
-                <th>Mevcut Miktar</th>
-                <th>Birim</th>
-                <th>İç Toplam</th>
-                <th class="noprint">İşlemler</th>
-            </tr>
-        </thead>
-                  
-{% if object_list %}
-
-        <tbody>     
-            {% for stock in object_list %}
-                <tr>
-                    <td>
-                        <p>{{ stock.name }}</p>
-                    </td>
-                    <td class="align-middle">{{ stock.category }}</td>
-                    <td class="align-middle">{{ stock.quantity }}</td>
-                    <td class="align-middle">{{ stock.unit }}</td>
-                    <td class="align-middle">{{ stock.quantity_box }}</td>
-                    <td class="align-middle noprint">
-                        <a href="{% url 'edit-stock' stock.pk %}" class="btn btn-info btn-sm"> Düzenle</a>
-                        <a href="{% url 'delete-stock' stock.pk %}" class="btn btn-danger btn-sm"> Sil </a>
-                    </td>          
-                </tr>
-            {% endfor %}                   
-        </tbody>
-
-    </table>  
-</div>
-    <div class="align-middle">
-        {% if is_paginated %}
-
-            {% if page_obj.has_previous %}
-                <a class="btn btn-outline-info mb-4" href="?page=1">First</a>
-                <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Önceki</a>
-            {% endif %}
-
-            {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                    <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
-                {% endif %}
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-                <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Sonraki</a>
-                <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Son</a>
-            {% endif %}
-
-        {% endif %}
-    </div>
-
-{% else %}
-
-        <tbody></tbody>   
-    </table>
-
-    <br><br><br><br><br><br><br><br>
-    <div style="color: #575757; font-style: bold; font-size: 1.5rem; text-align: center;">Henüz bir kayıt yok. Ürün eklemeyi deneyin.</div>
-
-    
-
-{% endif %}
-<div class="wrapper">
-    <button class="center btn btn-primary" onclick="printpage('printArea')">Yazdır</button>
 </div>
 
-    <script>
-    function printpage(divName) {
-        var printContents = document.getElementById(divName).innerHTML;
-        var originalContents = document.body.innerHTML;
-        document.body.innerHTML = printContents;
-        window.print();
-        document.body.innerHTML = originalContents;
-    }       
-    </script>
+<style>
+    /* Arama ve Filtreleme Stilleri */
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .table {
+        margin-bottom: 0;
+    }
+    .table th {
+        border-top: none;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+        color: white;
+        font-weight: 500;
+        padding: 1rem;
+    }
+    .table td {
+        vertical-align: middle;
+        padding: 0.75rem;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(33, 150, 243, 0.05);
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .action-btn i {
+        font-size: 0.875rem;
+    }
+    .pagination {
+        margin-bottom: 0;
+    }
+    .page-link {
+        border-radius: 4px;
+        margin: 0 2px;
+        color: #2196F3;
+    }
+    .page-item.active .page-link {
+        background-color: #2196F3;
+        border-color: #2196F3;
+    }
+    .empty-state {
+        padding: 2rem;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 1rem;
+        animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-20px);
+        }
+        60% {
+            transform: translateY(-10px);
+        }
+    }
+    @media print {
+        .noprint {
+            display: none !important;
+        }
+        .card {
+            box-shadow: none !important;
+        }
+        .card-header {
+            background: none !important;
+            color: #000 !important;
+        }
+        .table th {
+            background: none !important;
+            color: #000 !important;
+            border-bottom: 2px solid #dee2e6;
+        }
+    }
+
+    .thumbnail-container {
+        width: 50px;
+        height: 50px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-thumbnail {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .no-image-thumbnail {
+        width: 100%;
+        height: 100%;
+        background: #f8f9fa;
+        border: 1px dashed #dee2e6;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+    }
+
+    .no-image-thumbnail i {
+        font-size: 1.2rem;
+    }
+
+    @media print {
+        .thumbnail-container {
+            display: none;
+        }
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+<script>
+function printpage(divName) {
+    var printContents = document.getElementById(divName).innerHTML;
+    var originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+}
+
+// Tooltip'leri aktifleştir
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+
+document.getElementById('camera-btn').addEventListener('click', function() {
+    var qrReader = document.getElementById('qr-reader');
+    qrReader.style.display = 'block';
+    const html5QrCode = new Html5Qrcode("qr-reader");
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 200 },
+        qrCodeMessage => {
+            document.getElementById('barcode-input').value = qrCodeMessage;
+            html5QrCode.stop();
+            qrReader.style.display = 'none';
+            document.getElementById('barcode-form').submit();
+        },
+        errorMessage => {}
+    ).catch(err => {
+        alert('Kamera başlatılamadı: ' + err);
+        qrReader.style.display = 'none';
+    });
+});
+
+// Barkod/QR arama kutusu kısa yol tuşları
+const barcodeInput = document.getElementById('barcode-input');
+if (barcodeInput) {
+    barcodeInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('barcode-form').submit();
+        }
+        if (e.key === 'Escape') {
+            barcodeInput.value = '';
+        }
+    });
+}
+// Toplu sorgulama alanı kısa yol tuşları
+const bulkForm = document.getElementById('bulk-barcode-form');
+if (bulkForm) {
+    const bulkTextarea = bulkForm.querySelector('textarea[name="bulk_barcodes"]');
+    bulkTextarea.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            bulkForm.submit();
+        }
+        if (e.key === 'Escape') {
+            bulkTextarea.value = '';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('id_category');
+    const subcategorySelect = document.getElementById('id_subcategory');
+    function loadSubcategories(categoryId, selectedSubcategory) {
+        fetch(`/inventory/ajax/load-subcategories/?category=${categoryId}`)
+            .then(response => response.json())
+            .then(data => {
+                subcategorySelect.innerHTML = '<option value="">Tüm Alt Kategoriler</option>';
+                data.forEach(function(subcat) {
+                    const selected = selectedSubcategory == subcat.id ? 'selected' : '';
+                    subcategorySelect.innerHTML += `<option value="${subcat.id}" ${selected}>${subcat.name}</option>`;
+                });
+            });
+    }
+    if (categorySelect && subcategorySelect) {
+        categorySelect.addEventListener('change', function() {
+            loadSubcategories(this.value, '');
+        });
+        // Sayfa yüklendiğinde, eğer kategori seçiliyse alt kategorileri yükle
+        const initialCategory = categorySelect.value;
+        const initialSubcategory = subcategorySelect.getAttribute('data-selected');
+        if (initialCategory) {
+            loadSubcategories(initialCategory, initialSubcategory || '');
+        }
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('barcode-form');
+    const barcodeInput = document.getElementById('barcode-input');
+    if (form && barcodeInput) {
+        form.addEventListener('submit', function(e) {
+            if (barcodeInput.value.trim() !== '') {
+                form.action = '{% url "barcode-search" %}';
+            } else {
+                form.action = '{% url "inventory" %}';
+            }
+        });
+    }
+});
+</script>
 {% endblock content %}

@@ -1,0 +1,154 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Stok Kartı Fişi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 0;
+            padding: 0;
+        }
+        .card {
+            width: 320px;
+            padding: 10px 24px 8px 24px;
+            border: 1px dashed #222;
+            margin: auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .firm-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            margin-top: 2px;
+            background: #e3eafc;
+            border-radius: 6px 6px 0 0;
+            padding: 4px 0 2px 0;
+        }
+        .firm-logo {
+            width: 120px;
+            height: 48px;
+            object-fit: contain;
+            margin-bottom: 0;
+            margin-top: 2px;
+        }
+        .firm-title {
+            font-size: 17px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #1a237e;
+        }
+        .product-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 10px;
+            color: #222;
+        }
+        .info-block {
+            display: flex;
+            flex-direction: column;
+            width: 70%;
+            max-width: 180px;
+            margin-left: 90px;
+            margin-right: auto;
+        }
+        .row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2px;
+            justify-content: flex-start;
+        }
+        .label {
+            display: flex;
+            align-items: center;
+            min-width: 70px;
+            max-width: 70px;
+        }
+        .label-text {
+            flex: 1;
+            text-align: left;
+            font-weight: bold;
+            color: #0d47a1;
+        }
+        .colon {
+            width: 10px;
+            text-align: right;
+            font-weight: bold;
+            color: #0d47a1;
+        }
+        .value {
+            flex: 1;
+            text-align: left;
+            color: #222;
+            word-break: break-all;
+        }
+        .barcode, .qrcode {
+            text-align: center;
+            margin: 6px 0 4px 0;
+        }
+        .footer-info {
+            background: #e3eafc;
+            border-radius: 0 0 6px 6px;
+            padding: 4px 0 2px 0;
+            text-align: center;
+            font-size: 11px;
+            color: #1a237e;
+            margin-top: 8px;
+        }
+        @media print {
+            body, html {
+                background: white !important;
+            }
+            .noprint { display: none; }
+            .card { box-shadow: none; border: 1px solid #222; }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="firm-header">
+        <img src="{{ common.company.logo.url }}" alt="Logo" class="firm-logo">
+        <!--<div class="firm-title">{{common.company.name}}</div>-->
+    </div>
+    <div class="product-title">{{ stockcard.stock.name }}</div>
+    <div class="info-block">
+        <div class="row"><span class="label"><span class="label-text">LOT</span><span class="colon">:</span></span><span class="value">{{ stockcard.lot }}</span></div>
+        <div class="row"><span class="label"><span class="label-text">Seri No</span><span class="colon">:</span></span><span class="value">{{ stockcard.serial_number }}</span></div>
+        <div class="row"><span class="label"><span class="label-text">Adet</span><span class="colon">:</span></span><span class="value">{{ stockcard.quantity }}</span></div>
+        <div class="row"><span class="label"><span class="label-text">Boy</span><span class="colon">:</span></span><span class="value">{{ stockcard.length }}</span></div>
+        <div class="row"><span class="label"><span class="label-text">Cinsi</span><span class="colon">:</span></span><span class="value">{{ stockcard.type }}</span></div>
+        <div class="row"><span class="label"><span class="label-text">Kalite</span><span class="colon">:</span></span><span class="value">{{ stockcard.quality }}</span></div>
+        <div class="row"><span class="label"><span class="label-text">Standart</span><span class="colon">:</span></span><span class="value">{{ stockcard.std }}</span></div>
+        <div class="row"><span class="label"><span class="label-text">Tarih</span><span class="colon">:</span></span><span class="value">{{ stockcard.date|date:'d.m.Y' }}</span></div>
+        <div class="row"><span class="label"><span class="label-text">Operatör</span><span class="colon">:</span></span><span class="value">{{ stockcard.operator }}</span></div>
+        <div class="row"><span class="label"><span class="label-text">Menşei</span><span class="colon">:</span></span><span class="value">{{ stockcard.origin }}</span></div>
+        <div class="row"><span class="label"><span class="label-text">Kalite Kontrol</span><span class="colon">:</span></span><span class="value">{{ stockcard.quality_control }}</span></div>
+        <div class="row"><span class="label"><span class="label-text">Paketçi</span><span class="colon">:</span></span><span class="value">{{ stockcard.packer }}</span></div>
+        <div class="row"><span class="label"><span class="label-text">Barkod No</span><span class="colon">:</span></span><span class="value">{{ stockcard.barcode_number }}</span></div>
+    </div>
+    <div class="barcode">
+        {% if stockcard.barcode %}
+            <img src="{{ stockcard.barcode.url }}" alt="Barkod" style="height:38px;">
+        {% endif %}
+    </div>
+    <div class="qrcode">
+        {% if stockcard.qr_code %}
+            <img src="{{ stockcard.qr_code.url }}" alt="QR Kod" style="height:60px;">
+        {% endif %}
+    </div>
+    <div class="footer-info">
+        {{ common.company.address }}
+    </div>
+</div>
+<div class="noprint" style="text-align:center; margin-top:8px;">
+    <button onclick="window.print()" style="padding:4px 16px; font-size:13px;">Yazdır</button>
+</div>
+</body>
+</html> 

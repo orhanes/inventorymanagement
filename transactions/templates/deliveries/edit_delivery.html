@@ -1,96 +1,867 @@
 {% extends "base.html" %}
-
+{% load widget_tweaks %}
 
 {% block title %} {{title}} {% endblock title %}
 
-
 {% block content %}
+<div class="container mt-4">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title text-white">
+                        <i class="fas fa-truck me-2"></i>{{ title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    
+                    <form method="post" class="form">
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        {% csrf_token %}
+                        
+                        <!-- Ortak Alanlar Başlığı -->
+                        <h5 class="section-title mb-3"><i class="fas fa-layer-group me-2"></i>Ortak Alanlar</h5>
+                        <!-- Ortak Alanlar -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Form No</label>
+                                <input type="text" class="form-control readonly-field" value="{{ form.instance.delivery_number|default:preview_delivery_number }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nakliye Türü</label>
+                                {{ form.delivery_type }}
+                            </div>
+                        </div>
 
-    <div style="color:#575757; font-style: bold; font-size: 3rem; border-bottom: 1px solid white;">{{title}}</div>
-    <hr style="height:1px;border:none;color:#333;background-color:#333;">
+                        <div id="delivery-type-alert" class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Bilgilendirme:</strong> Şu an sadece ortak alanlar görüntülenmektedir. Lütfen yukarıdan bir Nakliye Türü seçiniz. Seçiminize göre ilgili alanlar otomatik olarak görüntülenecektir.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                        </div>
 
-    <form method="post">
+                        <!-- Ortak Form Alanları -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Satış Kalemi</label>
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="sale_item_choice" id="sale_item_select_radio" value="select" checked>
+                                        <label class="form-check-label text-primary" for="sale_item_select_radio" style="font-size:0.95em;">
+                                            <i class="fas fa-list me-1 text-primary"></i> Mevcut Satıştan Seç
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="sale_item_choice" id="sale_item_manual_radio" value="manual">
+                                        <label class="form-check-label text-primary" for="sale_item_manual_radio" style="font-size:0.95em;">
+                                            <i class="fas fa-keyboard me-1 text-primary"></i> Elle Gir
+                                        </label>
+                                    </div>
+                                </div>
+                                <div id="sale_item_select_area" class="mt-2">
+                                    {{ form.sale_item_select|add_class:"form-select" }}
+                                    {% if form.sale_item_select.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.sale_item_select.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div id="sale_item_manual_area" class="mt-2" style="display:none;">
+                                    {{ form.sale_item_manual|add_class:"form-control" }}
+                                    {% if form.sale_item_manual.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.sale_item_manual.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label">Alıcı</label>
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="buyer_choice" id="buyer_select_radio" value="select" checked>
+                                        <label class="form-check-label text-primary" for="buyer_select_radio" style="font-size:0.95em;">
+                                            <i class="fas fa-users me-1 text-primary"></i> Mevcut Müşteriden Seç
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="buyer_choice" id="buyer_manual_radio" value="manual">
+                                        <label class="form-check-label text-primary" for="buyer_manual_radio" style="font-size:0.95em;">
+                                            <i class="fas fa-keyboard me-1 text-primary"></i> Elle Gir
+                                        </label>
+                                    </div>
+                                </div>
+                                <div id="buyer_select_area" class="mt-2">
+                                    {{ form.buyer_select|add_class:"form-select" }}
+                                    {% if form.buyer_select.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.buyer_select.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div id="buyer_manual_area" class="mt-2" style="display:none;">
+                                    {{ form.buyer_manual|add_class:"form-control" }}
+                                    {% if form.buyer_manual.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.buyer_manual.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-12 mt-3">
+                                <label class="form-label">Adres</label>
+                                {{ form.address|add_class:"form-control" }}
+                                {% if form.address.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.address.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label">Fiş No</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-file-invoice"></i></span>
+                                    {{ form.billno }}
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label">Teslim Eden</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
+                                    {{ form.deliverer }}
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label">Durum</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-tasks"></i></span>
+                                    {{ form.status|add_class:"form-control status-select" }}
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label">İrsaliye Numarası</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                                    {{ form.waybill_number }}
+                                </div>
+                            </div>
+                            <div class="col-md-4 mt-3">
+                                <label class="form-label">Gönderim Tarihi</label>
+                                <div class="input-group">
+                                    {{ form.sending_date|add_class:"form-control"|attr:"type:date" }}
+                                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mt-3">
+                                <label class="form-label">Tahmini Teslimat Tarihi</label>
+                                <div class="input-group">
+                                    {{ form.estimated_delivery_date|add_class:"form-control"|attr:"type:date" }}
+                                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mt-3">
+                                <label class="form-label">Gerçekleşen Tarih</label>
+                                <div class="input-group">
+                                    {{ form.actual_delivery_date|add_class:"form-control"|attr:"type:date" }}
+                                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                </div>
+                            </div>
+                            <div class="col-md-12 mt-3">
+                                <label class="form-label">Not</label>
+                                {{ form.description }}
+                            </div>
+                            
+                        </div>
+
+                        <!-- Araç/Kurye Nakliye Bilgileri -->
+                        <h5 id="vehicle-courier-title" class="section-title mb-3" style="display:none;">
+                            <i class="fas fa-truck me-2"></i><span id="delivery-type-text">Araç/Kurye</span> Nakliye Bilgileri
+                        </h5>
+                        <div id="common-delivery-fields" class="row mb-3" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label">Şoför/Kurye Adı</label>
+                                {{ form.courier_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">T.C. Kimlik No</label>
+                                {{ form.courier_id }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Telefon</label>
+                                {{ form.courier_phone }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Şoför/Kurye Numarası</label>
+                                {{ form.courier_number }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Araç Türü</label>
+                                {{ form.vehicle_type }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Araç Plakası</label>
+                                {{ form.vehicle_plate }}
+                            </div>
+                        </div>
+
+                        <!-- Araç Özel Alanları -->
+                        <div id="vehicle-fields" class="row mb-3" style="display: none;">
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label">İzahat</label>
+                                {{ form.explanation }}
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <div class="tonaj-analiz-box p-3 mb-2">
+                                    <div class="form-check mb-3">
+                                        {{ form.tonage|add_class:"form-check-input" }}
+                                        <label class="form-check-label ms-2" for="{{ form.tonage.id_for_label }}">
+                                            <i class="fas fa-weight me-1"></i>Tonajdan Sorumluyuz
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        {{ form.analysed|add_class:"form-check-input" }}
+                                        <label class="form-check-label ms-2" for="{{ form.analysed.id_for_label }}">
+                                            <i class="fas fa-flask me-1"></i>Analizli S-420
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Kargo/Posta Nakliye Bilgileri -->
+                        <h5 id="cargo-title" class="section-title mb-3" style="display:none;"><i class="fas fa-shipping-fast me-2"></i>Kargo/Posta Nakliye Bilgileri</h5>
+                        <div id="cargo-fields" class="row mb-3" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label">Takip Numarası</label>
+                                {{ form.tracking_number }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nakliye Firması</label>
+                                {{ form.delivery_company }}
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-primary">{{ savebtn }}</button>
+                                {% if delbtn %}
+                                <a href="{% url 'delete-delivery' object.pk %}" class="btn btn-danger">{{ delbtn }}</a>
+                                {% endif %}
+                                <a href="{% url 'deliveries-list' %}" class="btn btn-secondary">İptal</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+    .form-control:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    select.form-control {
+        width: 100% !important;
+        min-width: 200px;
+        height: calc(1.5em + 1.5rem) !important;
+        padding: 0.375rem 2.25rem 0.375rem 0.75rem !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23555' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        line-height: 1.5;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .input-group select.form-control {
+        flex: 1 1 auto;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: 0;
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-right: none;
+        display: flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .input-group {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        flex-wrap: nowrap;
+    }
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    .form-group select {
+        max-width: none;
+    }
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .is-valid {
+        border-color: #198754 !important;
+    }
+    .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+        position: absolute;
+        bottom: -1.25rem;
+        left: 0;
+        padding-left: 0.5rem;
+    }
+    .is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    .form-control.is-invalid:focus,
+    .form-control.is-valid:focus {
+        box-shadow: none;
+    }
+    .input-group .form-control.is-invalid,
+    .input-group .form-control.is-valid {
+        z-index: 3;
+    }
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    .input-group {
+        margin-bottom: 0.5rem;
+    }
+    .readonly-field {
+        background-color: #e9ecef !important;
+        cursor: not-allowed !important;
+        opacity: 0.8;
+    }
     
-        {% csrf_token %}
-        {{ form.non_field_errors }}
-        
-        <div class="form-group">
-            <label for="{{ form.deilvery.billno.id_for_label }}">Fiş No:</label>
-            {{ form.billno}}
-        </div>
-        <div class="form-group">
-            <label for="{{ form.sale_item.id_for_label }}">Sipariş:</label>
-            {{ form.sale_item}}
-        </div>
-        <div class="form-group">
-            <label for="{{ form.buyer.id_for_label }}">Müşteri:</label>
-            {{ form.buyer}}
-        </div>
-        <div class="form-group">
-            <label for="{{ form.explanation.id_for_label }}">İzahat:</label>
-            {{ form.explanation}}
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.courier_name.errors }}
-                <label for="{{ form.courier_name.id_for_label }}">Şoför Adı / Soyadı:</label>
-                {{ form.courier_name }}
-            </div>
-            <div class="form-group col-md-6">
-                {{ form.courier_id.errors }}
-                <label for="{{ form.courier_id.id_for_label }}">Şoför T.C. Kimlik No:</label>
-                {{ form.courier_id }}
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.courier_phone.errors }}
-                <label for="{{ form.courier_phone.id_for_label }}">Şoför Telefonu:</label>
-                {{ form.courier_phone }}
-            </div>
-            <div class="form-group col-md-6">
-                {{ form.courier_vehicle.errors }}
-                <label for="{{ form.courier_vehicle.id_for_label }}">Şoför Aracı:</label>
-                {{ form.courier_vehicle }}
-            </div>
-        </div>
+    /* Tarih seçici stilleri */
+    .datepicker {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+    
+    .input-group-text {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-left: none;
+        cursor: pointer;
+    }
+    
+    .input-group-text:hover {
+        background-color: #e9ecef;
+    }
+    
+    .datepicker-dropdown {
+        padding: 10px;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border: none;
+        border-radius: 8px;
+    }
+    
+    .datepicker table tr td.active,
+    .datepicker table tr td.active:hover,
+    .datepicker table tr td.active.disabled,
+    .datepicker table tr td.active.disabled:hover {
+        background-color: #2196F3 !important;
+        background-image: none;
+    }
+    
+    .datepicker table tr td.today {
+        background-color: #e3f2fd !important;
+        background-image: none;
+    }
+    
+    .datepicker table tr td:hover {
+        background-color: #e9ecef;
+    }
+    
+    .datepicker .datepicker-switch {
+        font-weight: 600;
+        color: #2196F3;
+    }
+    
+    .datepicker .prev,
+    .datepicker .next {
+        color: #2196F3;
+    }
+    
+    .datepicker .prev:hover,
+    .datepicker .next:hover {
+        background-color: #e3f2fd;
+    }
 
-        <div class="form-group">
-            {{ form.vehicle_plate.errors }}
-            <label for="{{ form.vehicle_plate.id_for_label }}">Araç Plakası:</label>
-            {{ form.vehicle_plate }}
-        </div>
+    /* Durum seçici stilleri */
+    .status-select {
+        background-color: #fff;
+        color: #495057;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        padding: 0.375rem 0.75rem;
+        transition: all 0.3s ease;
+    }
 
-        <div class="form-group">
-            {{ form.description.errors }}
-            <label for="{{ form.description.id_for_label }}">Not:</label>
-            {{ form.description }}
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.tonage.errors }}
-                <label for="{{ form.tonage.id_for_label }}">Tonajdan Sorumluyuz &nbsp;&nbsp;&nbsp;&nbsp;</label>
-                {{form.tonage}}
-            </div>
-            <div class="form-group col-md-6">
-                {{ form.analysed.errors }}
-                <label for="{{ form.analysed.id_for_label }}">Analizli S-420 &nbsp;&nbsp;&nbsp;&nbsp;</label>
-                {{form.analysed}}
-            </div>
-        </div>
-        <br>
+    .status-select option[value="Beklemede"] {
+        background-color: #17a2b8;
+        color: white;
+        padding: 10px;
+    }
 
-        <div class="align-middle">
-            <button type="submit" class="btn btn-success">{{ savebtn }}</button>
-            {% if title == "Yeni Nakliye" %}
-                <button type="reset" class="btn btn-danger" >Sıfırla</button>
-            {% endif %}
-            {% if delbtn %}
-                <a href="{% url 'delete-delivery' delivery.pk %}" class="btn btn-danger"> Nakliye Sil</a>
-            {% endif %}
-            <a href="{% url 'deliveries-list' %}" class="btn btn-secondary">Vazgeç</a>
-        </div>
-        
-    </form>
+    .status-select option[value="Yolda"] {
+        background-color: #ffc107;
+        color: black;
+        padding: 10px;
+    }
 
+    .status-select option[value="Teslim Edildi"] {
+        background-color: #28a745;
+        color: white;
+        padding: 10px;
+    }
+
+    .status-select option[value="İptal"] {
+        background-color: #dc3545;
+        color: white;
+        padding: 10px;
+    }
+
+    /* Durum badge stilleri */
+    .status-badge {
+        display: inline-block;
+        padding: 0.25em 0.6em;
+        font-size: 0.875em;
+        font-weight: 600;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+        margin-left: 0.5rem;
+    }
+
+    .status-badge.badge-info {
+        background-color: #17a2b8;
+        color: white;
+    }
+
+    .status-badge.badge-warning {
+        background-color: #ffc107;
+        color: black;
+    }
+
+    .status-badge.badge-success {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .status-badge.badge-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .custom-checkbox {
+        padding: 15px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .custom-checkbox:hover {
+        background-color: #e9ecef;
+        border-color: #2196F3;
+    }
+
+    .custom-checkbox .form-check-input {
+        width: 1.2em;
+        height: 1.2em;
+        margin-top: 0.2em;
+        cursor: pointer;
+    }
+
+    .custom-checkbox .form-check-label {
+        font-weight: 500;
+        cursor: pointer;
+        color: #495057;
+    }
+
+    .custom-checkbox .form-check-input:checked {
+        background-color: #2196F3;
+        border-color: #2196F3;
+    }
+
+    .custom-checkbox .form-check-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+
+    .form-check.form-switch {
+        min-width: 220px;
+        padding: 10px 0 10px 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 0;
+    }
+    .form-check-input[type="checkbox"], .form-check-input[type="radio"] {
+        width: 2em;
+        height: 1.2em;
+        margin-top: 0;
+        cursor: pointer;
+    }
+    .form-check-label {
+        font-weight: 500;
+        cursor: pointer;
+        color: #495057;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .tonaj-analiz-box {
+        background: #f8f9fa;
+        border-radius: 10px;
+        border: 1.5px solid #2196F3;
+        box-shadow: 0 2px 8px rgba(33,150,243,0.07);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .tonaj-analiz-box .form-check-input[type="checkbox"] {
+        width: 1.3em;
+        height: 1.3em;
+        border-radius: 0.35em;
+        border: 2px solid #2196F3;
+        margin-top: 0.1em;
+    }
+    .tonaj-analiz-box .form-check-input:checked {
+        background-color: #2196F3;
+        border-color: #2196F3;
+    }
+    .tonaj-analiz-box .form-check-label {
+        font-size: 1.05em;
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    /* Diğer radio buttonlar için klasik Bootstrap görünümü */
+    .form-check-input[type="radio"] {
+        width: 1em;
+        height: 1em;
+        border-radius: 50%;
+        border: 1px solid #adb5bd;
+        background: #fff;
+        margin-top: 0.2em;
+        box-shadow: none;
+    }
+    .form-check-input[type="radio"]:checked {
+        background-color: #2196F3;
+        border-color: #2196F3;
+    }
+    .section-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1976D2;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Satış kalemi seçimi
+        const saleItemSelectRadio = document.getElementById('sale_item_select_radio');
+        const saleItemManualRadio = document.getElementById('sale_item_manual_radio');
+        const saleItemSelectArea = document.getElementById('sale_item_select_area');
+        const saleItemManualArea = document.getElementById('sale_item_manual_area');
+        const saleItemSelect = document.getElementById('id_sale_item_select');
+        const saleItemManual = document.getElementById('id_sale_item_manual');
+
+        function toggleSaleItemFields() {
+            if (saleItemSelectRadio.checked) {
+                saleItemSelectArea.style.display = '';
+                saleItemManualArea.style.display = 'none';
+                saleItemManual.disabled = true;
+                saleItemManual.value = '';
+            } else {
+                saleItemSelectArea.style.display = 'none';
+                saleItemManualArea.style.display = '';
+                saleItemManual.disabled = false;
+                saleItemSelect.value = '';
+            }
+        }
+
+        // Alıcı seçimi
+        const buyerSelectRadio = document.getElementById('buyer_select_radio');
+        const buyerManualRadio = document.getElementById('buyer_manual_radio');
+        const buyerSelectArea = document.getElementById('buyer_select_area');
+        const buyerManualArea = document.getElementById('buyer_manual_area');
+        const buyerSelect = document.getElementById('id_buyer_select');
+        const buyerManual = document.getElementById('id_buyer_manual');
+
+        function toggleBuyerFields() {
+            if (buyerSelectRadio.checked) {
+                buyerSelectArea.style.display = '';
+                buyerManualArea.style.display = 'none';
+                buyerManual.disabled = true;
+                buyerManual.value = '';
+            } else {
+                buyerSelectArea.style.display = 'none';
+                buyerManualArea.style.display = '';
+                buyerManual.disabled = false;
+                buyerSelect.value = '';
+            }
+        }
+
+        // Radio butonları değiştiğinde
+        saleItemSelectRadio.addEventListener('change', toggleSaleItemFields);
+        saleItemManualRadio.addEventListener('change', toggleSaleItemFields);
+        buyerSelectRadio.addEventListener('change', toggleBuyerFields);
+        buyerManualRadio.addEventListener('change', toggleBuyerFields);
+
+        // Sayfa yüklendiğinde
+        toggleSaleItemFields();
+        toggleBuyerFields();
+
+        // Nakliye türü değişikliği
+        const deliveryTypeSelect = document.querySelector('#id_delivery_type');
+        const vehicleFields = document.querySelector('#vehicle-fields');
+        const cargoFields = document.querySelector('#cargo-fields');
+        const commonDeliveryFields = document.querySelector('#common-delivery-fields');
+        const deliveryTypeAlert = document.querySelector('#delivery-type-alert');
+
+        function updateFields() {
+            const selectedType = deliveryTypeSelect.options[deliveryTypeSelect.selectedIndex].text.trim();
+            console.log('selectedType:', selectedType);
+            
+            // Başlıkları gizle
+            document.getElementById('vehicle-courier-title').style.display = 'none';
+            document.getElementById('cargo-title').style.display = 'none';
+            
+            // Tüm alanları gizle
+            vehicleFields.style.display = 'none';
+            cargoFields.style.display = 'none';
+            commonDeliveryFields.style.display = 'none';
+            
+            // Seçilen tipe göre alanları ve başlığı göster
+            switch(selectedType) {
+                case 'ARAÇ':
+                    document.getElementById('vehicle-courier-title').style.display = 'block';
+                    document.getElementById('delivery-type-text').textContent = 'Araç';
+                    commonDeliveryFields.style.display = 'flex';
+                    vehicleFields.style.display = 'flex';
+                    deliveryTypeAlert.style.display = 'none';
+                    break;
+                case 'KARGO':
+                case 'POSTA':
+                    document.getElementById('cargo-title').style.display = 'block';
+                    cargoFields.style.display = 'flex';
+                    deliveryTypeAlert.style.display = 'none';
+                    break;
+                case 'KURYE':
+                    document.getElementById('vehicle-courier-title').style.display = 'block';
+                    document.getElementById('delivery-type-text').textContent = 'Kurye';
+                    commonDeliveryFields.style.display = 'flex';
+                    deliveryTypeAlert.style.display = 'none';
+                    break;
+                default:
+                    deliveryTypeAlert.style.display = 'block';
+            }
+            
+            // Debug: Alanların display durumunu yazdır
+            console.log('commonDeliveryFields:', commonDeliveryFields.style.display);
+            console.log('vehicleFields:', vehicleFields.style.display);
+            console.log('cargoFields:', cargoFields.style.display);
+        }
+
+        // Nakliye türü değiştiğinde
+        deliveryTypeSelect.addEventListener('change', updateFields);
+        updateFields();
+
+        // Durum seçici için özel stil
+        const statusSelect = document.querySelector('.status-select');
+        const statusBadge = document.createElement('span');
+        statusBadge.className = 'status-badge';
+        statusSelect.parentNode.appendChild(statusBadge);
+
+        function updateStatusBadge() {
+            const selectedValue = statusSelect.value;
+            statusBadge.className = 'status-badge';
+            
+            switch(selectedValue) {
+                case 'Beklemede':
+                    statusBadge.classList.add('badge-info');
+                    statusBadge.textContent = 'Beklemede';
+                    break;
+                case 'Yolda':
+                    statusBadge.classList.add('badge-warning');
+                    statusBadge.textContent = 'Yolda';
+                    break;
+                case 'Teslim Edildi':
+                    statusBadge.classList.add('badge-success');
+                    statusBadge.textContent = 'Teslim Edildi';
+                    break;
+                case 'İptal':
+                    statusBadge.classList.add('badge-danger');
+                    statusBadge.textContent = 'İptal';
+                    break;
+                default:
+                    statusBadge.textContent = '';
+            }
+        }
+
+        statusSelect.addEventListener('change', updateStatusBadge);
+        updateStatusBadge();
+
+        // T.C. Kimlik No ve Telefon için kontrolleri ekle (hem keydown hem input hem paste)
+        const numericInputs = [
+            document.getElementById('id_courier_id'),
+            document.getElementById('id_courier_phone')
+        ];
+        numericInputs.forEach(input => {
+            if (input) {
+                input.addEventListener('keydown', function(event) {
+                    const key = event.key;
+                    if (!/^\d$/.test(key) && 
+                        key !== 'Backspace' && 
+                        key !== 'Delete' && 
+                        key !== 'ArrowLeft' && 
+                        key !== 'ArrowRight' && 
+                        key !== 'Tab') {
+                        event.preventDefault();
+                    }
+                });
+                input.addEventListener('input', function(event) {
+                    event.target.value = event.target.value.replace(/[^\d]/g, '');
+                });
+                input.addEventListener('paste', function(event) {
+                    event.preventDefault();
+                    const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+                    input.value = pastedText.replace(/[^\d]/g, '');
+                });
+            }
+        });
+
+        // Otomatik büyük harf için fonksiyon (sadece value'ya uygula, placeholder'a dokunma)
+        function toUpperCase(event) {
+            const start = event.target.selectionStart;
+            const end = event.target.selectionEnd;
+            event.target.value = event.target.value.toUpperCase();
+            event.target.setSelectionRange(start, end);
+        }
+        const uppercaseInputs = [
+            document.getElementById('id_courier_name'),
+            document.getElementById('id_vehicle_plate'),
+            document.getElementById('id_explanation')
+        ];
+        uppercaseInputs.forEach(input => {
+            if (input) {
+                input.addEventListener('input', toUpperCase);
+                // Placeholder'ı küçük harfli ve orijinal haliyle ayarla
+                if (input.placeholder) {
+                    input.placeholder = input.placeholder.charAt(0).toUpperCase() + input.placeholder.slice(1).toLowerCase();
+                }
+            }
+        });
+
+        // Kargo alanlarını asla disabled yapma (her zaman aktif tut)
+        const trackingInput = document.getElementById('id_tracking_number');
+        const companyInput = document.getElementById('id_delivery_company');
+        if (trackingInput) trackingInput.disabled = false;
+        if (companyInput) companyInput.disabled = false;
+
+        // Form submit olmadan önce kargo alanlarını tekrar aktif et
+        document.querySelector('form').addEventListener('submit', function() {
+            var tracking = document.getElementById('id_tracking_number');
+            var company = document.getElementById('id_delivery_company');
+            if (tracking) tracking.disabled = false;
+            if (company) company.disabled = false;
+        });
+    });
+</script>
+{% endblock %}
 {% endblock content %}

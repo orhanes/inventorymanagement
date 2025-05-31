@@ -1,103 +1,283 @@
 {% extends "base.html" %}
-
+{% load l10n %}
 {% load static %}
 
 
 {% block title %} Anasayfa {% endblock title %}
 
-
 {% block content %}
-
-    <div style="color:#464646; font-style: bold; font-size: 3rem; border-bottom: 1px solid #464646;">Hoşgeldin, {{ request.user.username }}</div>
-
-    <br>
-
-    <div id="container" style="position: relative; height:45vh; border: 1.2mm ridge #4e6570; border-radius: 30px;" class="align-middle table-bordered">
-        <canvas id="bar-graph"></canvas>
+<div class="container mt-4">
+    <!-- İstatistik Kartları -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-box fa-3x text-primary mb-3"></i>
+                    <h3 class="text-primary">{{ total_products }}</h3>
+                    <p class="text-muted mb-0">Toplam Ürün</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x text-success mb-3"></i>
+                    <h3 class="text-success">{{ total_customers }}</h3>
+                    <p class="text-muted mb-0">Toplam Müşteri</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-truck fa-3x text-info mb-3"></i>
+                    <h3 class="text-info">{{ total_suppliers }}</h3>
+                    <p class="text-muted mb-0">Toplam Tedarikçi</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x text-warning mb-3"></i>
+                    <h3 class="text-warning">{{ total_sales }}</h3>
+                    <p class="text-muted mb-0">Toplam Satış</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <br>
+    <!-- Grafik -->
+    <div class="card shadow-lg mb-4">
+        <div class="card-header bg-gradient-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Stok Durumu</h3>
+        </div>
+        <div class="card-body">
+            <div class="chart-container" style="position: relative; height:400px;">
+                <canvas id="bar-graph"></canvas>
+            </div>
+        </div>
+    </div>
 
+    <!-- Satış ve Satın Alma Kartları -->
     <div class="row">
-        <div class="col-md-6">
-            <a href="{% url 'select-supplier' %}" class="btn btn-success btn-lg btn-block btn-huge">Stok Ekle</a>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Son Satışlar</h5>
+                    <a href="{% url 'select-buyer' %}" class="btn btn-light btn-sm">
+                        <i class="fas fa-plus-circle me-1"></i>Satış Ekle
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% for item in sales %}
+                        <div class="sale-item mb-3 {% if not forloop.first %}border-top pt-3{% endif %}">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <h6 class="text-primary">Form No: {{ item.year|unlocalize }}/{{ item.sequence|stringformat:'04d' }}</h6>
+                                    <p class="mb-1">Satın Alınan Firma: <strong>{{ item.buyer.name }}</strong></p>
+                                    <small class="text-muted"><i class="far fa-calendar-alt me-1"></i>{{ item.time.date }}</small>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <h5 class="text-success">{{ item.get_total_price }} TL</h5>
+                                    <a href="{% url 'sale-bill' item.billno %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-file-invoice me-1"></i>Formu Görüntüle
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
-        <div class="col-md-6">
-            <a href="{% url 'select-buyer' %}" class="btn btn-success btn-lg btn-block btn-huge">Satış Ekle</a>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-cart-plus me-2"></i>Son Satınalmalar</h5>
+                    <a href="{% url 'select-supplier' %}" class="btn btn-light btn-sm">
+                        <i class="fas fa-plus-circle me-1"></i>Satınalma Ekle
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% for item in purchases %}
+                        <div class="purchase-item mb-3 {% if not forloop.first %}border-top pt-3{% endif %}">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <h6 class="text-primary">Form No: {{ item.year|unlocalize }}/{{ item.sequence|stringformat:'04d' }}</h6>
+                                    <p class="mb-1">Satılan Firma: <strong>{{ item.supplier.name }}</strong></p>
+                                    <small class="text-muted"><i class="far fa-calendar-alt me-1"></i>{{ item.time.date }}</small>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <h5 class="text-success">{{ item.get_total_price }} TL</h5>
+                                    <a href="{% url 'purchase-bill' item.billno %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-file-invoice me-1"></i>Formu Görüntüle
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Chart !== 'undefined') {
+            Chart.defaults.color = '#3c3c3c';
+            Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
 
-    <br>
+            // Django template değişkenlerini JavaScript'e aktar
+            const chartData = JSON.parse('{{ data|escapejs }}');
+            const chartLabels = JSON.parse('{{ labels|escapejs }}');
 
-    <div class="content-section">
-        <div class="row">
-            
-            <div class="col-md-6">
-                <div style="color: #4e6570; font-style: bold; font-size: 1.3em; border-bottom: 2px solid #4e6570">Son Satışlar</div><br>
-                {% for item in sales %}
-                    {% if not forloop.first %}
-                        <br><div style="border-bottom: 0.5px solid #4e6570"></div><br>
-                    {% endif %}
-                    <div class="row">               
-                        <div class="col-md-9"> 
-                            Makbuz No: #{{ item.billno }} <br> 
-                            Satın Alınan Firma <b>{{ item.buyer.name }}</b> <br>
-                            <small><i>{{ item.time.date }}</i></small>
-                        </div>
-                        <div class="col-md-2"> <br> {{ item.get_total_price }} TL <br> <a href="{% url 'sale-bill' item.billno %}">Makbuzu Görüntüle</a> </div>
-                    </div>
-                {% endfor %}
-            </div>
+            // Grafik konfigürasyonu
+            const barConfig = {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Stoktaki Envanter',
+                        data: chartData,
+                        backgroundColor: 'rgba(33, 150, 243, 0.7)',
+                        borderColor: 'rgba(33, 150, 243, 1)',
+                        borderWidth: 1,
+                        hoverBackgroundColor: 'rgba(33, 150, 243, 0.9)',
+                        hoverBorderColor: 'rgba(33, 150, 243, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                stepSize: 1
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 12
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: function(value) {
+                                return value;
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 12
+                            },
+                            color: '#333'
+                        }
+                    }
+                }
+            };
 
-            <div class="col-md-6">
-                <div style="color: #4e6570; font-style: bold; font-size: 1.3em; border-bottom: 2px solid #4e6570">Son Satın Almalar</div><br>
-                {% for item in purchases %}
-                    {% if not forloop.first %}
-                        <br><div style="border-bottom: 0.5px solid #4e6570"></div><br>
-                    {% endif %}
-                    <div class="row">           
-                        <div class="col-md-9"> 
-                            Makbuz No: #{{ item.billno }} <br> 
-                            Satılan Firma <b>{{ item.supplier.name }}</b> <br>
-                            <small><i>{{ item.time.date }}</i></small>
-                        </div>
-                        <div class="col-md-2"> <br>{{ item.get_total_price }} TL <br> <a href="{% url 'purchase-bill' item.billno %}">Makbuzu Görüntüle</a> </div>
-                    </div>
-                {% endfor %}
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Loading Chart JS -->
-    <script src="{% static 'js/Chart.min.js' %}"></script>  
-    <script>
-        Chart.defaults.global.defaultFontColor = '#3c3c3c';
-
-        //configuration for the bar graph
-        var barConfig = {
-            type: 'bar',
-            data: {
-                datasets: [{
-                    backgroundColor: '#1a79a5',
-                    label: 'Stoktaki Envanter',
-                    data: {{ data|safe }},
-                }],
-                labels: {{ labels|safe }}
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-            },
-        };
-
-
-        //runs all charts on loading the webpage
-        window.onload = function() {
-            var ctx = document.getElementById('bar-graph').getContext('2d');
+            // Grafiği oluştur
+            const ctx = document.getElementById('bar-graph').getContext('2d');
             window.BarStock = new Chart(ctx, barConfig);
-        };
+        } else {
+            console.error('Chart.js yüklenemedi!');
+        }
+    });
 
-    </script>
+</script>
 
+
+
+<style>
+    body {
+        background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+    }
+    .card {
+        border-radius: 18px;
+        border: none;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        background: rgba(255,255,255,0.95);
+        transition: transform 0.3s cubic-bezier(.4,2,.3,1), box-shadow 0.3s;
+    }
+    .card:hover {
+        transform: scale(1.03) translateY(-8px);
+        box-shadow: 0 16px 40px 0 rgba(33,150,243,0.18);
+    }
+    .card-header {
+        border-radius: 18px 18px 0 0 !important;
+        background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 1.2rem;
+        letter-spacing: 1px;
+    }
+    .fa-3x {
+        font-size: 3rem;
+        filter: drop-shadow(0 2px 8px rgba(33,150,243,0.15));
+    }
+    .btn-modern, .btn.btn-light.btn-sm {
+        background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+        color: #fff !important;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        box-shadow: 0 4px 16px rgba(33,150,243,0.10);
+        transition: all 0.2s;
+    }
+    .btn-modern:hover, .btn.btn-light.btn-sm:hover {
+        background: linear-gradient(90deg, #38f9d7 0%, #43e97b 100%);
+        color: #fff !important;
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 8px 24px rgba(33,150,243,0.18);
+    }
+    .chart-container {
+        border-radius: 10px;
+        padding: 10px;
+    }
+    .sale-item, .purchase-item {
+        transition: all 0.3s ease;
+    }
+    .sale-item:hover, .purchase-item:hover {
+        transform: translateX(5px) scale(1.02);
+        background: rgba(33,150,243,0.04);
+    }
+    .fa-3x {
+        font-size: 3rem;
+    }
+    .stat-title {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #888;
+        margin-top: 0.5rem;
+    }
+    .stat-value {
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin-bottom: 0.2rem;
+    }
+    .animate__animated {
+        animation-duration: 0.8s;
+    }
+</style>
 {% endblock content %}

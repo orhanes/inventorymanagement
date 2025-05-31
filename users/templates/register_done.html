@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Kayıt Başarılı | Stok Yönetimi</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        body {
+            background-image: url('/static/images/login_photo.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .register-done-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+        }
+        .register-done-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        .register-done-card:hover {
+            transform: translateY(-5px);
+        }
+        .register-done-header {
+            background: rgba(76, 175, 80, 0.85);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 12px 12px 0 0;
+        }
+        .register-done-header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .register-done-body {
+            padding: 30px;
+            text-align: center;
+        }
+        .btn-login {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 30px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            background: linear-gradient(45deg, #1976D2, #2196F3);
+            color: #fff;
+        }
+        .form-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .form-link a {
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .form-link a:hover {
+            color: #1976D2;
+            text-decoration: underline;
+        }
+        .app-title {
+            color: white;
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            background: rgba(33, 150, 243, 0.7);
+            border-radius: 12px;
+            padding: 10px 30px;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .app-title i {
+            margin-right: 0.5rem !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-done-container">
+        <div class="w-100 d-flex justify-content-center">
+            <div class="app-title animate__animated animate__fadeInDown">
+                <i class="fas fa-boxes"></i>Stok Yönetim Programı
+            </div>
+        </div>
+        <div class="register-done-card animate__animated animate__fadeIn">
+            <div class="register-done-header">
+                <h1><i class="fas fa-check-circle me-2"></i>Kayıt Başarılı!</h1>
+            </div>
+            <div class="register-done-body">
+                <h4 class="text-success">Kayıt olduğun için teşekkür ederiz, <strong>{{ new_user.username }}</strong>!</h4>
+                <p class="mt-3">Artık hesabınızla giriş yapabilirsiniz.</p>
+                <div class="form-link mt-3">
+                    <a href="{% url 'login' %}" class="btn btn-login mt-3">
+                        <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %} Vergi Oranları {% endblock title %}
+
+{% block content %}
+<div class="container-fluid mt-4 animate__animated animate__fadeIn">
+    <div class="card shadow">
+        <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fas fa-percentage me-2"></i>Vergi Oranları
+            </h3>
+            <a class="btn btn-warning" href="{% url 'tax_rate_create' %}">
+                <i class="fas fa-plus me-2"></i>Yeni Vergi Oranı
+            </a>
+        </div>
+        <div class="card-body">
+            {% if tax_rates %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Vergi Adı</th>
+                            <th>Vergi Oranı</th>
+                            <th>Durum</th>
+                            <th>Oluşturulma Tarihi</th>
+                            <th>Güncellenme Tarihi</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tax_rate in tax_rates %}
+                        <tr>
+                            <td>{{ tax_rate.name }}</td>
+                            <td>%{{ tax_rate.rate }}</td>
+                            <td>
+                                {% if tax_rate.is_active %}
+                                <span class="badge bg-success">Aktif</span>
+                                {% else %}
+                                <span class="badge bg-danger">Pasif</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ tax_rate.created_at|date:"d.m.Y H:i" }}</td>
+                            <td>{{ tax_rate.updated_at|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'tax_rate_edit' tax_rate.pk %}" class="btn btn-sm btn-primary me-2" title="Düzenle">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger delete-btn" 
+                                            data-id="{{ tax_rate.pk }}" 
+                                            data-name="{{ tax_rate.name }}" 
+                                            title="Sil">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center text-muted mb-3">
+                <small>Toplam {{ tax_rates.paginator.count }} kayıt bulunmaktadır.</small>
+            </div>
+            {% if tax_rates.has_other_pages %}
+            <div class="text-center text-muted mb-3">
+                <small>Toplam {{ tax_rates.paginator.num_pages }} sayfa içerisinde {{ tax_rates.number }}. sayfadasınız</small>
+            </div>
+            <nav aria-label="Sayfalama" class="mt-2">
+                <ul class="pagination justify-content-center">
+                    {% if tax_rates.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="İlk">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ tax_rates.previous_page_number }}" aria-label="Önceki">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;&laquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;</span>
+                        </li>
+                    {% endif %}
+
+                    {% for i in tax_rates.paginator.page_range %}
+                        {% if tax_rates.number == i %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ i }}</span>
+                            </li>
+                        {% elif i > tax_rates.number|add:'-3' and i < tax_rates.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if tax_rates.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ tax_rates.next_page_number }}" aria-label="Sonraki">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ tax_rates.paginator.num_pages }}" aria-label="Son">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;&raquo;</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-percentage fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">Henüz vergi oranı eklenmemiş</h4>
+                <p class="text-muted">Yeni bir vergi oranı eklemek için "Yeni Vergi Oranı" butonunu kullanabilirsiniz.</p>
+                <a href="{% url 'tax_rate_create' %}" class="btn btn-success mt-3">
+                    <i class="fas fa-plus me-2"></i>Yeni Vergi Oranı Ekle
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .table {
+        margin-bottom: 0;
+    }
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        border-top: none;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    .badge {
+        padding: 0.5em 0.75em;
+        font-weight: 500;
+        border-radius: 6px;
+    }
+    .bg-success {
+        background-color: #198754 !important;
+    }
+    .bg-danger {
+        background-color: #dc3545 !important;
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Silme butonlarına tıklama olayı ekle
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const name = this.getAttribute('data-name');
+            
+            Swal.fire({
+                title: 'Emin misiniz?',
+                html: `<strong>${name}</strong> vergi oranını silmek istediğinizden emin misiniz?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Evet, Sil!',
+                cancelButtonText: 'Vazgeç',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                },
+                customClass: {
+                    confirmButton: 'btn btn-danger px-4 me-3',
+                    cancelButton: 'btn btn-secondary px-4'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/common/tax-rates/${id}/delete/`;
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
+
+{% endblock content %} 

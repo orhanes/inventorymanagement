@@ -2,12 +2,12 @@
 {% load static %}
 {% load l10n %}
 
-{% block title %} Satın Alma Fatura No : {{ bill.billno }}{% endblock title %}
+{% block title %} Satın Alma Form No : {{ bill.billno }}{% endblock title %}
 
 
 {% block content %}
 
-    <div style="color:#575757; font-style: bold; font-size: 3rem;  border-bottom: 1px solid white;">Satınalma Makbuz No : {{ bill.billno }}</div>
+    <!--<div style="color:#575757; font-style: bold; font-size: 3rem;  border-bottom: 1px solid white;">Satınalma Form No : {{ bill.billno }}</div>-->
     
     <form method="post">
     {% csrf_token %}
@@ -20,19 +20,20 @@
 
                 <table class="outer-box inner-box" style="width: 840px; margin-left: auto; margin-right: auto;">
                     <tbody>
-                        
+                        <!--
                         <tr style="height: 1px;">
-                            <td> <p style="text-align: center;">MAKBUZ - SATINALMA</p> </td>
+                            <td> <p style="text-align: center;">SATINALMA FORM NO : {{ bill.billno }}</p> </td>
                         </tr>
+                        -->
                         
                         <tr style="text-align: center;">
                             <td >
-                                <span><img src="/static/images/toprak_logo.jpg" alt="Toprak Logo" width="800" height="220"></span>
-                                <span style="font-size: 200%;">TOPRAK BORU PROFİL SAC</span> <br>
-                                <span style="font-size: 120%; font-weight: bold;">SAN. VE LTD. ŞTİ</span> <br>
-                                <span style="font-weight: bold;">ADRES :</span>Yıldırım Beyazıt Mah. 305 No'lu Cad. No: 2/1 <br>Payas - HATAY<br>
-                                <span style="font-weight: bold;">EMAIL : info@toprakboruprofil.com</span> <br>
-                                <span style="font-weight: bold;">VERGİ KİMLİK NO: 123456789</span> <br><br>
+                                <span><img src="{{common.company.logo.url}}" alt="Firma Logo" width="400" height="150" style="object-fit: contain;"></span> <br>
+                                <span class="text-uppercase font-weight-bold text-center" style="font-size: 120%;">{{common.company.name}}</span> <br>
+                                <span class="text-uppercase font-weight-bold text-center" >ADRES:</span><span> {{common.company.address}}</span><br>
+                                <span class="text-uppercase font-weight-bold text-center" >EMAIL:</span><span> {{common.company.email}}</span> <br>
+                                <span class="text-uppercase font-weight-bold text-center" >VERGİ KİMLİK NO:</span><span> {{common.company.tax_id}}</span> <br>
+                                <span class="text-uppercase font-weight-bold text-center" >VERGİ DAİRESİ:</span><span> {{common.company.tax_administration}}</span> <br><br>
                             </td>
                         </tr>
                         
@@ -41,39 +42,39 @@
                             <table class="outer-box" style="width: 800px; margin-left: auto; margin-right: auto;">
                                 <tbody>
                                     <tr>
-                                        <td class="inner-box" style="text-align: center; font-weight: bold;background-color:#D3D3D3;" colspan="3">SATINALMA MAKBUZU</td>
+                                        <td class="inner-box" style="text-align: center; font-weight: bold;background-color:#D3D3D3;" colspan="3">SATINALMA FORMU</td>
                                     </tr>
                                     <tr>
                                         <td class="inner-box" style="width: 50%; font-weight: bold;">&nbsp; TEDARİKÇİ ADI</td>
-                                        <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp; MAKBUZ NO</td>
-                                        <td class="inner-box" style="width: 25%;">&nbsp;&nbsp;{{ bill.billno }}</td>
+                                        <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp; FORM NO</td>
+                                        <td class="inner-box" style="width: 25%;">&nbsp;{{ bill }}</td>
                                     </tr>
                                     <tr>
                                         <td class="inner-box" style="width: 50%;">&nbsp;{{ bill.supplier.name }}</td>
                                         <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;TARİH</td>
-                                        <td class="inner-box" style="width: 25%;">&nbsp;&nbsp;{{ bill.time.date }}</td>
+                                        <td class="inner-box" style="width: 25%;">&nbsp;{{ bill.time.date|date:"d / m / Y" }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="inner-box" style="width: 50%;" rowspan="3">{{ bill.supplier.address|linebreaks }} {{ bill.supplier.county }}, {{ bill.supplier.city }}, {{ bill.supplier.country }}</td>
+                                        <td class="inner-box" style="width: 50%;" rowspan="3"><span style="font-weight: bold;">&nbsp;ADRES:</span><br>&nbsp;{{ bill.supplier.address }} <br>&nbsp;{{ bill.supplier.county }}, {{ bill.supplier.city }}, {{ bill.supplier.country }}</td>
                                         <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;VERGİ KİMLİK NO</td>
-                                        <td class="inner-box" style="width: 25%;">&nbsp;&nbsp;{{ bill.supplier.tax_id|unlocalize }}</td>
+                                        <td class="inner-box" style="width: 25%;">&nbsp;{{ bill.supplier.tax_id|unlocalize }}</td>
                                     </tr>
                                     <tr>
                                         <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;VERGİ DAİRESİ</td>
-                                        <td class="inner-box" style="width: 25%;">&nbsp;&nbsp;{{ bill.supplier.tax_administration }}</td>
+                                        <td class="inner-box align-left text-uppercase" style="width: 25%;">&nbsp;{{ bill.supplier.tax_administration }}</td>
                                     </tr>
                                     <tr>
                                         <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;İRSALİYE NO</td>
-                                        {% for item in items %}
-                                            <td class="inner-box align-left" style="width: 25%;">&nbsp; {{ item.waybill_no }}  </td>
-                                        {% endfor %}
+                                        <td class="inner-box align-left text-uppercase" style="width: 75%;">
+                                            &nbsp;{{ items.0.waybill_no }}
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="inner-box" style="font-weight: bold;">&nbsp;İLGİLİ KİŞİ : <span style="font-weight:300;"> {{ bill.supplier.representative }}</span></td>
                                         <td class="inner-box" style="width: 25%; font-weight: bold;">&nbsp;İRSALİYE TARİHİ</td>
-                                        {% for item in items %}
-                                            <td class="inner-box align-left" style="width: 25%;"> &nbsp; {{ item.waybill_date }}  </td>
-                                        {% endfor %}
+                                        <td class="inner-box align-left" style="width: 75%;">
+                                            &nbsp;{{ items.0.waybill_date|date:"d / m / Y" }}
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -96,7 +97,7 @@
                                     {% for item in items %}
                                         <tr style="height: auto;">
                                             <td class="inner-box align-middle" style="width: 5%;">&nbsp; {{ forloop.counter }}</td>
-                                            <td class="inner-box" style="width: 30%;">&nbsp; {{ item.stock.name }}</td>
+                                            <td class="inner-box text-uppercase" style="width: 30%;">&nbsp; {{ item.stock.name }}</td>
                                             <td class="inner-box align-middle" style="width: 12%;">&nbsp; {{ item.quantity }}</td>
                                             <td class="inner-box align-middle" style="width: 12%;">&nbsp;{{ item.stock.unit }}</td>
                                             <td class="inner-box align-middle" style="width: 12%;">&nbsp; {{ item.perprice }} TL</td>
@@ -115,33 +116,28 @@
                                     <br>
                                     <tr>
                                         <td class="inner-box" style="width: 35%; text-align: center;" rowspan="7">
-                                            <p> <span style="font-weight: bold;">BANKA BİLGİLERİ <br> ORHAN</span> <br>
-                                               ZİRAAT BANKASI <br> IBAN - TR05 0000 0000 0000 0000 00 <br> ŞUBE KODU - ABCD 010 0110 <br> HESAP NUMARASI <br> HES NO - 541-010-0400</p>
+                                            <p> <span class="font-weight-bold text-uppercase">TEDARİKÇİ BANKA BİLGİLERİ</span> <br>
+                                                 <span class="text-uppercase"> {{ bill.supplier.bank_name }} </span> <br>
+                                                 <span class="text-uppercase"> IBAN - {{bill.supplier.iban_no}} </span> <br> 
+                                                 <span class="text-uppercase"> ŞUBE KODU - {{bill.supplier.branch_code|unlocalize}} </span> <br> 
+                                                 <span class="text-uppercase"> HESAP NUMARASI - {{bill.supplier.account_number|unlocalize}} </span> <br> 
                                         </td>
                                     </tr>
                                     <tr>
-                                        {% for item in items %}
                                         <td class="inner-box" style="font-weight: bold;">&nbsp;TOPLAM</td>
-                                        <td class="inner-box align-middle">&nbsp; {{ item.totalprice }} TL </td>
-                                        {% endfor %}
+                                        <td class="inner-box align-middle">&nbsp; {{ bill.get_total_price }} TL </td>
                                     </tr>
                                     <tr>
-                                        {% for item in items %}
-                                        <td class="inner-box" style="width: 30%; font-weight: bold;">&nbsp;KDV (% {{ item.get_tax_rate_display }})</td>
-                                        <td class="inner-box align-middle" style="width: 30%;">&nbsp; {{ item.calculate_tax_amount|floatformat:2 }} TL</td>
-                                        {% endfor %}
+                                        <td class="inner-box" style="width: 30%; font-weight: bold;">&nbsp;KDV (%{{ items.0.get_tax_rate_display }})</td>
+                                        <td class="inner-box align-middle" style="width: 30%;">&nbsp; {{ bill.get_total_tax_amount|floatformat:2 }} TL</td>
                                     </tr>
                                     <tr>
-                                        {% for item in items %}
                                         <td class="inner-box" style="font-weight: bold;">&nbsp;TOPLAM (KDV DAHİL)</td>
-                                        <td class="inner-box align-middle">&nbsp; {{ item.total_with_tax }} TL</td>
-                                        {% endfor %}
+                                        <td class="inner-box align-middle">&nbsp; {{ bill.get_total_with_tax }} TL</td>
                                     </tr>
                                     <tr>
-                                        {% for item in items %}
                                         <td class="inner-box" style="font-weight: bold;">&nbsp;VADE TARİHİ</td>
-                                        <td class="inner-box align-middle">&nbsp; {{ item.due_date }}</td>
-                                        {% endfor %}
+                                        <td class="inner-box align-middle">&nbsp; {{ items.0.due_date|date:"d / m / Y" }}</td>
                                     </tr>
                                     
                                     <!--
@@ -160,17 +156,34 @@
                         </tr>
 
                         <tr>
-                            <td style="text-align: right;margin-right: 60px;">
-                                <br>
-                                <span style="font-weight: bold;margin-right: 60px;">FİRMA ADINA &nbsp;&nbsp;</span><span style="font-weight: bold;margin-right: 60px;"><br> Ad / Soyad / İmza</span>
-                                <br>
-                                <br>
-                                <br>
-                                <br>
-                                <br>
-                                <br>
-                                <br>
-                                <br>
+                            <td>
+                            <table class="outer-box" style="width: 800px; margin-left: auto; margin-right: auto; margin-top: 20px;">
+                                <tbody>
+                                    <tr>
+                                        <td class="inner-box" style="width: 33%; text-align: center; border: 1px solid black;">
+                                            <span style="font-weight: bold;">HAZIRLAYAN</span><br>
+                                            <span style="font-weight: bold;">SATINALMA SORUMLUSU</span><br>
+                                            <br><br><br><br>
+                                        </td>
+                                        <td class="inner-box" style="width: 33%; text-align: center; border: 1px solid black;">
+                                            <span style="font-weight: bold;">ONAY</span><br>
+                                            <span style="font-weight: bold;">MUHASEBE MÜDÜRÜ</span><br>
+                                            <br><br><br><br>
+                                        </td>
+                                        <td class="inner-box" style="width: 33%; text-align: center; border: 1px solid black;">
+                                            <span style="font-weight: bold;">YÖNETİM ONAYI</span><br>
+                                            <span style="font-weight: bold;">GENEL MÜDÜR</span><br>
+                                            <br><br><br><br>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <br><br>
                             </td>
                         </tr>
 
@@ -189,10 +202,24 @@
 
         <br><br>
 
-        <div class="wrapper">
-            <button class="center btn btn-primary" onclick="printpage('printArea')">Yazdır</button>
-            <button class="center btn btn-success" type="submit">Taslağı Kaydet</button>
-            <a href="{% url 'purchases-list' %}" class=" btn center btn-secondary">Geri Dön</a>
+        <div class="d-flex justify-content-center mt-4">
+            <div class="mx-3">
+                <button class="btn btn-primary px-4" onclick="printpage('printArea')">
+                    <i class="fas fa-print me-2"></i>Yazdır
+                </button>
+            </div>
+            <!--    
+            <div class="mx-3">
+                <button class="btn btn-success px-4" type="submit">
+                    <i class="fas fa-save me-2"></i>Taslağı Kaydet
+                </button>
+            </div>
+            -->
+            <div class="mx-3">
+                <a href="{% url 'purchases-list' %}" class="btn btn-secondary px-4">
+                    <i class="fas fa-arrow-left me-2"></i>Geri Dön
+                </a>
+            </div>
         </div>
     </form>
 

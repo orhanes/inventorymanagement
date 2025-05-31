@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %} {{ object.name }} - Ürün Detayı {% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fas fa-box-open me-2"></i>Ürün Detayı - ({{ object.name }})
+            </h3>
+            <div>
+                <button onclick="printDetail()" class="btn btn-light me-2">
+                    <i class="fas fa-print me-2"></i>Yazdır
+                </button>
+                <a href="{% url 'edit-stock' object.pk %}" class="btn btn-warning">
+                    <i class="fas fa-edit me-2"></i>Düzenle
+                </a>
+                <a href="{% url 'inventory' %}" class="btn btn-secondary ms-2">
+                    <i class="fas fa-arrow-left me-2"></i>Geri Dön
+                </a>
+            </div>
+        </div>
+        <div class="card-body" id="printArea">
+            <!-- Ürün Resmi -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="image-display-container">
+                        <div class="image-preview-container">
+                            {% if object.image %}
+                                <img src="{{ object.image.url }}" alt="{{ object.name }}" class="img-fluid rounded product-image">
+                            {% else %}
+                                <div class="no-image-placeholder">
+                                    <i class="fas fa-image fa-4x text-muted"></i>
+                                    <p class="text-muted mt-2">Resim Yok</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <!-- Marka ve Model -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-trademark text-primary me-2"></i>Marka
+                        </label>
+                        <div class="detail-value">{{ object.brand }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-cube text-primary me-2"></i>Model
+                        </label>
+                        <div class="detail-value">{{ object.model }}</div>
+                    </div>
+                </div>
+                <!-- Ürün Adı ve Kategori -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-box text-primary me-2"></i>Ürün Adı
+                        </label>
+                        <div class="detail-value">{{ object.name }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-tags text-primary me-2"></i>Kategori
+                        </label>
+                        <div class="detail-value">{{ object.category }}</div>
+                    </div>
+                </div>
+                <!-- Alt Kategori ve Renk -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-tags text-primary me-2"></i>Alt Kategori
+                        </label>
+                        <div class="detail-value">{{ object.subcategory }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-palette text-primary me-2"></i>Renk
+                        </label>
+                        <div class="detail-value">{{ object.color }}</div>
+                    </div>
+                </div>
+                <!-- Birim ve Miktar -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-ruler text-primary me-2"></i>Birim
+                        </label>
+                        <div class="detail-value">{{ object.unit }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-hashtag text-primary me-2"></i>Miktar
+                        </label>
+                        <div class="detail-value">{{ object.quantity }}</div>
+                    </div>
+                </div>
+                <!-- Seri Numarası ve Barkod Numarası -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-barcode text-primary me-2"></i>Seri Numarası
+                        </label>
+                        <div class="detail-value">{{ object.serial_number }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-barcode text-primary me-2"></i>Barkod Numarası
+                        </label>
+                        <div class="detail-value">{{ object.barcode }}</div>
+                    </div>
+                </div>
+                <!-- Alış ve Satış Fiyatı -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-money-bill-wave text-primary me-2"></i>Alış Fiyatı
+                        </label>
+                        <div class="detail-value">{{ object.purchase_price }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-money-check-alt text-primary me-2"></i>Satış Fiyatı
+                        </label>
+                        <div class="detail-value">{{ object.sale_price }}</div>
+                    </div>
+                </div>
+                <!-- Son Kullanma Tarihi ve Garanti Süresi -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-calendar-alt text-primary me-2"></i>Son Kullanma Tarihi
+                        </label>
+                        <div class="detail-value">{% if object.expiry_date %}{{ object.expiry_date|date:'d.m.Y' }}{% else %}-{% endif %}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-shield-alt text-primary me-2"></i>Garanti Süresi
+                        </label>
+                        <div class="detail-value">{% if object.warranty_period %}{{ object.warranty_period }}{% else %}-{% endif %}</div>
+                    </div>
+                </div>
+                <!-- Üretici ve Tedarikçi -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-industry text-primary me-2"></i>Üretici
+                        </label>
+                        <div class="detail-value">{{ object.manufacturer }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-truck text-primary me-2"></i>Tedarikçi
+                        </label>
+                        <div class="detail-value">{{ object.supplier }}</div>
+                    </div>
+                </div>
+                <!-- Minimum Stok ve Raf/Konum -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-exclamation-triangle text-primary me-2"></i>Minimum Stok Seviyesi
+                        </label>
+                        <div class="detail-value">{{ object.min_stock_level }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-map-marker-alt text-primary me-2"></i>Raf/Konum
+                        </label>
+                        <div class="detail-value">{{ object.location }}</div>
+                    </div>
+                </div>
+                <!-- Açıklama/Özellikler ve Aktiflik -->
+                <div class="col-md-8">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-align-left text-primary me-2"></i>Açıklama/Özellikler
+                        </label>
+                        <div class="detail-value">{{ object.description }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex align-items-center">
+                    <div class="detail-group w-100 d-flex align-items-center justify-content-center" style="height: 100%;">
+                        <label class="detail-label me-3 mb-0 fs-5 fw-bold">
+                            <i class="fas fa-toggle-on text-primary me-2"></i>Aktif
+                        </label>
+                        <div>
+                            {% if object.is_active %}
+                                <span class="badge bg-success">Aktif</span>
+                            {% else %}
+                                <span class="badge bg-danger">Pasif</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <!-- Oluşturulma ve Güncellenme Tarihi -->
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-calendar-plus text-primary me-2"></i>Oluşturulma Tarihi
+                        </label>
+                        <div class="detail-value">{{ object.created_at|date:"d F Y, H:i" }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-group">
+                        <label class="detail-label">
+                            <i class="fas fa-calendar-check text-primary me-2"></i>Güncellenme Tarihi
+                        </label>
+                        <div class="detail-value">{{ object.updated_at|date:"d F Y, H:i" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted">
+                        <small>
+                            <i class="fas fa-info-circle me-1"></i>
+                            Son güncelleme: {{ object.updated_at|timesince }} önce
+                        </small>
+                    </div>
+                    <div class="noprint">
+                        <a href="{% url 'delete-stock' object.pk %}" class="btn btn-outline-danger">
+                            <i class="fas fa-trash me-2"></i>Ürünü Sil
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5">
+                <h5 class="mb-3"><i class="fas fa-id-card me-2"></i>Stok Kartları</h5>
+                {% if object.cards.count == 0 %}
+                    <div class="alert alert-info d-flex justify-content-between align-items-center">
+                        Bu ürüne ait henüz stok kartı yok.
+                        <a href="{% url 'add-stockcard' object.pk %}" class="btn btn-primary btn-sm ms-3">Stok Kartı Ekle</a>
+                    </div>
+                {% else %}
+                    <div class="d-flex justify-content-end mb-2">
+                        <a href="{% url 'add-stockcard' object.pk %}" class="btn btn-success btn-sm">Yeni Stok Kartı Ekle</a>
+                    </div>
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                            <tr class="text-center">
+                                <th>LOT</th>
+                                <th>Seri No</th>
+                                <th>Adet</th>
+                                <th>Boy</th>
+                                <th>Kalite</th>
+                                <th>Tarih</th>
+                                <th>Yazdır</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for card in object.cards.all %}
+                            <tr class="text-center">
+                                <td>{{ card.lot }}</td>
+                                <td>{{ card.serial_number }}</td>
+                                <td>{{ card.quantity }}</td>
+                                <td>{{ card.length }}</td>
+                                <td>{{ card.quality }}</td>
+                                <td>{{ card.date|date:'d.m.Y' }}</td>
+                                <td>
+                                    <a href="{% url 'print-stockcard' card.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-print"></i> Yazdır
+                                    </a>
+                                    {% if is_stok_yonetici %}
+                                        <a href="{% url 'edit-stockcard' card.pk %}" class="btn btn-outline-warning btn-sm ms-1">
+                                            <i class="fas fa-edit"></i> Düzenle
+                                        </a>
+                                        <a href="{% url 'delete-stockcard' card.pk %}" class="btn btn-outline-danger btn-sm ms-1">
+                                            <i class="fas fa-trash"></i> Sil
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .detail-group {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+    .detail-label {
+        display: block;
+        color: #6c757d;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .detail-value {
+        color: #212529;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .border-top {
+        border-color: #e9ecef !important;
+    }
+    @media (max-width: 768px) {
+        .detail-group {
+            padding: 1rem;
+        }
+        .detail-value {
+            font-size: 1rem;
+        }
+    }
+    @media print {
+        .noprint {
+            display: none !important;
+        }
+        .card {
+            box-shadow: none !important;
+            border: none !important;
+        }
+        .card-header {
+            background: none !important;
+            color: #000 !important;
+            padding: 0 !important;
+            margin-bottom: 2rem;
+        }
+        .detail-group {
+            background: none !important;
+            box-shadow: none !important;
+            padding: 0.5rem !important;
+            border: 1px solid #dee2e6;
+        }
+        .detail-label {
+            color: #000 !important;
+        }
+        .detail-value {
+            color: #000 !important;
+        }
+        .border-top {
+            border-color: #000 !important;
+        }
+        @page {
+            margin: 1cm;
+        }
+    }
+    .image-display-container {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .image-preview-container {
+        max-width: 400px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .product-image {
+        max-height: 300px;
+        width: auto;
+        object-fit: contain;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border: 1px solid #dee2e6;
+        padding: 10px;
+        background: white;
+    }
+
+    @media print {
+        .product-image {
+            max-height: 200px;
+            box-shadow: none;
+            border: 1px solid #000;
+        }
+    }
+
+    .no-image-placeholder {
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        color: #6c757d;
+    }
+
+    .no-image-placeholder i {
+        margin-bottom: 1rem;
+    }
+</style>
+
+<script>
+function printDetail() {
+    window.print();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.detail-value').forEach(function(el) {
+        if (el.textContent.trim() === '' || el.textContent.trim() === 'None') {
+            el.textContent = '-';
+        }
+    });
+});
+</script>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+{% endblock content %}

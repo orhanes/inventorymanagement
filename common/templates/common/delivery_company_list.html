@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} Nakliye Firmaları {% endblock title %}
+
+{% block content %}
+<div class="container-fluid mt-4 animate__animated animate__fadeIn">
+    <div class="card shadow">
+        <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="fas fa-truck me-2"></i>Nakliye Firmaları</h3>
+            <a class="btn btn-warning" href="{% url 'delivery_company_create' %}">
+                <i class="fas fa-plus me-2"></i>Yeni Nakliye Firması
+            </a>
+        </div>
+        <div class="card-body">
+            {% if delivery_companies %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Logo</th>
+                            <th>Firma Adı</th>
+                            <th>Telefon</th>
+                            <th>E-posta</th>
+                            <th>Web Sitesi</th>
+                            <th>Durum</th>
+                            <th>Oluşturulma Tarihi</th>
+                            <th>Güncellenme Tarihi</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for company in delivery_companies %}
+                        <tr>
+                            <td>
+                                {% if company.logo %}
+                                <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="img-thumbnail" style="max-width: 50px;">
+                                {% else %}
+                                <i class="fas fa-building fa-2x text-muted"></i>
+                                {% endif %}
+                            </td>
+                            <td>{{ company.name }}</td>
+                            <td>{{ company.phone|default:"-" }}</td>
+                            <td>{{ company.email|default:"-" }}</td>
+                            <td>
+                                {% if company.website %}
+                                <a href="{{ company.website }}" target="_blank" class="text-primary">
+                                    <i class="fas fa-external-link-alt"></i> {{ company.website|truncatechars:20 }}
+                                </a>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if company.is_active %}
+                                <span class="badge bg-success">Aktif</span>
+                                {% else %}
+                                <span class="badge bg-danger">Pasif</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ company.created_at|date:"d.m.Y H:i" }}</td>
+                            <td>{{ company.updated_at|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'delivery_company_edit' company.pk %}" class="btn btn-sm btn-primary me-2" title="Düzenle">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger delete-btn" 
+                                            data-id="{{ company.pk }}" 
+                                            data-name="{{ company.name }}" 
+                                            title="Sil">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center text-muted mb-3">
+                <small>Toplam {{ delivery_companies.paginator.count }} kayıt bulunmaktadır.</small>
+            </div>
+            {% if delivery_companies.has_other_pages %}
+            <div class="text-center text-muted mb-3">
+                <small>Toplam {{ delivery_companies.paginator.num_pages }} sayfa içerisinde {{ delivery_companies.number }}. sayfadasınız</small>
+            </div>
+            <nav aria-label="Sayfalama" class="mt-2">
+                <ul class="pagination justify-content-center">
+                    {% if delivery_companies.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="İlk">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ delivery_companies.previous_page_number }}" aria-label="Önceki">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;&laquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;</span>
+                        </li>
+                    {% endif %}
+
+                    {% for i in delivery_companies.paginator.page_range %}
+                        {% if delivery_companies.number == i %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ i }}</span>
+                            </li>
+                        {% elif i > delivery_companies.number|add:'-3' and i < delivery_companies.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if delivery_companies.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ delivery_companies.next_page_number }}" aria-label="Sonraki">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ delivery_companies.paginator.num_pages }}" aria-label="Son">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;&raquo;</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-truck fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">Henüz nakliye firması eklenmemiş</h4>
+                <p class="text-muted">Yeni bir nakliye firması eklemek için "Yeni Nakliye Firması" butonunu kullanabilirsiniz.</p>
+                <a href="{% url 'delivery_company_create' %}" class="btn btn-success mt-3">
+                    <i class="fas fa-plus me-2"></i>Yeni Nakliye Firması Ekle
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .table {
+        margin-bottom: 0;
+    }
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        border-top: none;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    .pagination {
+        margin-bottom: 0;
+    }
+    .page-link {
+        color: #2196F3;
+        border: none;
+        margin: 0 2px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+    .page-link:hover {
+        background-color: #2196F3;
+        color: white;
+        transform: translateY(-2px);
+    }
+    .page-item.active .page-link {
+        background-color: #2196F3;
+        border-color: #2196F3;
+    }
+    .page-item.disabled .page-link {
+        color: #6c757d;
+        pointer-events: none;
+        background-color: #fff;
+        border-color: #dee2e6;
+    }
+    .badge {
+        padding: 0.5em 0.75em;
+        font-weight: 500;
+        border-radius: 6px;
+    }
+    .img-thumbnail {
+        border-radius: 8px;
+        padding: 0.25rem;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    .img-thumbnail:hover {
+        transform: scale(1.1);
+    }
+    .btn-group {
+        gap: 0.25rem;
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Silme butonlarına tıklama olayı ekle
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const name = this.getAttribute('data-name');
+            
+            Swal.fire({
+                title: 'Emin misiniz?',
+                html: `<strong>${name}</strong> nakliye firmasını silmek istediğinizden emin misiniz?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Evet, Sil!',
+                cancelButtonText: 'Vazgeç',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                },
+                customClass: {
+                    confirmButton: 'btn btn-danger px-4 me-3',
+                    cancelButton: 'btn btn-secondary px-4'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/common/delivery-companies/${id}/delete/`;
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
+
+{% endblock content %} 

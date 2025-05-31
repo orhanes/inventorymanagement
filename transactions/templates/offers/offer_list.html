@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+{% load l10n %}
+{% load widget_tweaks %}
+
+{% block title %} Teklif Listesi {% endblock title %}
+
+{% block content %}
+<div class="container-fluid mt-4 animate__animated animate__fadeIn">
+    <div class="card shadow">
+        <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fas fa-file-invoice-dollar me-2"></i>Teklif Listesi
+            </h3>
+            <a class="btn btn-warning" href="{% url 'new-offer' %}">
+                <i class="fas fa-plus me-2"></i>Teklif Ekle
+            </a>
+        </div>
+        <div class="card-body">
+            <div id="printArea">
+                <!-- Arama ve Filtreleme Kartı -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light py-2">
+                        <h5 class="mb-0"><i class="fas fa-search me-2"></i>Arama ve Filtreleme</h5>
+                    </div>
+                    <div class="card-body py-2">
+                        <form method="get" class="row g-2 align-items-end">
+                            <div class="col-lg-2 col-md-3 col-6">
+                                <label class="form-label small mb-1">Teklif No</label>
+                                <input type="text" class="form-control form-control-sm" name="number" value="{{ request.GET.number }}" placeholder="Teklif no...">
+                            </div>
+                            <div class="col-lg-4 col-md-5 col-12">
+                                <label class="form-label small mb-1">Kurum/Firma</label>
+                                <input type="text" class="form-control form-control-sm" name="institution" value="{{ request.GET.institution }}" placeholder="Kurum veya firma...">
+                            </div>
+                            <div class="col-lg-3 col-md-4 col-12">
+                                <label class="form-label small mb-1">Tarih Aralığı</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="date" class="form-control" name="start_date" value="{{ request.GET.start_date }}">
+                                    <span class="input-group-text">-</span>
+                                    <input type="date" class="form-control" name="end_date" value="{{ request.GET.end_date }}">
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-3 col-6">
+                                <label class="form-label small mb-1">Sıralama</label>
+                                <select class="form-select form-select-sm" name="sort">
+                                    <option value="">Varsayılan</option>
+                                    <option value="date_asc" {% if request.GET.sort == 'date_asc' %}selected{% endif %}>Tarih (Eski-Yeni)</option>
+                                    <option value="date_desc" {% if request.GET.sort == 'date_desc' %}selected{% endif %}>Tarih (Yeni-Eski)</option>
+                                    <option value="number_asc" {% if request.GET.sort == 'number_asc' %}selected{% endif %}>No (A-Z)</option>
+                                    <option value="number_desc" {% if request.GET.sort == 'number_desc' %}selected{% endif %}>No (Z-A)</option>
+                                    <option value="total_asc" {% if request.GET.sort == 'total_asc' %}selected{% endif %}>Tutar (Az-Çok)</option>
+                                    <option value="total_desc" {% if request.GET.sort == 'total_desc' %}selected{% endif %}>Tutar (Çok-Az)</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-1 col-md-2 col-12 d-flex gap-1 justify-content-end">
+                                <button type="submit" class="btn btn-primary btn-sm w-100" title="Ara">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                <a href="{% url 'offers-list' %}" class="btn btn-secondary btn-sm w-100" title="Temizle">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body py-2">
+                        <div class="row text-center">
+                            <div class="col-6 col-md-3 mb-2">
+                                <span class="badge bg-dark me-2">&nbsp;&nbsp;&nbsp;</span>
+                                <small>İptal Edildi</small>
+                            </div>
+                            <div class="col-6 col-md-3 mb-2">
+                                <span class="badge bg-danger me-2">&nbsp;&nbsp;&nbsp;</span>
+                                <small>Reddedildi</small>
+                            </div>
+                            <div class="col-6 col-md-3 mb-2">
+                                <span class="badge bg-warning me-2">&nbsp;&nbsp;&nbsp;</span>
+                                <small>Beklemede</small>
+                            </div>
+                            <div class="col-6 col-md-3 mb-2">
+                                <span class="badge bg-success me-2">&nbsp;&nbsp;&nbsp;</span>
+                                <small>Onaylandı</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th width="15%" class="text-center sortable" data-sort="number">
+                                    Teklif No
+                                    <i class="fas fa-sort ms-1"></i>
+                                </th>
+                                <th width="10%" class="text-center sortable" data-sort="date">
+                                    Tarih
+                                    <i class="fas fa-sort ms-1"></i>
+                                </th>
+                                <th width="20%" class="text-center">Firma/Kurum</th>
+                                <th width="10%" class="text-center">Durum</th>
+                                <th width="15%" class="text-center sortable" data-sort="total">
+                                    Toplam
+                                    <i class="fas fa-sort ms-1"></i>
+                                </th>
+                                <th width="15%" class="text-center noprint">İşlemler</th>
+                            </tr>
+                        </thead>
+                        {% if offers %}
+                            <tbody>
+                                {% for offer in offers %}
+                                    <tr>
+                                        <td class="align-middle text-center">{{ offer.number }}</td>
+                                        <td class="align-middle text-center">{{ offer.date|date:'d.m.Y' }}</td>
+                                        <td class="align-middle text-center">{{ offer.institution }}</td>
+                                        <td class="align-middle text-center">
+                                            {% if offer.status.name == "Beklemede" %}
+                                                <span class="badge bg-warning text-dark">{{ offer.status }}</span>
+                                            {% elif offer.status.name == "Onaylandı" %}
+                                                <span class="badge bg-success">{{ offer.status }}</span>
+                                            {% elif offer.status.name == "Reddedildi" %}
+                                                <span class="badge bg-danger">{{ offer.status }}</span>
+                                            {% elif offer.status.name == "İptal Edildi" %}
+                                                <span class="badge bg-dark">{{ offer.status }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ offer.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            {{ offer.get_grand_total|floatformat:2 }}
+                                            {% if offer.items.first.currency %}
+                                                {{ offer.items.first.currency.symbol }}
+                                            {% endif %}
+                                        </td>
+                                        <td class="align-middle text-center noprint">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <a href="{% url 'offer' offer.pk %}" class="btn btn-primary btn-sm action-btn" title="Göster" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'offer-bill' offer.pk %}" class="btn btn-secondary btn-sm action-btn" title="Form Görüntüle" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-file-invoice"></i>
+                                                </a>
+                                                <a href="{% url 'edit-offer' offer.pk %}" class="btn btn-warning btn-sm action-btn" title="Düzenle" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'delete-offer' offer.pk %}" class="btn btn-danger btn-sm action-btn" title="İptal Et" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-ban"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        {% else %}
+                            <tbody>
+                                <tr>
+                                    <td colspan="8" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <i class="fas fa-file-invoice-dollar text-muted mb-3"></i>
+                                            <h4 class="text-muted">Henüz bir teklif kaydı yok</h4>
+                                            <p class="text-muted mb-3">Yeni teklif eklemek için üstteki "Teklif Ekle" butonunu kullanabilirsiniz.</p>
+                                            <a href="{% url 'new-offer' %}" class="btn btn-primary">
+                                                <i class="fas fa-plus me-2"></i>Yeni Teklif Ekle
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        {% endif %}
+                    </table>
+                </div>
+
+                <div class="text-center text-muted mb-3">
+                    <small>Toplam {{ page_obj.paginator.count }} kayıt bulunmaktadır.</small>
+                </div>
+                {% if is_paginated %}
+                <div class="text-center text-muted mb-3">
+                    <small>Toplam {{ page_obj.paginator.num_pages }} sayfa içerisinde {{ page_obj.number }}. sayfadasınız</small>
+                </div>
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.number %}&number={{ request.GET.number }}{% endif %}{% if request.GET.institution %}&institution={{ request.GET.institution }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" title="İlk Sayfa">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.number %}&number={{ request.GET.number }}{% endif %}{% if request.GET.institution %}&institution={{ request.GET.institution }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" title="Önceki">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if request.GET.number %}&number={{ request.GET.number }}{% endif %}{% if request.GET.institution %}&institution={{ request.GET.institution }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.number %}&number={{ request.GET.number }}{% endif %}{% if request.GET.institution %}&institution={{ request.GET.institution }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" title="Sonraki">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.number %}&number={{ request.GET.number }}{% endif %}{% if request.GET.institution %}&institution={{ request.GET.institution }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" title="Son Sayfa">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+
+            <div class="text-center mt-4">
+                <button class="btn btn-primary px-4" onclick="printpage('printArea')">
+                    <i class="fas fa-print me-2"></i>Yazdır
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .table {
+        margin-bottom: 0;
+    }
+    .table th {
+        border-top: none;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+        color: white;
+        font-weight: 500;
+        padding: 1rem;
+    }
+    .table td {
+        vertical-align: middle;
+        padding: 0.75rem;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(33, 150, 243, 0.05);
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .action-btn i {
+        font-size: 0.875rem;
+        line-height: 1;
+    }
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+    .pagination {
+        margin-bottom: 0;
+    }
+    .page-link {
+        border-radius: 4px;
+        margin: 0 2px;
+        color: #2196F3;
+    }
+    .page-item.active .page-link {
+        background-color: #2196F3;
+        border-color: #2196F3;
+    }
+    .input-group .form-control {
+        border-radius: 8px 0 0 8px;
+        border: 1px solid #ced4da;
+    }
+    .input-group .btn {
+        border-radius: 0 8px 8px 0;
+    }
+    @media print {
+        .noprint {
+            display: none !important;
+        }
+        .card {
+            box-shadow: none !important;
+        }
+        .card-header {
+            background: none !important;
+            color: #000 !important;
+        }
+        .table th {
+            background: none !important;
+            color: #000 !important;
+            border-bottom: 2px solid #dee2e6;
+        }
+    }
+
+    /* Boş durum için stiller */
+    .empty-state {
+        padding: 2rem;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 1rem;
+        animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-20px);
+        }
+        60% {
+            transform: translateY(-10px);
+        }
+    }
+    
+    /* Arama kutusu için iyileştirmeler */
+    .input-group .form-control:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+        z-index: 1;
+    }
+    .input-group .btn-outline-secondary {
+        border-color: #ced4da;
+        color: #6c757d;
+    }
+    .input-group .btn-outline-secondary:hover {
+        background-color: #e9ecef;
+        border-color: #ced4da;
+        color: #495057;
+    }
+    .sortable {
+        cursor: pointer;
+        position: relative;
+    }
+    .sortable:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    .sortable i {
+        opacity: 0.5;
+    }
+    .sortable:hover i {
+        opacity: 1;
+    }
+    .sortable.active i {
+        opacity: 1;
+    }
+    .sortable.asc i:before {
+        content: "\f0de";  /* fa-sort-up */
+    }
+    .sortable.desc i:before {
+        content: "\f0dd";  /* fa-sort-down */
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+<script>
+function printpage(divName) {
+    var printContents = document.getElementById(divName).innerHTML;
+    var originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+}
+
+// Tooltip'leri aktifleştir
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Mevcut sıralama parametresini al
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSort = urlParams.get('sort') || '-date';
+    
+    // Sıralama başlıklarını işaretle
+    document.querySelectorAll('.sortable').forEach(header => {
+        const sortField = header.dataset.sort;
+        if (currentSort === sortField) {
+            header.classList.add('active', 'asc');
+        } else if (currentSort === `-${sortField}`) {
+            header.classList.add('active', 'desc');
+        }
+        
+        // Tıklama olayını ekle
+        header.addEventListener('click', function() {
+            const currentUrl = new URL(window.location.href);
+            let newSort;
+            
+            if (currentSort === sortField) {
+                newSort = `-${sortField}`;
+            } else if (currentSort === `-${sortField}`) {
+                newSort = sortField;
+            } else {
+                newSort = `-${sortField}`;
+            }
+            
+            currentUrl.searchParams.set('sort', newSort);
+            window.location.href = currentUrl.toString();
+        });
+    });
+});
+</script>
+{% endblock content %}

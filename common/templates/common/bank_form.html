@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} {{ title }} {% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-university me-2"></i>{{ title }}</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate id="bankForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% if form %}
+                    {{ form.non_field_errors }}
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            <label for="name" class="form-label">
+                                Banka Adı <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-university"></i></span>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{% if bank %}{{ bank.name }}{% endif %}" 
+                                       placeholder="Banka adı giriniz" required>
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen banka adını giriniz.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            <label for="bank_type" class="form-label">
+                                Banka Türü <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                <select class="form-control" id="bank_type" name="bank_type" required>
+                                    <option value="">---------</option>
+                                    {% for bank_type in bank_types %}
+                                        <option value="{{ bank_type.id }}" {% if bank and bank.bank_type.id == bank_type.id %}selected{% endif %}>{{ bank_type.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen bir banka türü seçiniz.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            <label for="eft_code" class="form-label">EFT Kodu</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                                <input type="text" class="form-control" id="eft_code" name="eft_code" 
+                                       value="{% if bank %}{{ bank.eft_code }}{% endif %}" 
+                                       placeholder="EFT kodu giriniz">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            <label for="phone" class="form-label">Telefon</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       value="{% if bank %}{{ bank.phone }}{% endif %}" 
+                                       placeholder="Telefon numarası giriniz">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            <label for="fax" class="form-label">Fax</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-fax"></i></span>
+                                <input type="tel" class="form-control" id="fax" name="fax" 
+                                       value="{% if bank %}{{ bank.fax }}{% endif %}" 
+                                       placeholder="Fax numarası giriniz">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            <label for="customer_service" class="form-label">Müşteri Hizmetleri</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-headset"></i></span>
+                                <input type="tel" class="form-control" id="customer_service" name="customer_service" 
+                                       value="{% if bank %}{{ bank.customer_service }}{% endif %}" 
+                                       placeholder="Müşteri hizmetleri numarası giriniz">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            <label for="email" class="form-label">E-posta</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{% if bank %}{{ bank.email }}{% endif %}" 
+                                       placeholder="E-posta adresi giriniz">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            <label for="website" class="form-label">Web Sitesi</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                <input type="url" class="form-control" id="website" name="website" 
+                                       value="{% if bank %}{{ bank.website }}{% endif %}" 
+                                       placeholder="Web sitesi adresi giriniz">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-4">
+                        <div class="form-group">
+                            <label for="address" class="form-label">Adres</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                <textarea class="form-control" id="address" name="address" rows="3" 
+                                          placeholder="Adres giriniz">{% if bank %}{{ bank.address }}{% endif %}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-4">
+                        <div class="form-group">
+                            <label for="logo" class="form-label">Logo</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-image"></i></span>
+                                <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                            </div>
+                            {% if bank and bank.logo %}
+                            <div class="mt-2">
+                                <img src="{{ bank.logo.url }}" alt="{{ bank.name }}" class="img-thumbnail" style="max-width: 100px;">
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <div>
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="fas fa-save me-2"></i>Kaydet
+                        </button>
+                        <button type="reset" class="btn btn-danger px-4">
+                            <i class="fas fa-undo me-2"></i>Sıfırla
+                        </button>
+                    </div>
+                    <div>
+                        <a href="{% url 'bank_list' %}" class="btn btn-secondary px-4">
+                            <i class="fas fa-times me-2"></i>Vazgeç
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('bankForm');
+    const nameInput = document.getElementById('name');
+    const bankTypeSelect = document.getElementById('bank_type');
+    const emailInput = document.getElementById('email');
+    const websiteInput = document.getElementById('website');
+    
+    // Input validasyon fonksiyonu
+    function validateInput(input) {
+        const value = input.value.trim();
+        let isValid = true;
+        
+        if (!value) {
+            isValid = false;
+        } else if (value.length < 2) {
+            isValid = false;
+        }
+
+        if (!isValid) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+        } else {
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+        }
+    }
+
+    // Select validasyon fonksiyonu
+    function validateSelect(select) {
+        const value = select.value;
+        let isValid = true;
+        
+        if (!value) {
+            isValid = false;
+        }
+
+        if (!isValid) {
+            select.classList.add('is-invalid');
+            select.classList.remove('is-valid');
+        } else {
+            select.classList.add('is-valid');
+            select.classList.remove('is-invalid');
+        }
+    }
+
+    // Email validasyon fonksiyonu
+    function validateEmail(input) {
+        const value = input.value.trim();
+        let isValid = true;
+        
+        if (value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                isValid = false;
+            }
+        }
+
+        if (!isValid) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+        } else {
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+        }
+    }
+
+    // URL validasyon fonksiyonu
+    function validateURL(input) {
+        const value = input.value.trim();
+        let isValid = true;
+        
+        if (value) {
+            try {
+                new URL(value);
+            } catch (e) {
+                isValid = false;
+            }
+        }
+
+        if (!isValid) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+        } else {
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+        }
+    }
+
+    // Input değiştiğinde validasyon
+    nameInput.addEventListener('input', function() {
+        validateInput(this);
+    });
+
+    nameInput.addEventListener('blur', function() {
+        validateInput(this);
+    });
+
+    // Select değiştiğinde validasyon
+    bankTypeSelect.addEventListener('change', function() {
+        validateSelect(this);
+    });
+
+    bankTypeSelect.addEventListener('blur', function() {
+        validateSelect(this);
+    });
+
+    // Email değiştiğinde validasyon
+    emailInput.addEventListener('input', function() {
+        validateEmail(this);
+    });
+
+    emailInput.addEventListener('blur', function() {
+        validateEmail(this);
+    });
+
+    // Website değiştiğinde validasyon
+    websiteInput.addEventListener('input', function() {
+        validateURL(this);
+    });
+
+    websiteInput.addEventListener('blur', function() {
+        validateURL(this);
+    });
+
+    // Form gönderilmeden önce validasyon
+    form.addEventListener('submit', function(event) {
+        validateInput(nameInput);
+        validateSelect(bankTypeSelect);
+        validateEmail(emailInput);
+        validateURL(websiteInput);
+        
+        if (nameInput.classList.contains('is-invalid') || 
+            bankTypeSelect.classList.contains('is-invalid') ||
+            emailInput.classList.contains('is-invalid') ||
+            websiteInput.classList.contains('is-invalid')) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    });
+});
+</script>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+    .form-control:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-right: none;
+        display: flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .input-group {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        flex-wrap: nowrap;
+    }
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .is-valid {
+        border-color: #198754 !important;
+    }
+    .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+        position: absolute;
+        bottom: -1.25rem;
+        left: 0;
+        padding-left: 0.5rem;
+    }
+    .is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    .form-control.is-invalid:focus,
+    .form-control.is-valid:focus {
+        box-shadow: none;
+    }
+    .input-group .form-control.is-invalid,
+    .input-group .form-control.is-valid {
+        z-index: 3;
+    }
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    .input-group {
+        margin-bottom: 0.5rem;
+    }
+    .img-thumbnail {
+        border-radius: 8px;
+        padding: 0.25rem;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    .img-thumbnail:hover {
+        transform: scale(1.1);
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% endblock content %} 

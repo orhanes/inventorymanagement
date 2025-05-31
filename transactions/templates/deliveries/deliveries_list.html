@@ -7,104 +7,372 @@
 
 
 {% block content %}
-    
-    <div class="row" style="color: #575757; font-style: bold; font-size: 3rem;">
-        <div class="col-md-8">Nakiye Listesi</div>
-        <div class="col-md-4"> 
-            <div style="float:right;"> <a class="btn btn-success" href="{% url 'new-delivery' %}">Nakliye Ekle</a> </div>
+<div class="container-fluid mt-4 animate__animated animate__fadeIn">
+    <div class="card shadow">
+        <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fas fa-truck me-2"></i>Nakliye Listesi
+            </h3>
+            <a class="btn btn-warning" href="{% url 'new-delivery' %}">
+                <i class="fas fa-plus me-2"></i>Nakliye Ekle
+            </a>
+        </div>
+        <div class="card-body">
+            <div id="printArea">
+                <!-- Arama ve Filtreleme Kartı -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-search me-2"></i>Arama ve Filtreleme</h5>
+                    </div>
+                    <div class="card-body py-2">
+                        <form method="get">
+                            <div class="row g-2 align-items-end flex-nowrap" style="overflow-x:auto;">
+                                <!--
+                                <div class="col-md-1">
+                                    <input type="text" class="form-control form-control-sm" name="delivery_number" value="{{ request.GET.delivery_number }}" placeholder="Form No">
+                            </div>
+                                -->
+                                <div class="col-md-2">
+                                    <label class="form-label small mb-1">Firma/Kurum</label>
+                                    <input type="text" class="form-control form-control-sm" name="buyer_name" value="{{ request.GET.buyer_name }}" placeholder="Firma/Kurum">
+                            </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small mb-1">Nakliye Türü</label>
+                                    <select class="form-select form-select-sm" name="delivery_type">
+                                        <option value="">Tümü</option>
+                                        {% for dtype in delivery_types %}
+                                            <option value="{{ dtype.name }}" {% if request.GET.delivery_type == dtype.name %}selected{% endif %}>{{ dtype.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                            </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small mb-1">Nakliye Firması</label>
+                                    <select class="form-select form-select-sm" name="delivery_company">
+                                        <option value="">Tümü</option>
+                                        {% for dcompany in delivery_companies %}
+                                            <option value="{{ dcompany.name }}" {% if request.GET.delivery_company == dcompany.name %}selected{% endif %}>{{ dcompany.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                            </div>
+                            <div class="col-md-3">
+                                    <label class="form-label small mb-1">Tarih Aralığı</label>
+                                    <div class="input-group input-group-sm">
+                                    <input type="date" class="form-control" name="start_date" value="{{ request.GET.start_date }}">
+                                    <span class="input-group-text">-</span>
+                                    <input type="date" class="form-control" name="end_date" value="{{ request.GET.end_date }}">
+                                </div>
+                            </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small mb-1">Sıralama</label>
+                                    <select class="form-select form-select-sm" name="sort">
+                                    <option value="">Varsayılan</option>
+                                        <option value="date_asc" {% if request.GET.sort == 'date_asc' %}selected{% endif %}>Tarih ↑</option>
+                                        <option value="date_desc" {% if request.GET.sort == 'date_desc' %}selected{% endif %}>Tarih ↓</option>
+                                </select>
+                            </div>
+                                <div class="col-md-1 d-flex justify-content-end gap-1">
+                                    <label class="form-label small mb-1" style="visibility:hidden;">Ara</label>
+                                    <button type="submit" class="btn btn-primary btn-sm px-3">
+                                        <i class="fas fa-search"></i>
+                                </button>
+                                    <a href="{% url 'deliveries-list' %}" class="btn btn-secondary btn-sm px-3">
+                                        <i class="fas fa-times"></i>
+                                </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th width="10%" class="text-center">Form No</th>
+                                <th width="20%" class="text-center">Firma/Kurum Adı</th>
+                                <th width="15%" class="text-center">Nakliye Türü</th>
+                                <th width="15%" class="text-center">Firma/Araç</th>
+                                <th width="15%" class="text-center">İrsaliye No</th>
+                                <th width="15%" class="text-center">Gönderim Tarihi</th>
+                                <th width="10%" class="text-center">Durum</th>
+                                <th width="20%" class="text-center noprint">İşlemler</th>
+                            </tr>
+                        </thead>
+                        
+                        {% if object_list %}
+                            <tbody>     
+                                {% for delivery in object_list %}
+                                    <tr>
+                                        <td class="align-middle text-center">{{ delivery.delivery_number }}</td>
+                                        <td class="align-middle text-center">{{ delivery.buyer.name|default:"-" }}</td>
+                                        <td class="align-middle text-center">{{ delivery.delivery_type.name|default:"-" }}</td>
+                                        <td class="align-middle text-center">
+                                            {% if delivery.delivery_type.name == 'ARAÇ' or delivery.delivery_type.name == 'KURYE' %}
+                                                {{ delivery.vehicle_type|default:"-" }}
+                                            {% elif delivery.delivery_type.name == 'KARGO' or delivery.delivery_type.name == 'POSTA' %}
+                                                {{ delivery.delivery_company.name|default:"-" }}
+                                            {% else %}
+                                                {{ delivery.delivery_company.name|default:"-" }}
+                                            {% endif %}
+                                        </td>
+                                        <td class="align-middle text-center">{{ delivery.waybill_number|default:"-" }}</td>
+                                        <td class="align-middle text-center">{{ delivery.sending_date|date:"d.m.Y"|default:"-" }}</td>
+                                        <td class="align-middle text-center">
+                                            {% if delivery.status == 'BEKLEMEDE' %}
+                                                <span class="badge rounded-pill bg-warning text-dark px-3 py-2">Beklemede</span>
+                                            {% elif delivery.status == 'İPTAL EDİLDİ' %}
+                                                <span class="badge rounded-pill bg-dark px-3 py-2">İptal Edildi</span>
+                                            {% elif delivery.status == 'TESLİM EDİLDİ' %}
+                                                <span class="badge rounded-pill bg-success px-3 py-2">Teslim Edildi</span>
+                                            {% elif delivery.status == 'YOLDA' %}
+                                                <span class="badge rounded-pill bg-info text-dark px-3 py-2">Yolda</span>
+                                            {% else %}
+                                                <span class="badge rounded-pill bg-secondary px-3 py-2">{{ delivery.status|default:"-" }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="align-middle text-center noprint">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <a href="{% url 'delivery' delivery.pk %}" class="btn btn-primary btn-sm action-btn" title="Göster" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'delivery-bill' delivery.delivery_number %}" class="btn btn-secondary btn-sm action-btn" title="Form Görüntüle" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-file-invoice"></i>
+                                                </a>
+                                                <a href="{% url 'edit-delivery' delivery.pk %}" class="btn btn-warning btn-sm action-btn" title="Düzenle" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'delete-delivery' delivery.pk %}" class="btn btn-danger btn-sm action-btn" title="Sil" data-bs-toggle="tooltip">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>          
+                                    </tr>
+                                {% endfor %}                   
+                            </tbody>
+                        {% else %}
+                            <tbody>
+                                <tr>
+                                    <td colspan="8" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <i class="fas fa-truck text-muted mb-3"></i>
+                                            <h4 class="text-muted">Henüz bir kayıt yok</h4>
+                                            <p class="text-muted mb-3">Yeni nakliye eklemek için üstteki "Nakliye Ekle" butonunu kullanabilirsiniz.</p>
+                                            <a href="{% url 'new-delivery' %}" class="btn btn-primary">
+                                                <i class="fas fa-plus me-2"></i>Yeni Nakliye Ekle
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        {% endif %}
+                    </table>
+                </div>
+
+                <div class="text-center text-muted mb-3">
+                    <small>Toplam {{ page_obj.paginator.count }} kayıt bulunmaktadır.</small>
+                </div>
+                {% if is_paginated %}
+                <div class="text-center text-muted mb-3">
+                    <small>Toplam {{ page_obj.paginator.num_pages }} sayfa içerisinde {{ page_obj.number }}. sayfadasınız</small>
+                </div>
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.buyer_name %}&buyer_name={{ request.GET.buyer_name }}{% endif %}{% if request.GET.delivery_type %}&delivery_type={{ request.GET.delivery_type }}{% endif %}{% if request.GET.delivery_company %}&delivery_company={{ request.GET.delivery_company }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" title="İlk Sayfa">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.buyer_name %}&buyer_name={{ request.GET.buyer_name }}{% endif %}{% if request.GET.delivery_type %}&delivery_type={{ request.GET.delivery_type }}{% endif %}{% if request.GET.delivery_company %}&delivery_company={{ request.GET.delivery_company }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" title="Önceki">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if request.GET.buyer_name %}&buyer_name={{ request.GET.buyer_name }}{% endif %}{% if request.GET.delivery_type %}&delivery_type={{ request.GET.delivery_type }}{% endif %}{% if request.GET.delivery_company %}&delivery_company={{ request.GET.delivery_company }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.buyer_name %}&buyer_name={{ request.GET.buyer_name }}{% endif %}{% if request.GET.delivery_type %}&delivery_type={{ request.GET.delivery_type }}{% endif %}{% if request.GET.delivery_company %}&delivery_company={{ request.GET.delivery_company }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" title="Sonraki">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.buyer_name %}&buyer_name={{ request.GET.buyer_name }}{% endif %}{% if request.GET.delivery_type %}&delivery_type={{ request.GET.delivery_type }}{% endif %}{% if request.GET.delivery_company %}&delivery_company={{ request.GET.delivery_company }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" title="Son Sayfa">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+
+            <div class="text-center mt-4">
+                <button class="btn btn-primary px-4" onclick="printpage('printArea')">
+                    <i class="fas fa-print me-2"></i>Yazdır
+                </button>
+            </div>
         </div>
     </div>
+</div>
 
-    <div style="border-bottom: 1px solid white;"></div>
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .table {
+        margin-bottom: 0;
+    }
+    .table th {
+        border-top: none;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+        color: white;
+        font-weight: 500;
+        padding: 1rem;
+    }
+    .table td {
+        vertical-align: middle;
+        padding: 0.75rem;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(33, 150, 243, 0.05);
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .action-btn i {
+        font-size: 0.875rem;
+        line-height: 1;
+    }
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+    .pagination {
+        margin-bottom: 0;
+    }
+    .page-link {
+        border-radius: 4px;
+        margin: 0 2px;
+        color: #2196F3;
+    }
+    .page-item.active .page-link {
+        background-color: #2196F3;
+        border-color: #2196F3;
+    }
+    .input-group .form-control {
+        border-radius: 8px 0 0 8px;
+        border: 1px solid #ced4da;
+    }
+    .input-group .btn {
+        border-radius: 0 8px 8px 0;
+    }
+    @media print {
+        .noprint {
+            display: none !important;
+        }
+        .card {
+            box-shadow: none !important;
+        }
+        .card-header {
+            background: none !important;
+            color: #000 !important;
+        }
+        .table th {
+            background: none !important;
+            color: #000 !important;
+            border-bottom: 2px solid #dee2e6;
+        }
+    }
+
+    /* Boş durum için stiller */
+    .empty-state {
+        padding: 2rem;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 1rem;
+        animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-20px);
+        }
+        60% {
+            transform: translateY(-10px);
+        }
+    }
     
-    <br>
+    /* Arama kutusu için iyileştirmeler */
+    .input-group .form-control:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+        z-index: 1;
+    }
+    .input-group .btn-outline-secondary {
+        border-color: #ced4da;
+        color: #6c757d;
+    }
+    .input-group .btn-outline-secondary:hover {
+        background-color: #e9ecef;
+        border-color: #ced4da;
+        color: #495057;
+    }
+</style>
 
-    <table class="table table-css table-hover table-bordered">
-        <form method="get">
-            <div class="input-group search noprint">
-                {% render_field filter.form.courier_name class="form-control textinput" placeholder="Müşteri adıyla ara" %}
-                <div class="input-group-append">
-                   <button type="submit" class="btn btn-pink"> Ara </button>
-                </div>
-            </div>
-        </form>
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
 
-        <br>
-        
-        <thead class="thead-dark align-middle">
-            <tr>
-                <th >Fiş No</th>
-                <!-- <th >Sipariş</th>-->
-                <th >Şoför Adı / Soyadı</th>
-                <th >Şoför T.C. Kimlik No</th>
-                <th>Şoför Telefonu</th>
-                <th >Şoför Aracı</th>
-                <th >Araç Plakası</th>
-                <th >Tarih</th>
-                <th>İşlemler</th>
-            </tr>
-        </thead>
+<script>
+function printpage(divName) {
+    var printContents = document.getElementById(divName).innerHTML;
+    var originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+}
 
-{% if object_list %}
-
-        <tbody>
-            {% for delivery in object_list %}
-            <tr>
-                <!--<td class="align-middle"><p> <a href="{% url 'delivery' delivery.id %}"> {{ delivery.id }}</a> </p> </td>-->
-                <td class="align-middle"> {{ delivery.billno }} </td>
-                <!-- <td class="align-middle">{% for item in sale.get_items_list %} {{ item.sale_item.bill_no }} <br> {% endfor %}</td> -->
-                <td class="align-middle"> {{ delivery.courier_name }} </td> 
-                <td class="align-middle"> {{ delivery.courier_id|unlocalize }} </td>
-                <td class="align-middle"> {{ delivery.courier_phone }} </td>
-                <td class="align-middle"> {{ delivery.courier_vehicle }} </td>
-                <td class="align-middle"> {{ delivery.vehicle_plate }} </td>
-                <td class="align-middle"> {{ delivery.created_date }} </td>
-                <td class="align-middle">
-                    <div class="align-middle">
-                        <a href="{% url 'delivery' delivery.pk %}" class="btn btn-warning btn-sm">Göster</a>
-                        <a href="{% url 'edit-delivery' delivery.pk %}" class="btn btn-info btn-sm">Düzenle</a>
-                        <a href="{% url 'delete-delivery' delivery.pk %}" class="btn btn-danger btn-sm">Sil</a>
-                    </div>
-                </td>              
-            </tr>
-            {% endfor %}
-        </tbody>
-
-    </table>
-
-    <div class="align-middle">
-        {% if is_paginated %}
-
-            {% if page_obj.has_previous %}
-                <a class="btn btn-outline-info mb-4" href="?page=1">İlk</a>
-                <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Önceki</a>
-            {% endif %}
-
-            {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                    <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
-                {% endif %}
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-                <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Sonraki</a>
-                <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Son</a>
-            {% endif %}
-
-        {% endif %}
-    </div>
-
-{% else %}
-
-        <tbody></tbody>   
-    </table>
-
-    <br><br><br><br><br><br><br><br>
-    <div style="color: #575757; font-style: bold; font-size: 1.5rem; text-align: center;">Herhangi bir kayıt bulunamadı. Eklemeyi deneyin.</div>
-
-{% endif %}
-
-
+// Tooltip'leri aktifleştir
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+</script>
 {% endblock content %}

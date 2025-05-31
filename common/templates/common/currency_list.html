@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} Para Birimleri {% endblock title %}
+
+{% block content %}
+<div class="container-fluid mt-4 animate__animated animate__fadeIn">
+    <div class="card shadow">
+        <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Para Birimleri</h3>
+            <a class="btn btn-warning" href="{% url 'currency_create' %}">
+                <i class="fas fa-plus me-2"></i>Yeni Para Birimi
+            </a>
+        </div>
+        <div class="card-body">
+            {% if currencies %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Para Birimi Adı</th>
+                            <th>Kodu</th>
+                            <th>Sembol</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for currency in currencies %}
+                        <tr>
+                            <td>{{ currency.name }}</td>
+                            <td>{{ currency.code }}</td>
+                            <td>{{ currency.symbol }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'currency_edit' currency.pk %}" class="btn btn-sm btn-primary me-2" title="Düzenle">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger delete-btn" 
+                                            data-id="{{ currency.pk }}" 
+                                            data-name="{{ currency.name }}" 
+                                            title="Sil">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center text-muted mb-3">
+                <small>Toplam {{ currencies.paginator.count }} kayıt bulunmaktadır.</small>
+            </div>
+            {% if currencies.has_other_pages %}
+            <div class="text-center text-muted mb-3">
+                <small>Toplam {{ currencies.paginator.num_pages }} sayfa içerisinde {{ currencies.number }}. sayfadasınız</small>
+            </div>
+            <nav aria-label="Sayfalama" class="mt-2">
+                <ul class="pagination justify-content-center">
+                    {% if currencies.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="İlk">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ currencies.previous_page_number }}" aria-label="Önceki">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;&laquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;</span>
+                        </li>
+                    {% endif %}
+
+                    {% for i in currencies.paginator.page_range %}
+                        {% if currencies.number == i %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ i }}</span>
+                            </li>
+                        {% elif i > currencies.number|add:'-3' and i < currencies.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if currencies.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ currencies.next_page_number }}" aria-label="Sonraki">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ currencies.paginator.num_pages }}" aria-label="Son">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;&raquo;</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-money-bill-wave fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">Henüz para birimi eklenmemiş</h4>
+                <p class="text-muted">Yeni bir para birimi eklemek için "Yeni Para Birimi" butonunu kullanabilirsiniz.</p>
+                <a href="{% url 'currency_create' %}" class="btn btn-success mt-3">
+                    <i class="fas fa-plus me-2"></i>Yeni Para Birimi Ekle
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .table {
+        margin-bottom: 0;
+    }
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        border-top: none;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    .pagination {
+        margin-bottom: 0;
+    }
+    .page-link {
+        color: #2196F3;
+        border: none;
+        margin: 0 2px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+    .page-link:hover {
+        background-color: #2196F3;
+        color: white;
+        transform: translateY(-2px);
+    }
+    .page-item.active .page-link {
+        background-color: #2196F3;
+        border-color: #2196F3;
+    }
+    .page-item.disabled .page-link {
+        color: #6c757d;
+        pointer-events: none;
+        background-color: #fff;
+        border-color: #dee2e6;
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Silme butonlarına tıklama olayı ekle
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const name = this.getAttribute('data-name');
+            
+            Swal.fire({
+                title: 'Emin misiniz?',
+                html: `<strong>${name}</strong> para birimini silmek istediğinizden emin misiniz?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Evet, Sil!',
+                cancelButtonText: 'Vazgeç',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                },
+                customClass: {
+                    confirmButton: 'btn btn-danger px-4 me-3',
+                    cancelButton: 'btn btn-secondary px-4'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/common/currencies/${id}/delete/`;
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
+
+{% endblock content %} 

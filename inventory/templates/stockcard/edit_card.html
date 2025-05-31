@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %} Stok Kartı Güncelle {% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width:600px;">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark text-center py-3">
+            <h4 class="mb-0"><i class="fas fa-id-card me-2"></i>Stok Kartı Güncelle - {{ object.stock.name }}</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    {% for field in form.visible_fields %}
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-bold">{{ field.label }}</label>
+                            <div class="input-group">
+                                {% if field.name == 'barcode_number' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                                {% elif field.name == 'date' %}
+                                    {{ field|add_class:'form-control flatpickr'|attr:'autocomplete:off' }}
+                                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                {% elif field.name == 'stock' %}
+                                    {{ field|add_class:'form-select select2'|attr:'id:id_stock' }}
+                                    <span class="input-group-text"><i class="fas fa-box"></i></span>
+                                {% elif field.name == 'lot' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-layer-group"></i></span>
+                                {% elif field.name == 'heat_no' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-fire"></i></span>
+                                {% elif field.name == 'quality' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-certificate"></i></span>
+                                {% elif field.name == 'type' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-cube"></i></span>
+                                {% elif field.name == 'quantity' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-sort-numeric-up"></i></span>
+                                {% elif field.name == 'length' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-ruler-horizontal"></i></span>
+                                {% elif field.name == 'std' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-balance-scale"></i></span>
+                                {% elif field.name == 'operator' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-user-cog"></i></span>
+                                {% elif field.name == 'package_no' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-box-open"></i></span>
+                                {% elif field.name == 'origin' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                {% elif field.name == 'serial_number' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                                {% elif field.name == 'quality_control' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-check-circle"></i></span>
+                                {% elif field.name == 'packer' %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-user-check"></i></span>
+                                {% else %}
+                                    {{ field|add_class:'form-control' }}
+                                    <span class="input-group-text"><i class="fas fa-pen"></i></span>
+                                {% endif %}
+                            </div>
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'view-stock' object.stock.pk %}" class="btn btn-secondary px-4">Geri Dön</a>
+                    <button type="submit" class="btn btn-warning px-4">Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Select2 ve Flatpickr CDN -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<!-- FontAwesome CDN (ikonlar için) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<!-- Gerekli JS -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Select2 başlat
+        if (window.jQuery) {
+            $('#id_stock').select2({
+                width: '100%',
+                placeholder: 'Stok seçiniz',
+                allowClear: true
+            });
+        }
+        // Flatpickr başlat
+        if (window.flatpickr) {
+            flatpickr('.flatpickr', {
+                dateFormat: 'd.m.Y',
+                allowInput: true
+            });
+        }
+    });
+</script>
+{% endblock %} 

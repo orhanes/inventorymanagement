@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load l10n %}
 
 {% load widget_tweaks %}
 
@@ -7,87 +8,333 @@
 
 
 {% block content %}
-    
-    <div class="row" style="color: #575757; font-style: bold; font-size: 3rem;">
-        <div class="col-md-8">Satınalma Listesi</div>
-        <div class="col-md-4">           
-            <div style="float:right;"> <a class="btn btn-success" href="{% url 'select-supplier' %}">Stok Ekle</a> </div>
+<div class="container-fluid mt-4 animate__animated animate__fadeIn">
+    <div class="card shadow">
+        <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fas fa-shopping-cart me-2"></i>Satınalma Listesi
+            </h3>
+            <a class="btn btn-warning" href="{% url 'select-supplier' %}">
+                <i class="fas fa-plus me-2"></i>Satınalma Ekle
+            </a>
+        </div>
+        <div class="card-body">
+            <!-- Arama ve Filtreleme Kartı -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-search me-2"></i>Arama ve Filtreleme</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Tedarikçi Adı</label>
+                            <input type="text" class="form-control" name="supplier" value="{{ request.GET.supplier }}" placeholder="Tedarikçi adı ile ara...">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Form No</label>
+                            <input type="text" class="form-control" name="billno" value="{{ request.GET.billno }}" placeholder="Form no ile ara...">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tarih Aralığı</label>
+                            <div class="input-group">
+                                <input type="date" class="form-control" name="start_date" value="{{ request.GET.start_date }}">
+                                <span class="input-group-text">-</span>
+                                <input type="date" class="form-control" name="end_date" value="{{ request.GET.end_date }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Sıralama</label>
+                            <select class="form-select" name="sort">
+                                <option value="">Seçiniz</option>
+                                <option value="date_asc" {% if request.GET.sort == 'date_asc' %}selected{% endif %}>Tarih (Eski-Yeni)</option>
+                                <option value="date_desc" {% if request.GET.sort == 'date_desc' %}selected{% endif %}>Tarih (Yeni-Eski)</option>
+                                <option value="amount_asc" {% if request.GET.sort == 'amount_asc' %}selected{% endif %}>Tutar (Düşük-Yüksek)</option>
+                                <option value="amount_desc" {% if request.GET.sort == 'amount_desc' %}selected{% endif %}>Tutar (Yüksek-Düşük)</option>
+                            </select>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Ara
+                            </button>
+                            <a href="{% url 'purchases-list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Temizle
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="printArea">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th width="10%" class="text-center">Form No</th>
+                                <th width="15%" class="text-start">Tedarikçi</th>
+                                <th width="15%" class="text-start">Satın Alınan Stok</th>
+                                <th width="10%" class="text-center">Miktar</th>
+                                <th width="15%" class="text-end">Toplam Tutar</th>
+                                <th width="10%" class="text-center">Tarih</th>
+                                <th width="25%" class="text-center noprint">İşlemler</th>
+                            </tr>
+                        </thead>
+
+                        {% if bills %}
+                            <tbody>         
+                                {% for purchase in bills %}
+                                <tr>
+                                    <td class="text-center text-primary">{{ purchase.year|unlocalize }}/{{ purchase.sequence|stringformat:'04d' }}</td>
+                                    <td class="text-start"> 
+                                        {% if purchase.supplier.is_deleted %}
+                                            <span class="fw-medium text-uppercase">{{ purchase.supplier }}</span>
+                                        {% else %}
+                                            <a href="{% url 'supplier' purchase.supplier.name %}" class="text-decoration-none fw-medium text-uppercase">{{ purchase.supplier }}</a>
+                                        {% endif %}
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="fas fa-phone-alt me-1"></i>{{ purchase.supplier.phone }}
+                                        </small> 
+                                    </td>
+                                    <td class="text-start">
+                                        {% for item in purchase.get_items_list %}
+                                            <div>{{ item.stock.name }}</div>
+                                        {% endfor %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% for item in purchase.get_items_list %}
+                                            <div>{{ item.quantity }}</div>
+                                        {% endfor %}
+                                    </td>     
+                                    <td class="text-end">
+                                        {% for item in purchase.get_items_list %}
+                                            <div>{{ item.total_with_tax }} TL</div>
+                                        {% endfor %}
+                                    </td>
+                                    <td class="text-center">{{ purchase.time.date }}</td>
+                                    <td class="text-center noprint">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="{% url 'purchase-bill' purchase.billno %}" class="btn btn-primary btn-sm action-btn" title="Görüntüle" data-bs-toggle="tooltip">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'purchase-edit' purchase.billno %}" class="btn btn-warning btn-sm action-btn" title="Düzenle" data-bs-toggle="tooltip">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'delete-purchase' purchase.pk %}" class="btn btn-danger btn-sm action-btn" title="Sil" data-bs-toggle="tooltip">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        {% else %}
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <i class="fas fa-shopping-cart text-muted mb-3"></i>
+                                            <h4 class="text-muted">Henüz bir kayıt yok</h4>
+                                            <p class="text-muted mb-3">Yeni satın alma eklemek için üstteki "Stok Ekle" butonunu kullanabilirsiniz.</p>
+                                            <a href="{% url 'select-supplier' %}" class="btn btn-primary">
+                                                <i class="fas fa-plus me-2"></i>Yeni Satın Alma Ekle
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        {% endif %}
+                    </table>
+                </div>
+
+                <div class="text-center text-muted mb-3">
+                    <small>Toplam {{ page_obj.paginator.count }} kayıt bulunmaktadır.</small>
+                </div>
+                {% if is_paginated %}
+                <div class="text-center text-muted mb-3">
+                    <small>Toplam {{ page_obj.paginator.num_pages }} sayfa içerisinde {{ page_obj.number }}. sayfadasınız</small>
+                </div>
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1" title="İlk Sayfa">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" title="Önceki">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}" title="Sonraki">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" title="Son Sayfa">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+
+            <div class="text-center mt-4">
+                <button class="btn btn-primary px-4" onclick="printpage('printArea')">
+                    <i class="fas fa-print me-2"></i>Yazdır
+                </button>
+            </div>
         </div>
     </div>
+</div>
 
-    <br>
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .table {
+        margin-bottom: 0;
+    }
+    .table th {
+        border-top: none;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+        color: white;
+        font-weight: 500;
+        padding: 1rem;
+    }
+    .table td {
+        vertical-align: middle;
+        padding: 0.75rem;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(33, 150, 243, 0.05);
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .action-btn i {
+        font-size: 0.875rem;
+    }
+    .pagination {
+        margin-bottom: 0;
+    }
+    .page-link {
+        border-radius: 4px;
+        margin: 0 2px;
+        color: #2196F3;
+    }
+    .page-item.active .page-link {
+        background-color: #2196F3;
+        border-color: #2196F3;
+    }
+    .empty-state {
+        padding: 2rem;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 1rem;
+        animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-20px);
+        }
+        60% {
+            transform: translateY(-10px);
+        }
+    }
+    @media print {
+        .noprint {
+            display: none !important;
+        }
+        .card {
+            box-shadow: none !important;
+        }
+        .card-header {
+            background: none !important;
+            color: #000 !important;
+        }
+        .table th {
+            background: none !important;
+            color: #000 !important;
+            border-bottom: 2px solid #dee2e6;
+        }
+    }
+    /* Arama ve Filtreleme Stilleri */
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+</style>
 
-    <table class="table table-css table-hover table-bordered">
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
 
-        <thead class="thead-dark align-middle">
-            <tr>
-                <th width="10%">Fatura No</th>
-                <th width="15%">Tedarikçi</th>
-                <th width="15%">Satın Alınan Stok</th>
-                <th width="10%">Satın Alınan Miktar</th>
-                <th width="15%">Toplam Satın Alınan Fiyat</th>
-                <th width="10%">Satın Alma Tarihi</th>
-                <th width="25%">İşlemler</th>
-            </tr>
-        </thead>
+<script>
+function printpage(divName) {
+    var printContents = document.getElementById(divName).innerHTML;
+    var originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+}
 
-{% if bills %}
-
-        <tbody>         
-            {% for purchase in bills %}
-            <tr>
-                <td class="align-middle"> <p>{{ purchase.billno }}</p> </td>
-                <td class=""> 
-                    {% if purchase.supplier.is_deleted %}
-                        {{ purchase.supplier }}<br> 
-                    {% else %}
-                        <a href="{% url 'supplier' purchase.supplier.name %}">{{ purchase.supplier }}</a> <br> 
-                    {% endif %}
-                    <small style="color: #909494">Telefon: {{ purchase.supplier.phone }}</small> 
-                </td><!-- Log on to codeastro.com for more projects -->
-                <td class="align-middle">{% for item in purchase.get_items_list %} {{ item.stock.name }} <br> {% endfor %}</td>
-                <td class="align-middle">{% for item in purchase.get_items_list %} {{ item.quantity }} <br> {% endfor %}</td>     
-                <td class="align-middle">{% for item in purchase.get_items_list %} {{ item.total_with_tax }} TL {% endfor %}</td>
-                <td class="align-middle">{{ purchase.time.date }}</td>
-                <td class="align-middle"> <a href="{% url 'purchase-bill' purchase.billno %}" class="btn btn-secondary btn-sm">Faturayı Görüntüle</a> <a href="{% url 'delete-purchase' purchase.pk %}" class="btn btn-danger btn-sm">Faturayı Sil</a> </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-
-    </table>
-
-    <div class="align-middle">
-        {% if is_paginated %}
-
-            {% if page_obj.has_previous %}
-                <a class="btn btn-outline-info mb-4" href="?page=1">İlk</a>
-                <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Öncekis</a>
-            {% endif %}
-
-            {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                    <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
-                {% endif %}
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-                <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Sonraki</a>
-                <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Son</a>
-            {% endif %}
-
-        {% endif %}
-    </div>
-
-{% else %}
-
-        <tbody></tbody>  <!-- Log on to codeastro.com for more projects --> 
-    </table>
-
-    <br><br><br><br><br><br><br><br>
-    <div style="color: #575757; font-style: bold; font-size: 1.5rem; text-align: center;">Henüz bir kayıt yok. Eklemeyi deneyin.</div>
-<!-- Log on to codeastro.com for more projects -->
-{% endif %}
-
+// Tooltip'leri aktifleştir
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+</script>
 {% endblock content %}

@@ -1,94 +1,649 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
 
 {% block title %} {{title}} {% endblock title %}
 
-
 {% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg animate__animated animate__fadeIn">
+        <div class="card-header bg-gradient-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-envelope me-2"></i>{{title}}</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            <label for="id_number" class="form-label">
+                                Mail Order No <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                                {{ form.number|add_class:'form-control'|attr:'readonly:true'|attr:'style:background-color: #e9ecef;' }}
+                            </div>
+                            <small class="form-text text-muted">Mail Order numarası otomatik olarak oluşturulacaktır.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            <label for="id_date" class="form-label">
+                                Mail Order Tarihi <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                {{ form.date|add_class:'form-control datepicker' }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen tarih seçiniz.
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    <div style="color:#575757; font-style: bold; font-size: 3rem; border-bottom: 1px solid white;">{{title}}</div>
-    <hr style="height:1px;border:none;color:#333;background-color:#333;">
+                <div class="mb-4">
+                    <label class="form-label mb-2" >
+                        <i class="fas fa-building me-2"></i>Kişi Adı/Soyadı veya Firma/Kurum Adı
+                    </label>
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="customer_choice" id="customer_select" value="select" checked>
+                            <label class="form-check-label text-primary" for="customer_select" style="font-size:0.95em;">
+                                <i class="fas fa-users me-1 text-primary"></i> Mevcut Müşteriden Seç
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="customer_choice" id="customer_manual" value="manual">
+                            <label class="form-check-label text-primary" for="customer_manual" style="font-size:0.95em;">
+                                <i class="fas fa-keyboard me-1 text-primary"></i> Elle Gir
+                            </label>
+                        </div>
+                    </div>
+                    <div id="buyer_select_area" class="mt-2">
+                        {{ form.buyer_select|add_class:"form-select" }}
+                        {% if form.buyer_select.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.buyer_select.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div id="customer_name_area" class="mt-2" style="display:none;">
+                        {{ form.customer_name|add_class:"form-control" }}
+                        {% if form.customer_name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.customer_name.errors.0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
 
-    <form method="post">
-    
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                GSM (Cep) / Sabit Telefon <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                {{ form.phone }}
+                            </div>
+                            {% if form.phone.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.phone.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <div class="form-group">
+                            <label for="{{ form.address.id_for_label }}" class="form-label">
+                                Adres <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                {{ form.address }}
+                            </div>
+                            {% if form.address.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.address.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.bank.errors }}
+                            <label for="{{ form.bank.id_for_label }}" class="form-label">
+                                Banka Adı <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-university"></i></span>
+                                {{ form.bank }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen banka adını giriniz.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.owner.errors }}
+                            <label for="{{ form.owner.id_for_label }}" class="form-label">
+                                Kart Sahibi <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                {{ form.owner }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen kart sahibini giriniz.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.card_number.errors }}
+                            <label for="{{ form.card_number.id_for_label }}" class="form-label">
+                                Kart No <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                {{ form.card_number|add_class:"form-control"|attr:"pattern:[0-9]*"|attr:"inputmode:numeric"|attr:"maxlength:16" }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen kart numarasını giriniz.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.security_code.errors }}
+                            <label for="{{ form.security_code.id_for_label }}" class="form-label">
+                                Güvenlik Kodu <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-shield-alt"></i></span>
+                                {{ form.security_code|add_class:"form-control"|attr:"pattern:[0-9]*"|attr:"inputmode:numeric"|attr:"maxlength:3" }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen güvenlik kodunu giriniz.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="form-group">
+                            {{ form.expiry_month.errors }}
+                            <label for="{{ form.expiry_month.id_for_label }}" class="form-label">
+                                Son Kullanma Tarihi (Ay) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                {{ form.expiry_month|add_class:"form-control"|attr:"pattern:[0-9]*"|attr:"inputmode:numeric"|attr:"maxlength:2"|attr:"min:1"|attr:"max:12" }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen son kullanma ayını seçiniz.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="form-group">
+                            {{ form.expiry_year.errors }}
+                            <label for="{{ form.expiry_year.id_for_label }}" class="form-label">
+                                Son Kullanma Tarihi (Yıl) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                {{ form.expiry_year|add_class:"form-control"|attr:"pattern:[0-9]*"|attr:"inputmode:numeric"|attr:"maxlength:2"|attr:"min:23"|attr:"max:99" }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen son kullanma yılını seçiniz.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="form-group">
+                            {{ form.date.errors }}
+                            <label for="{{ form.date.id_for_label }}" class="form-label">
+                                Ödeme Tarihi <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
+                                {{ form.date|add_class:'form-control datepicker' }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen ödeme tarihini seçiniz.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.amount.errors }}
+                            <label for="{{ form.amount.id_for_label }}" class="form-label">
+                                Ödeme Tutarı (Rakamla) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lira-sign"></i></span>
+                                {{ form.amount|add_class:"form-control"|attr:"pattern:[0-9.,]*"|attr:"inputmode:decimal"|attr:"required:required" }}
+                            </div>
+                            {% if form.amount.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.amount.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group">
+                            {{ form.currency.errors }}
+                            <label for="{{ form.currency.id_for_label }}" class="form-label">
+                                Para Birimi <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-money-bill"></i></span>
+                                {{ form.currency|add_class:"form-select"|attr:"required:required" }}
+                            </div>
+                            {% if form.currency.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.currency.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <div class="form-group">
+                            {{ form.amount_write.errors }}
+                            <label for="{{ form.amount_write.id_for_label }}" class="form-label">
+                                Ödeme Tutarı (Yazıyla) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-pen"></i></span>
+                                {{ form.amount_write|attr:"required:required" }}
+                            </div>
+                            {% if form.amount_write.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.amount_write.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="form-group" style="display: none;">
+                            {{ form.user.errors }}
+                            <label for="{{ form.user.id_for_label }}" class="form-label">
+                                Oluşturan Kullanıcı <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user-cog"></i></span>
+                                {{ form.user }}
+                            </div>
+                            <div class="invalid-feedback">
+                                Lütfen kullanıcı seçiniz.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <div>
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="fas fa-save me-2"></i>Kaydet
+                        </button>
+                        {% if title == "Yeni Mail Order" %}
+                            <button type="reset" class="btn btn-danger px-4">
+                                <i class="fas fa-undo me-2"></i>Sıfırla
+                            </button>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if delbtn %}
+                            <a href="{% url 'delete-mailorder' mailorder.pk %}" class="btn btn-danger px-4">
+                                <i class="fas fa-trash me-2"></i>Sil
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'mailorders-list' %}" class="btn btn-secondary px-4">
+                            <i class="fas fa-times me-2"></i>Vazgeç
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+        height: auto;
+    }
+    .form-control:focus {
+        border-color: #2196F3;
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    select.form-control {
+        width: 100% !important;
+        min-width: 200px;
+        height: calc(1.5em + 1.5rem) !important;
+        padding: 0.375rem 2.25rem 0.375rem 0.75rem !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23555' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        line-height: 1.5;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .input-group select.form-control {
+        flex: 1 1 auto;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: 0;
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-right: none;
+        display: flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .input-group {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        flex-wrap: nowrap;
+    }
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.2rem rgba(33,150,243,.25);
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    .form-group select {
+        max-width: none;
+    }
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    .is-valid {
+        border-color: #198754 !important;
+    }
+    .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+        position: absolute;
+        bottom: -1.25rem;
+        left: 0;
+        padding-left: 0.5rem;
+    }
+    .is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    .form-control.is-invalid:focus,
+    .form-control.is-valid:focus {
+        box-shadow: none;
+    }
+    .input-group .form-control.is-invalid,
+    .input-group .form-control.is-valid {
+        z-index: 3;
+    }
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    .input-group {
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
+{% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tarih seçici ayarları
+    flatpickr(".datepicker", {
+        dateFormat: "Y-m-d",
+        locale: "tr",
+        allowInput: true,
+        altInput: true,
+        altFormat: "d.m.Y",
+        defaultDate: "today",
+        maxDate: "today"
+    });
+
+    // Sadece rakam girişi için fonksiyon
+    function onlyNumbers(event) {
+        const key = event.key;
+        if (!/^\d$/.test(key) && 
+            key !== 'Backspace' && 
+            key !== 'Delete' && 
+            key !== 'ArrowLeft' && 
+            key !== 'ArrowRight' && 
+            key !== 'Tab') {
+            event.preventDefault();
+        }
+    }
+
+    // Para tutarı için özel fonksiyon
+    function onlyNumbersAndDecimal(event) {
+        const key = event.key;
+        const input = event.target;
+        const value = input.value;
         
-        <div class="form-group">
-            <label for="{{ form.mailorder.customer_name.id_for_label }}">Müşteri Adı Soyadı / Firma Adı:</label>
-            {{ form.customer_name}}
-        </div>
-        <div class="form-group">
-            <label for="{{ form.address.id_for_label }}">Adres:</label>
-            {{ form.address}}
-        </div>
-        <div class="form-group">
-            <label for="{{ form.phone.id_for_label }}">GSM (Cep) / Sabit Telefon:</label>
-            {{ form.phone}}
-        </div>
-        <div class="form-group">
-            <label for="{{ form.bank.id_for_label }}">Banka Adı:</label>
-            {{ form.bank}}
-        </div>
-        <div class="form-group">
-            {{ form.owner.errors }}
-            <label for="{{ form.owner.id_for_label }}">Kart Sahibi:</label>
-            {{ form.owner }}
-        </div>
-        <div class="form-group">
-            {{ form.card_number.errors }}
-            <label for="{{ form.card_number.id_for_label }}">Kart No:</label>
-            {{ form.card_number }}
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.expiry_month.errors }}
-                <label for="{{ form.expiry_month.id_for_label }}">Son Kul. Tar. (Ay):</label>
-                {{ form.expiry_month }}
-            </div>
-            <div class="form-group col-md-6">
-                {{ form.expiry_year.errors }}
-                <label for="{{ form.expiry_year.id_for_label }}">Son Kul. Tar. (Yıl):</label>
-                {{ form.expiry_year }}
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.security_code.errors }}
-                <label for="{{ form.security_code.id_for_label }}">Güvenlik Kodu:</label>
-                {{ form.security_code }}
-            </div>
-            <div class="form-group col-md-6">
-                {{ form.date.errors }}
-                <label for="{{ form.date.id_for_label }}">Ödeme Tarihi:</label>
-                <input type="date" value="{{ form.date }}" />
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                {{ form.amount.errors }}
-                <label for="{{ form.amount.id_for_label }}">Ödeme Tutarı (Rakamla):</label>
-                {{ form.amount }}
-            </div>
-            <div class="form-group col-md-6">
-                {{ form.amount_write.errors }}
-                <label for="{{ form.amount_write.id_for_label }}">Ödeme Tutarı (Yazıyla):</label>
-                {{ form.amount_write }}
-            </div>
-        </div>
+        // İzin verilen tuşlar
+        if (key === 'Backspace' || key === 'Delete' || 
+            key === 'ArrowLeft' || key === 'ArrowRight' || 
+            key === 'Tab') {
+            return true;
+        }
 
-        <br>
+        // Virgül veya nokta kontrolü
+        if (key === ',' || key === '.') {
+            // Eğer zaten bir virgül veya nokta varsa engelle
+            if (value.includes(',') || value.includes('.')) {
+                event.preventDefault();
+                return false;
+            }
+            return true;
+        }
 
-        <div class="align-middle">
-            <button type="submit" class="btn btn-success">{{ savebtn }}</button>
-            {% if title == "Yeni Mail Order" %}
-                <button type="reset" class="btn btn-danger" >Sıfırla</button>
-            {% endif %}
-            {% if delbtn %}
-                <a href="{% url 'delete-mailorder' mailorder.pk %}" class="btn btn-danger"> Nakliye Sil</a>
-            {% endif %}
-            <a href="{% url 'mailorders-list' %}" class="btn btn-secondary">Vazgeç</a>
-        </div>
-        
-    </form>
+        // Sadece rakam girişine izin ver
+        if (!/^\d$/.test(key)) {
+            event.preventDefault();
+            return false;
+        }
+    }
+
+    // Yapıştırma işlemi için fonksiyon
+    function handlePaste(event) {
+        event.preventDefault();
+        const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+        const numbersOnly = pastedText.replace(/[^\d]/g, '');
+        const input = event.target;
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        const value = input.value;
+        input.value = value.substring(0, start) + numbersOnly + value.substring(end);
+    }
+
+    // Para tutarı için yapıştırma işlemi
+    function handleAmountPaste(event) {
+        event.preventDefault();
+        const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+        // Sadece rakam, virgül ve noktaya izin ver
+        const numbersOnly = pastedText.replace(/[^\d.,]/g, '');
+        const input = event.target;
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        const value = input.value;
+        input.value = value.substring(0, start) + numbersOnly + value.substring(end);
+    }
+
+    // Kart numarası, güvenlik kodu, son kullanma ay ve yıl için kontrolleri ekle
+    const numericInputs = [
+        document.getElementById('id_card_number'),
+        document.getElementById('id_security_code'),
+        document.getElementById('id_expiry_month'),
+        document.getElementById('id_expiry_year')
+    ];
+
+    numericInputs.forEach(input => {
+        if (input) {
+            input.addEventListener('keydown', onlyNumbers);
+            input.addEventListener('paste', handlePaste);
+        }
+    });
+
+    // Ödeme tutarı için kontrolleri ekle
+    const amountInput = document.getElementById('id_amount');
+    if (amountInput) {
+        amountInput.addEventListener('keydown', onlyNumbersAndDecimal);
+        amountInput.addEventListener('paste', handleAmountPaste);
+    }
+
+    // Form gönderilmeden önce kontrol
+    document.querySelector('form').addEventListener('submit', function(event) {
+        const amountInput = document.getElementById('id_amount');
+        if (amountInput && amountInput.value) {
+            // Virgülü noktaya çevir
+            amountInput.value = amountInput.value.replace(',', '.');
+        }
+    });
+
+    // Müşteri seçimi ve diğer işlemler...
+    const selectRadio = document.getElementById('customer_select');
+    const manualRadio = document.getElementById('customer_manual');
+    const buyerSelectArea = document.getElementById('buyer_select_area');
+    const customerNameArea = document.getElementById('customer_name_area');
+    const buyerSelect = document.getElementById('id_buyer_select');
+    const nameInput = document.getElementById('id_customer_name');
+    const phoneInput = document.getElementById('id_phone');
+    const addressInput = document.getElementById('id_address');
+
+    function toggleCustomerFields() {
+        if (selectRadio.checked) {
+            buyerSelectArea.style.display = '';
+            customerNameArea.style.display = 'none';
+            nameInput.disabled = true;
+            phoneInput.disabled = true;
+            addressInput.disabled = true;
+            
+            // Müşteri seçiliyse bilgileri getir
+            if (buyerSelect.value) {
+                fetch(`/transactions/buyer-info/${buyerSelect.value}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        nameInput.value = data.name || '';
+                        phoneInput.value = data.phone || '';
+                        addressInput.value = data.address || '';
+                    })
+                    .catch(error => {
+                        console.error('Müşteri bilgileri alınamadı:', error);
+                    });
+            }
+        } else {
+            buyerSelectArea.style.display = 'none';
+            customerNameArea.style.display = '';
+            nameInput.disabled = false;
+            phoneInput.disabled = false;
+            addressInput.disabled = false;
+            
+            // Elle giriş seçildiğinde alanları temizle
+            nameInput.value = '';
+            phoneInput.value = '';
+            addressInput.value = '';
+        }
+    }
+
+    // Radio butonları değiştiğinde
+    selectRadio.addEventListener('change', toggleCustomerFields);
+    manualRadio.addEventListener('change', toggleCustomerFields);
+
+    // Sayfa yüklendiğinde
+    toggleCustomerFields();
+
+    // Müşteri seçildiğinde
+    buyerSelect.addEventListener('change', function() {
+        if (selectRadio.checked && this.value) {
+            fetch(`/transactions/buyer-info/${this.value}/`)
+                .then(response => response.json())
+                .then(data => {
+                    nameInput.value = data.name || '';
+                    phoneInput.value = data.phone || '';
+                    addressInput.value = data.address || '';
+                })
+                .catch(error => {
+                    console.error('Müşteri bilgileri alınamadı:', error);
+                });
+        }
+    });
+});
+</script>
 
 {% endblock content %}
