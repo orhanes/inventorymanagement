@@ -44,10 +44,16 @@ INSTALLED_APPS = [
     'crispy_forms',                             # uses 'django-crispy-forms' app
     'login_required',                           # uses 'django-login-required-middleware' app
     'bootstrap5',
+    'django_filters',
 
     'homepage.apps.HomepageConfig',
     'inventory.apps.InventoryConfig',
     'transactions.apps.TransactionsConfig',
+    'common.apps.CommonConfig',
+    'users.apps.UsersConfig',
+    
+    'rest_framework',
+    'rest_framework.authtoken',
 
 ]
 
@@ -76,6 +82,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'common.context_processors.company_info',
             ],
         },
     },
@@ -148,3 +155,27 @@ LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [                    # urls ignored by the lo
 DATE_INPUT_FORMATS = ('%d-%m-%Y','%Y-%m-%d')
 
 USE_THOUSAND_SEPARATOR = True
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
+
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'orhanes@gmail.com'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'seninmailadresin@gmail.com')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'uygulama_sifresi')
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER 
