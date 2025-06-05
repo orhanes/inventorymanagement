@@ -40,33 +40,39 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
 
-    'widget_tweaks',                            # uses 'django-widget-tweaks' app
-    'crispy_forms',                             # uses 'django-crispy-forms' app
-    'login_required',                           # uses 'django-login-required-middleware' app
-    'bootstrap5',
+    # Third party apps
+    'widget_tweaks',
+    'crispy_forms',
+    "bootstrap5",
+    'login_required',
     'django_filters',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'debug_toolbar',
+    'django_tables2',
+    'taggit',
+    'tinymce',
+    'corsheaders',
 
+    # Local apps
     'homepage.apps.HomepageConfig',
     'inventory.apps.InventoryConfig',
     'transactions.apps.TransactionsConfig',
     'common.apps.CommonConfig',
     'users.apps.UsersConfig',
-    
-    'rest_framework',
-    'rest_framework.authtoken',
-
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # CORS middleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'login_required.middleware.LoginRequiredMiddleware',    # middleware used for global login
+    'debug_toolbar.middleware.DebugToolbarMiddleware',  # Debug toolbar middleware
+    'login_required.middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -179,3 +185,64 @@ else:
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'seninmailadresin@gmail.com')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'uygulama_sifresi')
     DEFAULT_FROM_EMAIL = EMAIL_HOST_USER 
+
+# Debug Toolbar Settings
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+
+# Crispy Forms Settings
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# Bootstrap 5 Settings
+BOOTSTRAP5 = {
+    'include_jquery': True,
+    'theme_url': None,
+    'javascript_in_head': False,
+    'css_url': None,
+    'javascript_url': None,
+    'javascript_in_head': False,
+    'horizontal_label_class': 'col-md-3',
+    'horizontal_field_class': 'col-md-9',
+    'set_placeholder': True,
+    'required_css_class': 'required',
+    'form_renderers': {
+        'default': 'django_bootstrap_v5.renderers.FormRenderer',
+    },
+}
+
+# TinyMCE Settings
+TINYMCE_DEFAULT_CONFIG = {
+    'height': 360,
+    'width': 'auto',
+    'cleanup_on_startup': True,
+    'custom_undo_redo_levels': 20,
+    'selector': 'textarea',
+    'theme': 'modern',
+    'plugins': '''
+        textcolor save link image media preview codesample contextmenu
+        table code lists fullscreen insertdatetime nonbreaking
+        contextmenu directionality searchreplace wordcount visualblocks
+        visualchars code fullscreen autolink lists charmap print hr
+        anchor pagebreak
+    ''',
+    'toolbar1': '''
+        fullscreen preview | undo redo | styleselect | bold italic |
+        alignleft aligncenter alignright alignjustify | bullist numlist outdent indent |
+        link image | print preview media | forecolor backcolor
+    ''',
+    'contextmenu': 'formats | link image',
+    'menubar': True,
+    'statusbar': True,
+}
+
+# CORS Settings
+CORS_ALLOW_ALL_ORIGINS = True  # Sadece geliştirme ortamında kullanın
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
+# Django Tables2 Settings
+DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap5.html" 
