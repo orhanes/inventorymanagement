@@ -58,6 +58,8 @@
 <body class="bg">
 
     <main id="wrapper">
+        <!-- Overlay -->
+        <div class="overlay"></div>
     
         <nav id="sidebar">
             <div class="sidebar-header">
@@ -465,8 +467,16 @@
         $(document).ready(function () {
             // Sidebar toggle - mini sidebar özelliği
             $('#sidebarCollapse').on('click', function () {
-                $('#sidebar').toggleClass('mini');
-                $('#content').toggleClass('mini');
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+                $('.overlay').toggleClass('active');
+            });
+
+            // Overlay tıklandığında menüyü kapat
+            $('.overlay').on('click', function() {
+                $('#sidebar').removeClass('active');
+                $('#content').removeClass('active');
+                $('.overlay').removeClass('active');
             });
 
             // Alt menülerin davranışı
